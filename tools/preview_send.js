@@ -255,7 +255,7 @@ function goldKrwNote() {
   const parts = [];
   if (intlPct != null) parts.push(`국제금 ${sgn(intlPct)}${N(intlPct)}%`);
   if (fxPct   != null) parts.push(`달러원 ${sgn(fxPct)}${N(fxPct)}%`);
-  const res = (c.goldKrw?.pct ?? 0) > 0 ? '원화가 상승' : (c.goldKrw?.pct ?? 0) < 0 ? '원화가 하락' : '보합';
+  const res = (c.goldKrw?.pct ?? 0) > 0 ? '원화 환산가 상승' : (c.goldKrw?.pct ?? 0) < 0 ? '원화 환산가 하락' : '보합';
   return `${parts.join(' + ')} → ${res}`;
 }
 
@@ -666,3 +666,11 @@ await transporter.sendMail({
 });
 
 console.log(`✅ 리포트 발송 완료 → ${process.env.GMAIL_RECIPIENT}`);
+
+// ── Notion 아카이빙 ───────────────────────────────────────────────────────────
+try {
+  const { publishToNotion } = await import('./publishers/notion.js');
+  await publishToNotion(todayStr, '', html, data);
+} catch (e) {
+  console.warn('[report] Notion 아카이빙 실패:', e.message);
+}
