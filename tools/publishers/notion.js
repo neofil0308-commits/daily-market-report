@@ -21,7 +21,7 @@ export async function publishToNotion(date, summaryMd, reportHtml, data) {
     ? `📊 [${date}] 시장 리포트 — 국내 휴장`
     : `📊 [${date}] 시장 리포트 — KOSPI ${kospiStr}`;
 
-  const pagesBase = (process.env.GITHUB_PAGES_BASE ?? '').replace(/\/$/, '');
+  const pagesBase = (process.env.PAGES_BASE_URL ?? '').replace(/\/$/, '');
   const htmlUrl   = pagesBase ? `${pagesBase}/outputs/${date}/report.html` : null;
 
   // Notion 페이지 본문: HTML 링크 + 마크다운 요약

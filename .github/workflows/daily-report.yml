@@ -39,7 +39,7 @@ jobs:
           GMAIL_SENDER:         ${{ secrets.GMAIL_SENDER }}
           GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
           GMAIL_RECIPIENT:      ${{ secrets.GMAIL_RECIPIENT }}
-          GITHUB_PAGES_BASE:    ${{ secrets.GITHUB_PAGES_BASE }}
+          PAGES_BASE_URL:       ${{ secrets.PAGES_BASE_URL }}
           TZ:                   Asia/Seoul
           OUTPUT_DIR:           ./outputs
 
