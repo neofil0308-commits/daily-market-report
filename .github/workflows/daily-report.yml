@@ -66,3 +66,11 @@ jobs:
           destination_dir: outputs
           keep_files:   true
           commit_message: "report: add ${{ github.run_id }}"
+
+      - name: Deploy robots.txt to GitHub Pages root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:  ./public
+          keep_files:   true
+          commit_message: "chore: update robots.txt"
