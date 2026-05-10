@@ -44,15 +44,16 @@ async function runWorkflow(opts = {}) {
     const usHoliday = await isHoliday(today.subtract(1, 'day'), 'US');
     logger.info(`공휴일 여부 — KR: ${krHoliday}, US: ${usHoliday}`);
 
-    // STEP 2: 데이터 수집 (병렬)
+    // STEP 2: 데이터 수집 — 시장데이터 먼저, 뉴스는 AI 키워드 생성 후
     logger.info('데이터 수집 시작...');
-    const [domestic, overseas, fxRates, commodities, rawNews] = await Promise.all([
+    const [domestic, overseas, fxRates, commodities] = await Promise.all([
       collectDomestic(krHoliday),
       collectOverseas(usHoliday),
       collectFxRates(),
       collectCommodities(),
-      collectNews(reportDate),
     ]);
+    // 해외증시·환율 데이터를 Gemini에 넘겨 오늘의 추가 키워드 포함해 뉴스 수집
+    const rawNews = await collectNews(reportDate, { overseas, fxRates });
 
     // STEP 3: 검증 및 변동값 계산
     data = validateData({ date: reportDate, domestic, overseas, fxRates, commodities, news: rawNews,
