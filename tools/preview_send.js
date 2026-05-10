@@ -593,11 +593,12 @@ ${reportSummaryHtml ? `
         <td class="c" style="color:#888">―</td>
         <td class="bi">${(() => {
           const h = fx.fomc?.junHoldPct;
+          const r = v => Math.round(v * 10) / 10;
           if (h == null) return 'CME FedWatch';
-          if (h >= 80) return `동결 유력 · 인하확률 ${round2(100-h)}%`;
-          if (h >= 50) return `동결 우세 · 인하확률 ${round2(100-h)}%`;
-          if (h >= 20) return `인하 우세 · 동결확률 ${round2(h)}%`;
-          return `인하 유력 · 동결확률 ${round2(h)}%`;
+          if (h >= 80) return `동결 유력 · 인하확률 ${r(100-h)}%`;
+          if (h >= 50) return `동결 우세 · 인하확률 ${r(100-h)}%`;
+          if (h >= 20) return `인하 우세 · 동결확률 ${r(h)}%`;
+          return `인하 유력 · 동결확률 ${r(h)}%`;
         })()}</td>
       </tr>
       <tr>
