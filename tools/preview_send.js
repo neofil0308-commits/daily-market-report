@@ -591,13 +591,27 @@ ${reportSummaryHtml ? `
         <td>6월 FOMC 동결확률</td>
         <td class="r">${fx.fomc?.junHoldPct ?? 'N/A'}%</td><td class="r">―</td>
         <td class="c" style="color:#888">―</td>
-        <td class="bi">인하확률 ${100-(fx.fomc?.junHoldPct??0)}% · CME FedWatch</td>
+        <td class="bi">${(() => {
+          const h = fx.fomc?.junHoldPct;
+          if (h == null) return 'CME FedWatch';
+          if (h >= 80) return `동결 유력 · 인하확률 ${round2(100-h)}%`;
+          if (h >= 50) return `동결 우세 · 인하확률 ${round2(100-h)}%`;
+          if (h >= 20) return `인하 우세 · 동결확률 ${round2(h)}%`;
+          return `인하 유력 · 동결확률 ${round2(h)}%`;
+        })()}</td>
       </tr>
       <tr>
         <td>9월 인하 가능성</td>
         <td class="r">${fx.fomc?.sepCutPct ?? 'N/A'}%</td><td class="r">―</td>
         <td class="c" style="color:#888">―</td>
-        <td class="bi">시장 9월 인하 기정사실화</td>
+        <td class="bi">${(() => {
+          const s = fx.fomc?.sepCutPct;
+          if (s == null) return 'CME FedWatch';
+          if (s >= 80) return '9월 인하 유력 · 시장 기정사실화';
+          if (s >= 50) return '9월 인하 우세 · 시장 기대 반영';
+          if (s >= 20) return '9월 동결 우세 · 인하 가능성 열려';
+          return '9월 동결 유력 · 추가 인하 기대 낮음';
+        })()}</td>
       </tr>
     </tbody>
   </table>
