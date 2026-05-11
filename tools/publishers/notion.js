@@ -4,6 +4,22 @@ import { logger } from '../utils/logger.js';
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
+// 오늘 날짜로 이미 발송된 항목이 Notion DB에 있는지 확인
+export async function checkAlreadySent(date) {
+  const dbId = process.env.NOTION_ARCHIVE_DB_ID;
+  if (!dbId || !process.env.NOTION_API_KEY) return false;
+  try {
+    const res = await notion.databases.query({
+      database_id: dbId,
+      filter: { property: '날짜', date: { equals: date } },
+      page_size: 1,
+    });
+    return res.results.length > 0;
+  } catch {
+    return false; // 확인 실패 시 발송 허용
+  }
+}
+
 export async function publishToNotion(date, summaryMd, reportHtml, data) {
   const dbId = process.env.NOTION_ARCHIVE_DB_ID;
   if (!dbId) {

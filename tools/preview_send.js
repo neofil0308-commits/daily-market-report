@@ -670,12 +670,20 @@ ${reportSummaryHtml ? `
 // ── HTML 파일 저장 ───────────────────────────────────────────────────────────
 await fs.writeFile(`./outputs/${todayStr}/report.html`, html, 'utf-8');
 
-// ── 중복 발송 방지: 오늘 이미 발송했으면 종료 ───────────────────────────────
+// ── 중복 발송 방지 (로컬: sent.flag / GA: Notion DB 조회) ───────────────────
 const sentFlagPath = `./outputs/${todayStr}/sent.flag`;
-const alreadySent = await fs.access(sentFlagPath).then(() => true).catch(() => false);
-if (alreadySent) {
-  console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 — 중복 발송 방지로 건너뜀`);
+const localSent   = await fs.access(sentFlagPath).then(() => true).catch(() => false);
+if (localSent) {
+  console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 (로컬 플래그) — 건너뜀`);
   process.exit(0);
+}
+// GitHub Actions 환경에서는 Notion DB로 중복 체크
+if (process.env.GITHUB_ACTIONS === 'true') {
+  const { checkAlreadySent } = await import('./publishers/notion.js');
+  if (await checkAlreadySent(todayStr)) {
+    console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 (Notion 확인) — 건너뜀`);
+    process.exit(0);
+  }
 }
 
 // ── Gmail 발송 ───────────────────────────────────────────────────────────────
