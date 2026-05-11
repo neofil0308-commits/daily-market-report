@@ -670,6 +670,14 @@ ${reportSummaryHtml ? `
 // ── HTML 파일 저장 ───────────────────────────────────────────────────────────
 await fs.writeFile(`./outputs/${todayStr}/report.html`, html, 'utf-8');
 
+// ── 중복 발송 방지: 오늘 이미 발송했으면 종료 ───────────────────────────────
+const sentFlagPath = `./outputs/${todayStr}/sent.flag`;
+const alreadySent = await fs.access(sentFlagPath).then(() => true).catch(() => false);
+if (alreadySent) {
+  console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 — 중복 발송 방지로 건너뜀`);
+  process.exit(0);
+}
+
 // ── Gmail 발송 ───────────────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -683,6 +691,8 @@ await transporter.sendMail({
   html,
 });
 
+// 발송 완료 플래그 기록 (재실행 시 중복 방지)
+await fs.writeFile(sentFlagPath, new Date().toISOString(), 'utf-8');
 console.log(`✅ 리포트 발송 완료 → ${process.env.GMAIL_RECIPIENT}`);
 
 // ── Notion 아카이빙 ───────────────────────────────────────────────────────────

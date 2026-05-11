@@ -22,7 +22,9 @@ export async function publishToNotion(date, summaryMd, reportHtml, data) {
     : `📊 [${date}] 시장 리포트 — KOSPI ${kospiStr}`;
 
   const pagesBase = (process.env.PAGES_BASE_URL ?? '').replace(/\/$/, '');
-  const htmlUrl   = pagesBase ? `${pagesBase}/outputs/${date}/report.html` : null;
+  // GitHub Actions 실행 시에만 Pages URL 사용 (로컬 실행은 배포 전이라 링크가 깨짐)
+  const isCI    = process.env.GITHUB_ACTIONS === 'true';
+  const htmlUrl = (pagesBase && isCI) ? `${pagesBase}/outputs/${date}/report.html` : null;
 
   // Notion 페이지 본문: HTML 링크 + 마크다운 요약
   const children = [];
