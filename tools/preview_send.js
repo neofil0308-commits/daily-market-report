@@ -667,6 +667,9 @@ ${reportSummaryHtml ? `
 </body>
 </html>`;
 
+// ── HTML 파일 저장 ───────────────────────────────────────────────────────────
+await fs.writeFile(`./outputs/${todayStr}/report.html`, html, 'utf-8');
+
 // ── Gmail 발송 ───────────────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   service: 'gmail',
