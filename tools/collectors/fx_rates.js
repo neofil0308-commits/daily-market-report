@@ -32,23 +32,20 @@ async function fetchFomcProbabilities() {
     ]);
 
     // 현재 기준금리: 당월 내재금리를 25bp 단위로 반올림
-    const CURRENT_RATE = cur != null ? round2(Math.round(cur / 0.25) * 0.25) : 3.75;
+    const CURRENT_RATE = cur.today != null ? round2(Math.round(cur.today / 0.25) * 0.25) : 3.75;
     const CUT_25BP     = CURRENT_RATE - 0.25;
 
-    // 6월 FOMC: 동결 확률
-    const junHoldPct = (jun != null && CURRENT_RATE > CUT_25BP)
-      ? clamp((jun - CUT_25BP) / (CURRENT_RATE - CUT_25BP) * 100)
-      : null;
-
-    // 9월 FOMC: 25bp 인하 확률 (현재 대비)
-    const sepCutPct = sep != null
-      ? clamp((CURRENT_RATE - sep) / 0.25 * 100)
-      : null;
+    const calcHold = rate => (rate != null && CURRENT_RATE > CUT_25BP)
+      ? clamp((rate - CUT_25BP) / (CURRENT_RATE - CUT_25BP) * 100) : null;
+    const calcCut  = rate => rate != null
+      ? clamp((CURRENT_RATE - rate) / 0.25 * 100) : null;
 
     return {
-      junHoldPct:  junHoldPct != null ? round2(junHoldPct)  : null,
-      sepCutPct:   sepCutPct  != null ? round2(sepCutPct)   : null,
-      currentRate: CURRENT_RATE,
+      junHoldPct:     jun.today != null ? round2(calcHold(jun.today)) : null,
+      junHoldPctPrev: jun.prev  != null ? round2(calcHold(jun.prev))  : null,
+      sepCutPct:      sep.today != null ? round2(calcCut(sep.today))  : null,
+      sepCutPctPrev:  sep.prev  != null ? round2(calcCut(sep.prev))   : null,
+      currentRate:    CURRENT_RATE,
     };
   } catch (e) {
     console.warn('[fx] FOMC 확률 계산 실패:', e.message);
@@ -56,7 +53,7 @@ async function fetchFomcProbabilities() {
   }
 }
 
-// ZQ 선물 최신 종가 → 내재금리 반환
+// ZQ 선물 최신·전일 종가 → 내재금리 반환
 async function fetchZQ(symbol) {
   try {
     const res = await axios.get(
@@ -64,12 +61,14 @@ async function fetchZQ(symbol) {
       { params: { interval: '1d', range: '5d' }, headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 10000 }
     );
     const closes = res.data.chart.result[0]?.indicators?.quote?.[0]?.close?.filter(Boolean);
-    if (!closes?.length) return null;
-    // ZQ 가격 = 100 - 내재금리(%) → 내재금리 = 100 - 가격
-    return round2(100 - closes[closes.length - 1]);
+    if (!closes || closes.length < 2) return { today: null, prev: null };
+    return {
+      today: round2(100 - closes[closes.length - 1]),
+      prev:  round2(100 - closes[closes.length - 2]),
+    };
   } catch (e) {
     console.warn(`[fx] ${symbol} 수집 실패:`, e.message);
-    return null;
+    return { today: null, prev: null };
   }
 }
 

@@ -10,8 +10,8 @@ const SYMBOLS = {
   platinum: 'PL=F',   // 백금 선물 (COMEX, oz)
   wti:      'CL=F',   // WTI 원유 (NYMEX, bbl)
   copper:   'HG=F',   // 구리 선물 (COMEX, lb)
-  aluminum: 'ALI=F',  // 알루미늄 선물
-  zinc:     'ZNC=F',  // 아연 — Yahoo Finance 미지원 시 null 처리됨
+  aluminum: 'ALI=F',  // 알루미늄 선물 (COMEX)
+  // zinc / nickel: LME 전용 — Yahoo Finance 갱신 불안정으로 제외
 };
 
 // 1돈 = 3.75g

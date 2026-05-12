@@ -12,8 +12,13 @@ export function validateData(raw) {
       volumeBn:     raw.domestic.kospi.volumeBn,
       marketCap:    raw.domestic.kospi.marketCap,
       supply:       raw.domestic.supply,
+      breadth:      raw.domestic.breadth ?? null,
       kospiHistory: raw.domestic.kospiHistory ?? [],
-      vkospi:       enrich(raw.domestic.vkospi?.today, raw.domestic.vkospi?.prev, '지수'),
+      vkospi:       {
+        ...enrich(raw.domestic.vkospi?.today, raw.domestic.vkospi?.prev, '지수'),
+        source: raw.domestic.vkospi?.source ?? null,
+        label:  raw.domestic.vkospi?.label  ?? null,
+      },
       isHoliday:    false,
     },
 

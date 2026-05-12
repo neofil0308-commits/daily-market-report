@@ -13,6 +13,41 @@ const BASE_QUERIES = [
   { category: '거시경제',  query: '연준 금리 환율 달러 인플레이션' },
 ];
 
+// 신문사 우선순위 (높을수록 우선)
+const SOURCE_PRIORITY = {
+  'hankyung.com': 10, 'mk.co.kr': 10,
+  'chosun.com': 9,   'donga.com': 9,
+  'hani.co.kr': 8,   'khan.co.kr': 8,
+  'joins.com': 7,    'fnnews.com': 6,
+  'newspim.com': 5,  'etoday.co.kr': 5,
+  'seoul.co.kr': 4,  'yna.co.kr': 4,
+};
+
+// 카테고리 표시 순서: 시장전반 → 거시경제 → 산업·기업
+const CATEGORY_ORDER = ['시장전반', '거시경제', '산업·기업'];
+
+function sourcePriority(url) {
+  try {
+    const host = new URL(url).hostname.replace('www.', '');
+    for (const [k, v] of Object.entries(SOURCE_PRIORITY)) {
+      if (host.includes(k)) return v;
+    }
+  } catch {}
+  return 3;
+}
+
+function titleKeywords(title) {
+  return title.replace(/[^\w가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
+}
+
+function jaccardSimilarity(kw1, kw2) {
+  const s1 = new Set(kw1);
+  const s2 = new Set(kw2);
+  const intersection = kw1.filter(w => s2.has(w)).length;
+  const union = new Set([...s1, ...s2]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
 /**
  * @param {string} reportDate - YYYY-MM-DD
  * @param {object} marketData - { overseas, fxRates } (선택, AI 키워드 생성에 활용)
@@ -26,8 +61,8 @@ export async function collectNews(reportDate, marketData = {}) {
     'X-Naver-Client-Secret': process.env.NAVER_CLIENT_SECRET,
   };
 
-  const cutoff = new Date(reportDate);
-  cutoff.setHours(0, 0, 0, 0);
+  // 전일(reportDate - 1일) 00:00 KST — UTC 서버에서도 정확히 동작
+  const cutoff = new Date(new Date(reportDate + 'T00:00:00+09:00').getTime() - 86_400_000);
 
   const allItems = [];
   const seenUrls = new Set();
@@ -62,7 +97,7 @@ export async function collectNews(reportDate, marketData = {}) {
     })
   );
 
-  return deduplicateSimilar(allItems);
+  return sortAndDedup(allItems);
 }
 
 // Gemini로 오늘의 추가 검색 키워드 2개 생성
@@ -107,6 +142,39 @@ JSON 배열만 출력하세요 (설명 없이):
   }
 }
 
+// 카테고리 정렬 + 유사 뉴스 중복 제거 (주요 신문사 우선)
+function sortAndDedup(items) {
+  // 각 아이템에 신문사 우선순위 점수 부여
+  const scored = items.map(item => ({
+    ...item,
+    _priority: sourcePriority(item.url),
+    _kw: titleKeywords(item.title),
+  }));
+
+  // 우선순위 높은 것부터 정렬
+  scored.sort((a, b) => b._priority - a._priority);
+
+  // 유사 뉴스 제거: 같은 카테고리 내 Jaccard >= 0.35이면 대표만 남김
+  const kept = [];
+  for (const item of scored) {
+    const similar = kept.find(
+      k => k.category === item.category && jaccardSimilarity(k._kw, item._kw) >= 0.35
+    );
+    if (!similar) kept.push(item);
+  }
+
+  // 카테고리 순서 정렬 (시장전반 > 거시경제 > 산업·기업)
+  kept.sort((a, b) => {
+    const oa = CATEGORY_ORDER.indexOf(a.category);
+    const ob = CATEGORY_ORDER.indexOf(b.category);
+    if (oa !== ob) return (oa === -1 ? 99 : oa) - (ob === -1 ? 99 : ob);
+    return b._priority - a._priority;
+  });
+
+  // 임시 필드 제거
+  return kept.map(({ _priority, _kw, ...rest }) => rest);
+}
+
 function extractSource(url) {
   const map = {
     'hankyung.com': '한국경제', 'mk.co.kr': '매일경제', 'chosun.com': '조선일보',
@@ -120,12 +188,3 @@ function extractSource(url) {
   } catch { return '출처미상'; }
 }
 
-function deduplicateSimilar(items) {
-  const seen = new Set();
-  return items.filter(item => {
-    const key = `${item.category}:${item.title.slice(0, 15)}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}

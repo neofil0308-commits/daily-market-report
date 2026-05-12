@@ -3,10 +3,31 @@
     "allow": [
       "Bash(node -e ' *)",
       "Bash(node --input-type=module)",
-      "Bash(mkdir -p \"c:/Users/neofi/content report/.claude/agents\")"
+      "Bash(mkdir -p \"c:/Users/neofi/content report/.claude/agents\")",
+      "Bash(claude mcp *)",
+      "Read(//c/Users/neofi/**)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,':', v\\) for proj in d.get\\('projects',{}\\).values\\(\\) for k,v in proj.get\\('mcpServers',{}\\).items\\(\\)]\")",
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\neofi\\\\content report\\\\outputs\\\\2026-05-12\")",
+      "Bash(Out-Null)",
+      "Bash(Set-Content -Path \"c:\\\\Users\\\\neofi\\\\content report\\\\outputs\\\\2026-05-12\\\\sent.flag\" -Value \"draft-preview-hold\" -Encoding utf8)",
+      "Bash(Write-Host \"sent.flag created\")",
+      "Bash(node tools/orchestrator.js --now)",
+      "Bash(echo \"draft-preview-hold\")",
+      "Bash(node tools/orchestrator.js --now --skip-collect)",
+      "Bash(Remove-Item -Force \"outputs/2026-05-12/sent.flag\" -ErrorAction SilentlyContinue)",
+      "Bash(grep -n \"const html\\\\|let html\\\\|html = \\\\`\\\\|html=\\\\`\" \"c:/Users/neofi/content report/tools/preview_send.js\")",
+      "Bash(ls outputs/)",
+      "Bash(dir outputs *)",
+      "Bash(start \"\" \"c:\\\\Users\\\\neofi\\\\content report\\\\outputs\\\\2026-05-12\\\\report_preview.html\")",
+      "Bash(ls templates/)",
+      "Bash(dir templates *)",
+      "Bash(file templates/market_report_reference)",
+      "Bash(head -5 templates/market_report_reference)",
+      "Bash(powershell -Command \"Get-Content 'templates/market_report_reference' -TotalCount 5\")"
     ],
     "additionalDirectories": [
-      "c:\\Users\\neofi\\content report\\.claude"
+      "c:\\Users\\neofi\\content report\\.claude",
+      "C:\\Users\\neofi"
     ]
   }
 }

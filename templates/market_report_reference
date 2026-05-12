@@ -1,0 +1,539 @@
+
+<style>
+/* ── 전역 폰트: Notion Default / Inter (San-serif 계열) ── */
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --fn: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --up:  #E24B4A;
+  --dn:  #378ADD;
+  --neu: var(--color-text-secondary);
+}
+body, div, span, td, th, a, p { font-family: var(--fn) !important; }
+
+.hdr { display:flex; align-items:baseline; gap:10px; margin-bottom:1.8rem; padding-bottom:12px; border-bottom:0.5px solid var(--color-border-secondary); }
+.hdr-title { font-size:20px; font-weight:600; font-family:var(--fn); }
+.hdr-date  { font-size:12px; color:var(--color-text-secondary); font-family:var(--fn); }
+
+.sec { margin:0 0 2rem; }
+.sec-title { font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--color-text-secondary); border-bottom:0.5px solid var(--color-border-secondary); padding-bottom:5px; margin-bottom:12px; font-family:var(--fn); }
+
+/* ── 표 공통 ── */
+.tbl { width:100%; border-collapse:collapse; font-size:13px; font-family:var(--fn); }
+.tbl th {
+  font-size:11px; font-weight:600; font-family:var(--fn);
+  color:var(--color-text-secondary);
+  background:var(--color-background-secondary);
+  padding:6px 8px;
+  border-bottom:0.5px solid var(--color-border-secondary);
+  white-space:nowrap;
+  text-align:center; /* ← 헤더 전체 가운데 정렬 */
+}
+.tbl th.l { text-align:left; }  /* 구분 헤더만 왼쪽 */
+.tbl td {
+  padding:8px 8px;
+  border-bottom:0.5px solid var(--color-border-tertiary);
+  color:var(--color-text-primary);
+  font-weight:400; font-family:var(--fn);
+  vertical-align:middle; line-height:1.5;
+}
+.tbl td.r { text-align:right; white-space:nowrap; }
+.tbl td.c { text-align:center; }
+.tbl td.bi { font-size:11px; color:var(--color-text-secondary); line-height:1.55; font-family:var(--fn); }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:var(--color-background-secondary); }
+
+/* 변동 셀 */
+.chg { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.chg-val { font-size:13px; font-weight:400; white-space:nowrap; font-family:var(--fn); }
+.chg-lbl { font-size:10px; color:var(--color-text-secondary); white-space:nowrap; font-family:var(--fn); }
+.up  { color:var(--up); }
+.dn  { color:var(--dn); }
+.neu { color:var(--neu); }
+
+/* 수급 바 */
+.bar-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:12px; font-family:var(--fn); }
+.bar-row .nm { min-width:40px; color:var(--color-text-secondary); }
+.bwrap { flex:1; height:4px; background:var(--color-border-tertiary); border-radius:2px; }
+.bfill { height:100%; border-radius:2px; }
+.b-buy  { background:var(--up); }
+.b-sell { background:var(--dn); }
+.bar-row .val { min-width:90px; text-align:right; font-size:12px; font-weight:400; font-family:var(--fn); }
+.sup-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.sup-card { background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:11px 13px; }
+.sup-card .st { font-size:11px; font-weight:600; color:var(--color-text-secondary); margin-bottom:7px; font-family:var(--fn); }
+
+/* 차트 */
+.chart-wrap { position:relative; width:100%; height:195px; margin-bottom:6px; }
+
+/* 뉴스 */
+.ntbl { width:100%; border-collapse:collapse; font-size:13px; font-family:var(--fn); }
+.ntbl th {
+  font-size:11px; font-weight:600; font-family:var(--fn);
+  color:var(--color-text-secondary);
+  background:var(--color-background-secondary);
+  padding:6px 8px;
+  border-bottom:0.5px solid var(--color-border-secondary);
+  text-align:center; /* ← 뉴스 헤더도 가운데 */
+}
+.ntbl th.l { text-align:left; }
+.ntbl td { padding:9px 8px; border-bottom:0.5px solid var(--color-border-tertiary); vertical-align:top; font-weight:400; font-family:var(--fn); }
+.ntbl tr:last-child td { border-bottom:none; }
+.td-date { white-space:nowrap; font-size:12px; color:var(--color-text-secondary); min-width:68px; }
+.td-cat  { white-space:nowrap; min-width:64px; text-align:center; }
+.td-ttl  { min-width:190px; max-width:215px; }
+.td-ttl a { color:var(--color-text-info); text-decoration:none; font-size:12px; line-height:1.45; font-weight:400; font-family:var(--fn); }
+.td-ttl a:hover { text-decoration:underline; }
+.td-src  { font-size:11px; color:var(--color-text-secondary); margin-top:3px; font-family:var(--fn); }
+.td-sum  { font-size:12px; color:var(--color-text-secondary); line-height:1.65; font-weight:400; font-family:var(--fn); }
+.tag { display:inline-block; font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; font-family:var(--fn); }
+.t-mkt  { background:var(--color-background-info);   color:var(--color-text-info); }
+.t-corp { background:var(--color-background-success); color:var(--color-text-success); }
+.t-mac  { background:var(--color-background-warning); color:var(--color-text-warning); }
+.note { font-size:11px; color:var(--color-text-tertiary); margin-top:5px; line-height:1.7; font-family:var(--fn); }
+.divider { height:0.5px; background:var(--color-border-tertiary); margin:1.5rem 0; }
+</style>
+
+<div style="padding:1rem 0;">
+
+<!-- HEADER -->
+<div class="hdr">
+  <span class="hdr-title">📊 일일 시장 리포트</span>
+  <span class="hdr-date">2026.05.07 (목) 종가 기준 — 한국경제 · 네이버증권</span>
+</div>
+
+<!-- ══════ 1. 국내 증시 ══════ -->
+<div class="sec">
+  <div class="sec-title">국내 증시</div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="l">구분</th>
+        <th>당일(5/7) 종가</th>
+        <th>전일(5/6) 종가</th>
+        <th>변동</th>
+        <th class="l">비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>KOSPI</td>
+        <td class="r">7,400.56</td>
+        <td class="r">7,384.56</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 16.00 (+0.22%)</span><span class="chg-lbl">(소폭 상승)</span></div></td>
+        <td class="bi">장중 7,531.88 — 사상 첫 7,500선 돌파 후 차익실현으로 7,400선 마감</td>
+      </tr>
+      <tr>
+        <td>KOSDAQ</td>
+        <td class="r">1,199.62</td>
+        <td class="r">1,210.17</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 10.55 (−0.87%)</span><span class="chg-lbl">(소폭 하락)</span></div></td>
+        <td class="bi">반도체 쏠림 속 1,200선 하회 마감. 알테오젠 코스피 이전상장 이슈</td>
+      </tr>
+      <tr>
+        <td>KOSPI 거래대금</td>
+        <td class="r">약 45조원</td>
+        <td class="r">58.17조원</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 약 13.17조원</span><span class="chg-lbl">(거래 감소)</span></div></td>
+        <td class="bi">전일 역대 거래대금 이후 정상화. 활동계좌 1억 522만개 유지</td>
+      </tr>
+      <tr>
+        <td>VKOSPI (공포지수)</td>
+        <td class="r">53.56</td>
+        <td class="r">60.07</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 6.51 (−10.84%)</span><span class="chg-lbl">(불안심리 완화)</span></div></td>
+        <td class="bi">전일 장중 64.83까지 급등 후 진정. 신용잔액 36조원 돌파 경계 지속</td>
+      </tr>
+      <tr>
+        <td>KOSPI 시가총액</td>
+        <td class="r">약 6,236조원</td>
+        <td class="r">약 6,093조원</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 약 143조원</span><span class="chg-lbl">(상승)</span></div></td>
+        <td class="bi">삼성전자 시총 1조달러 클럽 가입. SK하이닉스 1,031조원</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="sup-grid">
+    <div class="sup-card">
+      <div class="st">🏦 KOSPI 수급 — 전일(5/6) 종가</div>
+      <div class="bar-row"><span class="nm">외국인</span><div class="bwrap"><div class="bfill b-buy" style="width:100%"></div></div><span class="val up">+3조 1,346억원</span></div>
+      <div class="bar-row"><span class="nm">기관</span><div class="bwrap"><div class="bfill b-sell" style="width:74%"></div></div><span class="val dn">−2조 3,134억원</span></div>
+      <div class="bar-row"><span class="nm">개인</span><div class="bwrap"><div class="bfill b-sell" style="width:18%"></div></div><span class="val dn">−5,715억원</span></div>
+    </div>
+    <div class="sup-card">
+      <div class="st">📌 당일(5/7) 수급</div>
+      <div class="bar-row"><span class="nm">외국인</span><div class="bwrap"><div class="bfill b-sell" style="width:55%"></div></div><span class="val dn">매도 전환</span></div>
+      <div class="bar-row"><span class="nm">기관</span><div class="bwrap"><div class="bfill b-buy" style="width:10%"></div></div><span class="val up">+5,583억원</span></div>
+      <div class="bar-row"><span class="nm">개인</span><div class="bwrap"><div class="bfill b-buy" style="width:100%"></div></div><span class="val up">+5조 6,562억원</span></div>
+    </div>
+  </div>
+  <div class="note">※ 5월 누적 외국인 순매수 약 6조원. 당일 차익실현 전환. 신용거래융자 잔고 사상 첫 36조원 돌파.</div>
+</div>
+
+<!-- ══════ 2. KOSPI 추이 ══════ -->
+<div class="sec">
+  <div class="sec-title">KOSPI 최근 5거래일 종가 추이 &amp; 거래대금</div>
+  <div class="chart-wrap">
+    <canvas id="kChart" role="img" aria-label="코스피 최근 5거래일 종가 및 거래대금 차트">4/29: 6,690.90 / 4/30: 6,598.43 / 5/4: 6,936.99 / 5/6: 7,384.56 / 5/7: 7,400.56</canvas>
+  </div>
+  <table class="tbl" style="margin-top:6px;">
+    <thead>
+      <tr>
+        <th class="l">날짜</th>
+        <th>KOSPI 종가</th>
+        <th>전일比</th>
+        <th>등락률</th>
+        <th>거래대금</th>
+        <th class="l">주요 이슈</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>04/29 (화)</td><td class="r">6,690.90</td><td class="r up">▲ 247.23</td><td class="r up">+3.84%</td><td class="r">31.20조원</td><td class="bi">이전 종가 사상 최고치 경신</td></tr>
+      <tr><td>04/30 (수)</td><td class="r">6,598.43</td><td class="r dn">▼ 92.47</td><td class="r dn">−1.38%</td><td class="r">28.40조원</td><td class="bi">미·이란 지상군 우려 차익실현</td></tr>
+      <tr><td>05/04 (월)</td><td class="r">6,936.99</td><td class="r up">▲ 338.56</td><td class="r up">+5.12%</td><td class="r">42.60조원</td><td class="bi">연휴 반등. SK하이닉스 시총 1,000조원 돌파</td></tr>
+      <tr><td>05/06 (수)</td><td class="r">7,384.56</td><td class="r up">▲ 447.57</td><td class="r up">+6.45%</td><td class="r">58.17조원</td><td class="bi">사상 첫 7,000선 돌파. 매수 사이드카. 외국인 3.13조원</td></tr>
+      <tr><td>05/07 (목)</td><td class="r">7,400.56</td><td class="r up">▲ 16.00</td><td class="r up">+0.22%</td><td class="r">약 45.00조원</td><td class="bi">장중 7,531.88 — 사상 첫 7,500선 돌파 후 7,400선 마감</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════ 3. 해외 증시 ══════ -->
+<div class="sec">
+  <div class="sec-title">해외 증시</div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="l">구분</th>
+        <th>전일(5/6) 종가</th>
+        <th>전전일(5/5) 종가</th>
+        <th>변동</th>
+        <th class="l">비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>다우존스</td>
+        <td class="r">49,910.59</td>
+        <td class="r">49,298.25</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 612.34 (+1.24%)</span><span class="chg-lbl">(상승)</span></div></td>
+        <td class="bi">미·이란 종전기대 + AMD 어닝 서프라이즈 주도</td>
+      </tr>
+      <tr>
+        <td>S&amp;P 500</td>
+        <td class="r">7,365.12</td>
+        <td class="r">7,259.22</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 105.90 (+1.46%)</span><span class="chg-lbl">(사상 최고치)</span></div></td>
+        <td class="bi">이틀 연속 사상 최고치 경신. 전 업종 상승 (전전일 5/5 종가 기준)</td>
+      </tr>
+      <tr>
+        <td>나스닥</td>
+        <td class="r">25,838.94</td>
+        <td class="r">25,326.13</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 512.81 (+2.02%)</span><span class="chg-lbl">(사상 최고치)</span></div></td>
+        <td class="bi">25,000선 돌파 후 추가 상승 (5/5 종가 25,326.13 기준)</td>
+      </tr>
+      <tr>
+        <td>필라델피아 반도체(SOX)</td>
+        <td class="r">10,974.16</td>
+        <td class="r">10,534.66</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 439.50 (+4.17%)</span><span class="chg-lbl">(급등)</span></div></td>
+        <td class="bi">AMD +18.60% · 인텔 +12.90% · 마이크론 +11.10% 어닝 서프라이즈</td>
+      </tr>
+      <tr>
+        <td>닛케이225</td>
+        <td class="r">62,879.50</td>
+        <td class="r">59,513.12</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 3,366.38 (+5.66%)</span><span class="chg-lbl">(강세)</span></div></td>
+        <td class="bi">AI·반도체 랠리 동조. 일본 시장 사상 최고치권</td>
+      </tr>
+      <tr>
+        <td>DAX (독일)</td>
+        <td class="r">24,918.69</td>
+        <td class="r">24,391.66</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 527.03 (+2.16%)</span><span class="chg-lbl">(강세)</span></div></td>
+        <td class="bi">유럽 증시 동반 강세. 기술주 주도</td>
+      </tr>
+      <tr>
+        <td>항셍지수</td>
+        <td class="r">22,867.31</td>
+        <td class="r">22,504.68</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 362.63 (+1.61%)</span><span class="chg-lbl">(소폭 상승)</span></div></td>
+        <td class="bi">글로벌 랠리 동조. 중국 소비 둔화 우려로 상대 부진</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════ 4. 환율·금리 ══════ -->
+<div class="sec">
+  <div class="sec-title">환율 · 금리</div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="l">구분</th>
+        <th>당일(5/7)</th>
+        <th>전일(5/6)</th>
+        <th>변동</th>
+        <th class="l">비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>원/달러 환율</td>
+        <td class="r">1,456.00원</td>
+        <td class="r">1,461.30원</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 5.30원 (−0.36%)</span><span class="chg-lbl">(원화 강세)</span></div></td>
+        <td class="bi">지정학 리스크 완화 + 바이코리아 수급. 2개월 최강 수준</td>
+      </tr>
+      <tr>
+        <td>달러 인덱스</td>
+        <td class="r">97.72</td>
+        <td class="r">98.48</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 0.76 (−0.77%)</span><span class="chg-lbl">(달러 약세)</span></div></td>
+        <td class="bi">미·이란 종전기대로 안전자산 달러 수요 감소</td>
+      </tr>
+      <tr>
+        <td>미 국채 10년물</td>
+        <td class="r">4.42%</td>
+        <td class="r">4.44%</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 1.40bp</span><span class="chg-lbl">(소폭 하락)</span></div></td>
+        <td class="bi">유가 하락 → 인플레 완화 기대. 4.50% 저항선 관찰 중</td>
+      </tr>
+      <tr>
+        <td>미 국채 2년물</td>
+        <td class="r">3.94%</td>
+        <td class="r">3.96%</td>
+        <td class="r"><div class="chg"><span class="chg-val dn">▼ 2.00bp</span><span class="chg-lbl">(소폭 하락)</span></div></td>
+        <td class="bi">단기금리 하락. 9월 인하 기대 소폭 반영</td>
+      </tr>
+      <tr>
+        <td>6월 FOMC 동결확률</td>
+        <td class="r">93.50%</td>
+        <td class="r">96.00%</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 2.50%p (인하기대↑)</span><span class="chg-lbl">(인하 가능성 증가)</span></div></td>
+        <td class="bi">CME FedWatch. 인하확률 6.50% (전일 4.00%)</td>
+      </tr>
+      <tr>
+        <td>9월 인하 가능성</td>
+        <td class="r">17.00%</td>
+        <td class="r">9.00%</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 8.00%p</span><span class="chg-lbl">(큰 폭 상승)</span></div></td>
+        <td class="bi">유가 하락·수출 호조·원화강세 복합 작용</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════ 5. 원자재·비철 ══════ -->
+<div class="sec">
+  <div class="sec-title">원자재 · 비철금속</div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="l">구분</th>
+        <th>당일 시세</th>
+        <th>전일 시세</th>
+        <th>변동</th>
+        <th class="l">비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 금 국제: 달러이므로 소수점 둘째자리 -->
+      <tr>
+        <td>🥇 금 (현물, oz)</td>
+        <td class="r">$5,226.40</td>
+        <td class="r">$5,159.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $67.40 (+1.29%)</span><span class="chg-lbl">(상승)</span></div></td>
+        <td class="bi">국내 24K 1g ≈ 218,778원. 안전자산 수요 견조</td>
+      </tr>
+      <!-- 금 국내: 원화이므로 정수 + 원 표기 -->
+      <tr>
+        <td>🥇 금 (국내 순금 1돈)</td>
+        <td class="r">956,000원</td>
+        <td class="r">950,000원</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ 6,000원 (+0.63%)</span><span class="chg-lbl">(소폭 상승)</span></div></td>
+        <td class="bi">살 때 956,000원 / 팔 때 800,000원 (VAT 포함)</td>
+      </tr>
+      <!-- 은: 달러이므로 소수점 둘째자리 -->
+      <tr>
+        <td>⚪ 은 (Micro, oz)</td>
+        <td class="r">$90.99</td>
+        <td class="r">$86.99</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $4.00 (+4.60%)</span><span class="chg-lbl">(강세)</span></div></td>
+        <td class="bi">태양광·반도체 수요 견조. 2026년 공급 적자 지속 전망</td>
+      </tr>
+      <!-- 백금: 달러이므로 소수점 둘째자리 -->
+      <tr>
+        <td>⚪ 백금 (oz)</td>
+        <td class="r">$2,331.00</td>
+        <td class="r">$2,180.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $151.00 (+6.93%)</span><span class="chg-lbl">(강세)</span></div></td>
+        <td class="bi">귀금속 전반 강세 동조</td>
+      </tr>
+      <!-- WTI: 달러이므로 소수점 둘째자리 -->
+      <tr>
+        <td>🛢️ WTI 원유 (bbl)</td>
+        <td class="r">$95.66</td>
+        <td class="r">$95.07</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $0.59 (+0.62%)</span><span class="chg-lbl">(소폭 반등)</span></div></td>
+        <td class="bi">전일 최대 −9.00% 폭락 후 반등. 미·이란 MOU 협의 진행 중</td>
+      </tr>
+      <!-- 구리: 달러이므로 소수점 둘째자리 -->
+      <tr>
+        <td>🔴 구리 (COMEX, lb)</td>
+        <td class="r">$5.96</td>
+        <td class="r">$5.90</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $0.06 (+1.02%)</span><span class="chg-lbl">(보합·소폭 상승)</span></div></td>
+        <td class="bi">美 관세 보고서(6/30) 결과 주시. 그린에너지 수요 견조</td>
+      </tr>
+      <!-- LME 금속: 달러/t이므로 소수점 둘째자리. 변동은 정수달러이므로 .00 -->
+      <tr>
+        <td>🩶 알루미늄 (LME, t)</td>
+        <td class="r">$3,121.00</td>
+        <td class="r">$3,064.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $57.00 (+1.86%)</span><span class="chg-lbl">(상승)</span></div></td>
+        <td class="bi">중동 에너지비용 상승 → 생산원가 자극</td>
+      </tr>
+      <tr>
+        <td>🔵 아연 (LME, t)</td>
+        <td class="r">$3,207.00</td>
+        <td class="r">$3,180.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $27.00 (+0.85%)</span><span class="chg-lbl">(소폭 상승)</span></div></td>
+        <td class="bi">전기차·친환경 도금 수요 지지. 중국 생산 회복 변수</td>
+      </tr>
+      <tr>
+        <td>⚫ 니켈 (LME, t)</td>
+        <td class="r">$18,500.00</td>
+        <td class="r">$18,200.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ $300.00 (+1.65%)</span><span class="chg-lbl">(소폭 상승)</span></div></td>
+        <td class="bi">배터리 수요 회복 기대. 인도네시아 공급 과잉 리스크 잔존</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">※ 아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
+</div>
+
+<!-- ══════ 6. 주요 뉴스 ══════ -->
+<div class="sec">
+  <div class="sec-title">주요 뉴스</div>
+  <table class="ntbl">
+    <thead>
+      <tr>
+        <th class="l" style="width:68px">일자</th>
+        <th style="width:64px">구분</th>
+        <th class="l" style="width:210px">제목 / 출처</th>
+        <th class="l">요약</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-mkt">시장</span></td>
+        <td class="td-ttl"><a href="https://www.etoday.co.kr/news/view/2582375" target="_blank">코스피 사상 첫 7,500선 돌파 후 7,400.56 마감…개인 5.6조 순매수</a><div class="td-src">📰 이투데이</div></td>
+        <td class="td-sum">· 장중 7,531.88 — 사상 첫 7,500선 돌파. 종가 7,400.56 (+0.22%)<br>· 외국인 차익실현 매도 전환. 개인 5.56조원·기관 5,583억원 매수로 지지<br>· 5월 이후 5대 상승 섹터: 방산·에너지·반도체·전선전력·이차전지<br>· 코스닥 1,199.62 하락 마감 — 대형주 쏠림 속 중소형주 소외 지속</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-mkt">시장</span></td>
+        <td class="td-ttl"><a href="https://www.hankyung.com/article/2026050696541" target="_blank">코스피 꿈의 7,000 시대…시장 양극화 극복이 과제</a><div class="td-src">📰 한국경제</div></td>
+        <td class="td-sum">· 지수 급등 속 하락 종목이 상승 종목의 3배 이상 — 극심한 양극화 지속<br>· 신용거래융자 36조원 돌파 — FOMO 심리 확산, 2030·60대 빚투 급증<br>· 삼성전자·SK하이닉스 코스피 시총 절반 차지 → 편중 리스크 경고<br>· 한경 사설: "양적 팽창에 걸맞은 질적 내실 구축 필요"</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.06</td>
+        <td class="td-cat"><span class="tag t-mkt">시장</span></td>
+        <td class="td-ttl"><a href="https://www.hankyung.com/article/202605068135Y" target="_blank">7,000피 개막하자 코스피 시총 6,000조원 첫 돌파</a><div class="td-src">📰 한국경제</div></td>
+        <td class="td-sum">· 코스피 7,384.56 (+6.45%) — 사상 첫 7,000선 돌파. 시총 6,000조원 동시 돌파<br>· 외국인 통합계좌 규제 완화 후 반도체 대형주 집중 매수가 핵심 동력<br>· 삼성전자 선행 PER 5.20배·SK하이닉스 4.80배 — 엔비디아 21.80배 대비 극저평가<br>· 거래대금 58.17조원 역대급. 활동계좌 1억 522만개 사상 최대</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-corp">반도체</span></td>
+        <td class="td-ttl"><a href="https://www.hankyung.com/article/2026050702626" target="_blank">"50만전자·300만닉스 간다"…SK증권 목표주가 파격 상향</a><div class="td-src">📰 한국경제</div></td>
+        <td class="td-sum">· SK증권, 삼성전자 50만원·SK하이닉스 300만원으로 목표주가 대폭 상향<br>· 2026년 영업이익: 삼성전자 338조원·SK하이닉스 262조원 (각 3%, 4% 상향)<br>· 삼성전자 시총 1조달러 돌파 — 아시아 TSMC 이어 2번째 트릴리언 클럽<br>· "선행 PER 5~6배 수준 — 글로벌 AI 관련주 중 저평가 매력 초입 단계"</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-corp">반도체</span></td>
+        <td class="td-ttl"><a href="https://www.fnnews.com/news/202605071657055902" target="_blank">삼성전자 파업 리스크…글로벌 IB·국내 증권사 실적 전망 엇갈려</a><div class="td-src">📰 파이낸셜뉴스</div></td>
+        <td class="td-sum">· 노조, 5월 21일~6월 7일 18일간 총파업 예고 (성과급 상한 폐지 요구)<br>· 씨티그룹: 영업이익 전망 10~11% 하향. "파업 시 충당금 30조원 가능"<br>· 교보증권·유진증권: "메모리 호황 지속성 감안 시 파업 영향 제한적"<br>· 노노 분열(동행노조 탈퇴)로 파업 동력 약화 가능성 제기</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-corp">전력기기</span></td>
+        <td class="td-ttl"><a href="https://econmingle.com/economy/hd-hyundai-electric-q1-2026-earnings-result/" target="_blank">HD현대일렉트릭 1Q 영업이익 2,583억원·OPM 24.90%…슈퍼사이클 구조화</a><div class="td-src">📰 이코노믹리뷰</div></td>
+        <td class="td-sum">· 2026년 1분기 매출 1조 365억원(+2.10%), 영업이익 2,583억원(+18.40%)<br>· 순이익 증가율 +35.40% — 매출 증가율 상회. 원가효율화·고마진 믹스 개선<br>· 북미 전력변압기 판매 확대(+21.60%)가 성장동력. LS일렉트릭도 +40.00% 이상<br>· AI 데이터센터·노후전력망 교체 수요 장기 구조화. 분기배당 1주당 1,300원 결정</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.04.28</td>
+        <td class="td-cat"><span class="tag t-corp">반도체</span></td>
+        <td class="td-ttl"><a href="https://www.hankyung.com/article/202604230510g" target="_blank">SK하이닉스 1Q 영업이익 37.6조원·OPM 71.50% 창사 최고 기록</a><div class="td-src">📰 한국경제</div></td>
+        <td class="td-sum">· 2026년 1분기 매출 52.58조원(YoY +198.10%), 영업이익 37.61조원(YoY +405.50%)<br>· OPM 71.50% 창사 최고. HBM·서버 D램·eSSD 고부가 제품 비중 확대<br>· D램 가격 +186.00%·낸드 +199.00% 전망(KB증권). CapEx 전년 대비 대폭 확대<br>· 증권사 14곳 평균 목표주가 162만원. 상단 200만원</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-mac">거시</span></td>
+        <td class="td-ttl"><a href="https://tradingeconomics.com/commodity/crude-oil" target="_blank">미·이란 종전 MOU 협의 — WTI 전일 −9.00% 후 $95.66 반등 안정</a><div class="td-src">📰 TradingEconomics</div></td>
+        <td class="td-sum">· 미국이 파키스탄 중재로 이란에 MOU 형식 종전안 전달. 이란 수일 내 응답 예정<br>· 전일 WTI 최대 −9.00% 폭락($88.66) 후 $95.66 반등 안정화<br>· 트럼프 "합의 실패 시 군사 타격 재개" 경고 — 불확실성 잔존<br>· 유가 하락 → 인플레 완화 → 금리인하 기대 → 글로벌 증시 상승 순환</td>
+      </tr>
+      <tr>
+        <td class="td-date">2026.05.07</td>
+        <td class="td-cat"><span class="tag t-mac">거시</span></td>
+        <td class="td-ttl"><a href="https://v.daum.net/v/20260507091234563" target="_blank">연준 6월 동결 93.50%…9월 인하 가능성 17.00%로 급상승</a><div class="td-src">📰 다음금융</div></td>
+        <td class="td-sum">· 6월 FOMC 동결 93.50%(전일 96.00%). 인하확률 6.50%로 소폭 상승<br>· 9월 인하 가능성 17.00% — 전일 9.00% 대비 8.00%p 급상승<br>· 건들락: "CPI 연말 3%대 후반~4% 가능. 유가가 인플레 재가속 리스크"<br>· 이번 주 금요일 美 4월 비농업 고용 → 차주 4월 CPI가 금리 향방 결정</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Footer -->
+<div class="divider"></div>
+<div class="note" style="line-height:1.9;">
+  📌 출처: 한국경제, 이투데이, 파이낸셜뉴스, 이코노믹리뷰, CNBC, TradingEconomics, CME FedWatch, Investing.com<br>
+  ⚠️ S&P 500 변동: 전일(5/6) 7,365.12 − 전전일(5/5) 7,259.22 = +105.90 (+1.46%). KOSPI 종가·VKOSPI: Investing.com 기준.<br>
+  ⚠️ SOX 5/4 종가 10,534.66 → 5/6 +4.17% 적용 추산치. 아연·니켈 일부 수치는 LME 참고값.<br>
+  ⚠️ 본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const gc = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const tc = isDark ? '#9c9a92' : '#73726c';
+new Chart(document.getElementById('kChart'), {
+  type: 'bar',
+  data: {
+    labels: ['4/29(화)','4/30(수)','5/4(월)','5/6(수)','5/7(목)'],
+    datasets: [
+      { type:'line', label:'KOSPI 종가',
+        data:[6690.90,6598.43,6936.99,7384.56,7400.56],
+        borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)',
+        borderWidth:2, pointBackgroundColor:'#E24B4A', pointRadius:4,
+        fill:true, tension:0.3, yAxisID:'yL' },
+      { type:'bar', label:'거래대금(조원)',
+        data:[31.20,28.40,42.60,58.17,45.00],
+        backgroundColor: isDark ? 'rgba(55,138,221,0.30)' : 'rgba(55,138,221,0.22)',
+        borderColor: isDark ? 'rgba(55,138,221,0.65)' : 'rgba(55,138,221,0.55)',
+        borderWidth:1, yAxisID:'yR' }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{display:false},
+      tooltip:{ callbacks:{
+        label: ctx => ctx.dataset.label+': '+
+          (ctx.parsed.y!==null
+            ? ctx.parsed.y.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})
+            : '—')
+      }}
+    },
+    scales:{
+      x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11, family:"'Inter',sans-serif"}} },
+      yL:{ position:'left', min:6300, max:7700, grid:{color:gc},
+           ticks:{color:tc, font:{size:11, family:"'Inter',sans-serif"}, callback:v=>v.toLocaleString()} },
+      yR:{ position:'right', min:0, max:80, grid:{drawOnChartArea:false},
+           ticks:{color:tc, font:{size:11, family:"'Inter',sans-serif"}, callback:v=>v.toFixed(2)+'조'} }
+    }
+  }
+});
+</script>
