@@ -56,7 +56,20 @@ async function collectVkospi() {
 }
 
 // ── 메인 실행 ──────────────────────────────────────────────────────────────────
-const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+// KST 기준 날짜 계산.
+// GitHub Actions 크론 지연으로 새벽(00:00~08:59 KST)에 실행될 경우,
+// 실제 수집 데이터는 전날 종가 기준이므로 전 영업일 폴더에 저장한다.
+const nowKST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+const kstHour = nowKST.getUTCHours(); // toISOString 기준이므로 +9h 반영된 시각
+let dataDate = nowKST;
+if (kstHour < 9) {
+  // 장전 새벽: 전날 영업일로 후퇴
+  dataDate = new Date(nowKST.getTime() - 24 * 60 * 60 * 1000);
+  while ([0, 6].includes(dataDate.getUTCDay())) {
+    dataDate = new Date(dataDate.getTime() - 24 * 60 * 60 * 1000);
+  }
+}
+const todayStr = dataDate.toISOString().slice(0, 10);
 const outputDir = path.join(process.env.OUTPUT_DIR ?? './outputs', todayStr);
 await fs.mkdir(outputDir, { recursive: true });
 

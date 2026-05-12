@@ -418,7 +418,7 @@ body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-prima
 <div class="hdr">
   <div class="hdr-top">
     <span class="hdr-title">📊 일일 시장 리포트</span>
-    <span class="hdr-date">${dateFull} 종가 기준</span>
+    <span class="hdr-date">${dateFull} 종가 기준 — 한국경제 · 네이버증권</span>
   </div>
   ${headline ? `<span class="hdr-headline">📌 ${headline}</span>` : ''}
 </div>

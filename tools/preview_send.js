@@ -5,6 +5,7 @@ import axios from 'axios';
 import nodemailer from 'nodemailer';
 import { buildHtml } from './desk/designer.js';
 import { runTFAnalyst } from './teams/tf_analyst.js';
+import { runTFNews } from './teams/tf_news.js';
 
 // ── 날짜·데이터 로드 ──────────────────────────────────────────────────────────
 const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -104,7 +105,18 @@ if (histAll.length < 6) {
   } catch (e) { console.warn('[report] KOSPI 히스토리 폴백 실패:', e.message); }
 }
 
-// ── 애널리스트 리포트 분석 (tf_analyst) ─────────────────────────────────────
+// ── TF-1 뉴스 분석 (AI Summary top_stories 생성) ────────────────────────────
+let tfNewsResult = { findings: [], top_stories: [], themes: [] };
+try {
+  tfNewsResult = await runTFNews(news ?? [], data);
+  if (tfNewsResult.top_stories?.length) {
+    console.log(`[report] 뉴스 요약 ${tfNewsResult.top_stories.length}건 생성 완료`);
+  }
+} catch (e) {
+  console.warn('[report] 뉴스 분석 실패 (무시):', e.message);
+}
+
+// ── TF-2 애널리스트 리포트 분석 ─────────────────────────────────────────────
 let tfAnalystResult = { findings: [] };
 try {
   tfAnalystResult = await runTFAnalyst(data.dart ?? { reports: [] }, news ?? []);
@@ -118,7 +130,7 @@ try {
 // ── HTML 생성 (designer.js 공통 빌더) ────────────────────────────────────────
 const html = await buildHtml(
   { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [] },
-  { analyst: tfAnalystResult },
+  { news: tfNewsResult, analyst: tfAnalystResult },
   { headline: null, include_crypto: false, include_analyst: tfAnalystResult.findings?.length > 0 }
 );
 
