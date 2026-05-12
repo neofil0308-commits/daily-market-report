@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node tools/main.js",
-    "now": "node tools/main.js --now",
-    "dry-run": "node tools/main.js --now --dry-run",
-    "skip-collect": "node tools/main.js --now --skip-collect"
+    "start":        "node tools/main.js",
+    "now":          "node tools/main.js --now",
+    "dry-run":      "node tools/main.js --now --dry-run",
+    "skip-collect": "node tools/main.js --now --skip-collect",
+    "report":       "node tools/orchestrator.js --now",
+    "report:dry":   "node tools/orchestrator.js --now --dry-run",
+    "tf:news":      "node tools/teams/tf_news.js --date",
+    "tf:crypto":    "node tools/teams/tf_crypto.js --date",
+    "tf:analyst":   "node tools/teams/tf_analyst.js --date"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
