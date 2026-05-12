@@ -7,8 +7,8 @@ export function validateData(raw) {
     meta: raw.meta,
 
     domestic: raw.domestic.isHoliday ? { isHoliday: true } : {
-      kospi:        enrich(raw.domestic.kospi.close,  raw.domestic.kospi.prevClose,  '지수'),
-      kosdaq:       enrich(raw.domestic.kosdaq.close, raw.domestic.kosdaq.prevClose, '지수'),
+      kospi:        enrich(raw.domestic.kospi.today,  raw.domestic.kospi.prev,  '지수'),
+      kosdaq:       enrich(raw.domestic.kosdaq.today, raw.domestic.kosdaq.prev, '지수'),
       volumeBn:     raw.domestic.kospi.volumeBn,
       marketCap:    raw.domestic.kospi.marketCap,
       supply:       raw.domestic.supply,
