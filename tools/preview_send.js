@@ -3,7 +3,7 @@ import 'dotenv/config';
 import fs from 'fs/promises';
 import axios from 'axios';
 import nodemailer from 'nodemailer';
-import { buildHtml } from './desk/designer.js';
+import { buildHtml, buildEmailCard } from './desk/designer.js';
 import { runTFAnalyst } from './teams/tf_analyst.js';
 import { runTFNews } from './teams/tf_news.js';
 
@@ -152,7 +152,17 @@ if (process.env.GITHUB_ACTIONS === 'true') {
   }
 }
 
-// ── Gmail 발송 ───────────────────────────────────────────────────────────────
+// ── Gmail 발송 (뉴스카드 요약 이메일 + GitHub Pages 링크) ─────────────────────
+const reportUrl = `${process.env.PAGES_BASE_URL ?? ''}/outputs/${todayStr}/report.html`;
+
+const pipelineData = { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [] };
+const cardHtml = buildEmailCard(
+  pipelineData,
+  { news: tfNewsResult },
+  { headline: null },
+  reportUrl,
+);
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { user: process.env.GMAIL_SENDER, pass: process.env.GMAIL_APP_PASSWORD },
@@ -162,7 +172,7 @@ await transporter.sendMail({
   from:    `"시장 리포트" <${process.env.GMAIL_SENDER}>`,
   to:      process.env.GMAIL_RECIPIENT,
   subject: `${data.date} 시장 리포트`,
-  html,
+  html: cardHtml,
 });
 
 await fs.writeFile(sentFlagPath, new Date().toISOString(), 'utf-8');

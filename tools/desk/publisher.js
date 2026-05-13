@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import nodemailer from 'nodemailer';
 import { publishToNotion, checkAlreadySent } from '../publishers/notion.js';
+import { buildEmailCard } from './designer.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -13,8 +14,9 @@ import { logger } from '../utils/logger.js';
  * @param {string} html       최종 HTML 문자열
  * @param {object} data       Layer 1 data.json (Notion 메타데이터용)
  * @param {string} outputDir  출력 폴더 경로
+ * @param {string} reportUrl  GitHub Pages 전체 리포트 URL
  */
-export async function publish(date, html, data, outputDir) {
+export async function publish(date, html, data, outputDir, reportUrl = '') {
   // ── 중복 발송 방지 ─────────────────────────────────────────────────────────
   const sentFlag = path.join(outputDir, 'sent.flag');
   const localSent = await fs.access(sentFlag).then(() => true).catch(() => false);
@@ -43,7 +45,7 @@ export async function publish(date, html, data, outputDir) {
     from:    `"시장 리포트" <${process.env.GMAIL_SENDER}>`,
     to:      process.env.GMAIL_RECIPIENT,
     subject: `${date} 시장 리포트`,
-    html,
+    html: buildEmailCard(data, {}, {}, reportUrl),
   });
   logger.info(`[publisher] Gmail 발송 완료 → ${process.env.GMAIL_RECIPIENT}`);
 
