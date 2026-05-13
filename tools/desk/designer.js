@@ -385,10 +385,9 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
   --border-radius-md:6px;
 }
 body,div,span,td,th,a,p{font-family:var(--fn)!important}
-body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-primary)}
+body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)}
 .wrap{max-width:720px;margin:0 auto}
-.hdr{display:flex;flex-direction:column;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
-.hdr-top{display:flex;align-items:baseline;gap:10px}
+.hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
 .hdr-title{font-size:20px;font-weight:600}
 .hdr-date{font-size:12px;color:var(--color-text-secondary)}
 .hdr-headline{font-size:13px;color:var(--color-text-info);margin-top:6px;font-weight:500;display:block}
@@ -445,12 +444,10 @@ body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-prima
 
 <!-- HEADER -->
 <div class="hdr">
-  <div class="hdr-top">
-    <span class="hdr-title">📊 일일 시장 리포트</span>
-    <span class="hdr-date">${dateFull} 종가 기준 — 한국경제 · 네이버증권</span>
-  </div>
-  ${headline ? `<span class="hdr-headline">📌 ${headline}</span>` : ''}
+  <span class="hdr-title">📊 일일 시장 리포트</span>
+  <span class="hdr-date">${dateFull} 종가 기준 — 한국경제 · 네이버증권</span>
 </div>
+${headline ? `<div style="margin-top:-1.2rem;margin-bottom:1.8rem"><span class="hdr-headline">📌 ${headline}</span></div>` : ''}
 
 <!-- AI SUMMARY -->
 ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-badge">✦ AI</span> Summary</div>${summaryHtml}</div>` : ''}
@@ -459,7 +456,6 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">국내 증시</div>
   <table class="tbl">
-    <colgroup><col style="width:160px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
