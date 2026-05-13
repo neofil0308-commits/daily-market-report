@@ -746,7 +746,7 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   // ── 공통 스타일 상수 ──────────────────────────────────────────────────────
   const CARD  = 'background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.07)';
   const FONT  = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
-  const LABEL = `font-size:11px;font-weight:700;color:#555;letter-spacing:.04em;margin-bottom:12px;font-family:${FONT}`;
+  const LABEL = `font-size:15px;font-weight:700;color:#1e2330;margin-bottom:14px;font-family:${FONT}`;
   const CHIP  = `display:inline-block;background:#f0f4ff;color:#2563eb;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;font-family:${FONT}`;
 
   // ── 셀 컴포넌트: 지수 (큰 숫자) ──────────────────────────────────────────
@@ -756,19 +756,19 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     const chgStr = diff != null
       ? `${ar(diff)} ${sg(diff)}${fmt(Math.abs(diff))} (${sg(pct)}${fmt(pct)}%)`
       : '―';
-    return `<div style="flex:1;min-width:0;background:#f8f9fc;border-radius:10px;padding:14px 12px;text-align:center">
-      <div style="font-size:11px;color:#888;margin-bottom:5px;font-family:${FONT}">${label}</div>
-      <div style="font-size:20px;font-weight:700;color:#1e2330;line-height:1;font-family:${FONT}">${val != null ? valStr : 'N/A'}</div>
-      <div style="font-size:12px;color:${color};margin-top:5px;font-family:${FONT}">${chgStr}</div>
+    return `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:14px 12px;text-align:center">
+      <div style="font-size:12px;color:#666;margin-bottom:6px;font-family:${FONT}">${label}</div>
+      <div style="font-size:28px;font-weight:700;color:#1e2330;line-height:1;font-family:${FONT}">${val != null ? valStr : 'N/A'}</div>
+      <div style="font-size:13px;color:${color};margin-top:7px;font-weight:500;font-family:${FONT}">${chgStr}</div>
     </div>`;
   };
 
   // ── 셀 컴포넌트: 원자재·환율 (단위 포함) ─────────────────────────────────
   const dataCell = (label, valStr, diffStr, diffColor) =>
-    `<div style="flex:1;min-width:0;background:#f8f9fc;border-radius:10px;padding:12px 10px;text-align:center">
-      <div style="font-size:11px;color:#888;margin-bottom:4px;font-family:${FONT}">${label}</div>
-      <div style="font-size:15px;font-weight:700;color:#1e2330;font-family:${FONT}">${valStr}</div>
-      <div style="font-size:12px;color:${diffColor};margin-top:4px;font-family:${FONT}">${diffStr}</div>
+    `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:13px 10px;text-align:center">
+      <div style="font-size:12px;color:#666;margin-bottom:5px;font-family:${FONT}">${label}</div>
+      <div style="font-size:18px;font-weight:700;color:#1e2330;font-family:${FONT}">${valStr}</div>
+      <div style="font-size:13px;color:${diffColor};margin-top:5px;font-weight:500;font-family:${FONT}">${diffStr}</div>
     </div>`;
 
   // ── 1. 요약문 ─────────────────────────────────────────────────────────────
@@ -829,10 +829,10 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   const coinCell = (symbol, priceStr, chg24h) => {
     const color = clr(chg24h);
     const chgStr = chg24h != null ? `${ar(chg24h)} ${sg(chg24h)}${fmt(Math.abs(chg24h))}%` : '―';
-    return `<div style="flex:1;min-width:0;background:#f8f9fc;border-radius:10px;padding:12px 10px;text-align:center">
-      <div style="font-size:11px;color:#888;margin-bottom:4px;font-family:${FONT}">${symbol}</div>
-      <div style="font-size:14px;font-weight:700;color:#1e2330;font-family:${FONT}">${priceStr}</div>
-      <div style="font-size:12px;color:${color};margin-top:4px;font-family:${FONT}">${chgStr}</div>
+    return `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:13px 10px;text-align:center">
+      <div style="font-size:12px;color:#666;margin-bottom:5px;font-family:${FONT}">${symbol}</div>
+      <div style="font-size:16px;font-weight:700;color:#1e2330;font-family:${FONT}">${priceStr}</div>
+      <div style="font-size:13px;color:${color};margin-top:5px;font-weight:500;font-family:${FONT}">${chgStr}</div>
     </div>`;
   };
 
