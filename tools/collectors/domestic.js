@@ -52,7 +52,7 @@ export async function collectDomestic(isHoliday, prevOutputDir = null) {
       direction: kDiff == null ? 'flat' : kDiff > 0 ? 'up' : kDiff < 0 ? 'down' : 'flat',
       volumeBn:    realtimeStats.volumeBn,
       volumeShares: realtimeStats.volumeShares,
-      marketCap:   null,
+      marketCap:   realtimeStats.marketCap,
     },
     kosdaq: {
       today:     kosdaqData.today,
@@ -220,13 +220,77 @@ async function fetchKospiRealtimeStats() {
     const valueBn = pRaw(data.accumulatedTradingValueRaw);
     const volumeThousand = pRaw(data.accumulatedTradingVolumeRaw); // 주 단위
 
+    // 시가총액 병렬 수집 (별도 함수)
+    const marketCap = await fetchKospiMarketCap();
+
     return {
       volumeBn:  valueBn  != null ? round2(valueBn  / 1e12) : null,   // 조원
       volumeShares: volumeThousand != null ? Math.round(volumeThousand / 1e4) / 100 : null,  // 억주
+      marketCap,
     };
   } catch (e) {
     console.warn('[domestic] KOSPI 거래대금 수집 실패:', e.message);
-    return { volumeBn: null, volumeShares: null };
+    return { volumeBn: null, volumeShares: null, marketCap: null };
+  }
+}
+
+// KOSPI 전체 시가총액(조원) — Naver sise_market_sum 전 종목 합산
+// sosok=0: KOSPI, 페이지당 50개 종목, 시가총액 컬럼 단위: 억원
+async function fetchKospiMarketCap() {
+  try {
+    // 1페이지에서 총 페이지 수 확인 후 전체 병렬 수집
+    const firstRes = await axios.get(
+      'https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page=1',
+      { headers: NAVER_HDRS, responseType: 'arraybuffer', timeout: 12000 }
+    );
+    const firstHtml = new TextDecoder('euc-kr').decode(firstRes.data);
+    const { load } = await import('cheerio');
+    const $first = load(firstHtml);
+
+    // 마지막 페이지 번호 추출
+    const lastHref = $first('td.pgRR a').attr('href') ?? '';
+    const lastPageMatch = lastHref.match(/page=(\d+)/);
+    const totalPages = lastPageMatch ? parseInt(lastPageMatch[1]) : 1;
+
+    // 1페이지 시가총액 합산 (이미 로드됨)
+    const parsePage = (html) => {
+      const $ = load(html);
+      let total = 0;
+      $('table.type_2 tr').each((_, tr) => {
+        const tds = $(tr).find('td');
+        if (tds.length < 7) return;
+        const cap = parseFloat($(tds[6]).text().trim().replace(/,/g, ''));
+        if (!isNaN(cap) && cap > 0) total += cap;
+      });
+      return total; // 억원 단위
+    };
+
+    let grandTotal = parsePage(firstHtml);
+
+    // 나머지 페이지 병렬 수집 (배치 10개씩)
+    for (let batchStart = 2; batchStart <= totalPages; batchStart += 10) {
+      const batchEnd = Math.min(batchStart + 9, totalPages);
+      const pages = Array.from({ length: batchEnd - batchStart + 1 }, (_, i) => batchStart + i);
+      const results = await Promise.allSettled(
+        pages.map(page =>
+          axios.get(
+            `https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page=${page}`,
+            { headers: NAVER_HDRS, responseType: 'arraybuffer', timeout: 12000 }
+          ).then(r => parsePage(new TextDecoder('euc-kr').decode(r.data)))
+        )
+      );
+      results.forEach(r => { if (r.status === 'fulfilled') grandTotal += r.value; });
+    }
+
+    if (grandTotal <= 0) throw new Error('시가총액 합산 결과 0');
+
+    // 억원 → 조원 변환 (1조 = 10,000억)
+    const marketCapTrillion = round2(grandTotal / 10000);
+    console.log(`[domestic] KOSPI 시가총액 수집 완료: ${marketCapTrillion}조원 (${totalPages}페이지)`);
+    return marketCapTrillion;
+  } catch (e) {
+    console.warn('[domestic] KOSPI 시가총액 수집 실패:', e.message);
+    return null;
   }
 }
 
