@@ -141,7 +141,7 @@ function _supplyBar(name, val, maxAbs) {
   </div>`;
 }
 
-function _buildMarketCards(supply, breadth, date) {
+function _buildMarketCards(supply, breadth, date, prevMd) {
   const hasSupply  = supply?.foreign != null || supply?.institution != null || supply?.individual != null;
   const hasBreadth = breadth?.advancing != null || breadth?.intraHigh != null;
   if (!hasSupply && !hasBreadth) return '';
@@ -149,8 +149,9 @@ function _buildMarketCards(supply, breadth, date) {
   const supplyCard = hasSupply ? (() => {
     const { foreign, institution, individual } = supply;
     const maxAbs = Math.max(Math.abs(foreign ?? 0), Math.abs(institution ?? 0), Math.abs(individual ?? 0), 1);
+    const titleDate = prevMd ?? date?.slice(5)?.replace('-', '/') ?? '';
     return `<div class="sup-card">
-      <div class="st">📊 KOSPI 수급 (${date?.slice(5)?.replace('-', '/')})</div>
+      <div class="st">🏦 KOSPI 수급 — 전일(${titleDate}) 종가</div>
       ${_supplyBar('외국인', foreign, maxAbs)}
       ${_supplyBar('기관', institution, maxAbs)}
       ${_supplyBar('개인', individual, maxAbs)}
@@ -323,12 +324,14 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
     const tvStr = h.tradingValueBn != null
       ? `${N(h.tradingValueBn)}조원`
       : (h.volume && h.volume > 1000 ? `${(h.volume / 1e5).toFixed(1)}억주` : '―');
+    const issueStr = h.note ?? h.issue ?? '―';
     return `<tr>
       <td>${dateLabel}</td>
       <td class="r">${N(h.close)}</td>
       <td class="r">${diffStr}</td>
       <td class="r">${pctStr}</td>
       <td class="r">${tvStr}</td>
+      <td class="bi">${issueStr}</td>
     </tr>`;
   }).join('');
 
@@ -358,7 +361,7 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
 body,div,span,td,th,a,p{font-family:var(--fn)!important}
 body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-primary)}
 .wrap{max-width:720px;margin:0 auto}
-.hdr{margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
+.hdr{display:flex;flex-direction:column;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
 .hdr-top{display:flex;align-items:baseline;gap:10px}
 .hdr-title{font-size:20px;font-weight:600}
 .hdr-date{font-size:12px;color:var(--color-text-secondary)}
@@ -368,7 +371,7 @@ body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-prima
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);white-space:nowrap;text-align:center}
 .tbl th.l{text-align:left}
-.tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle;line-height:1.5}
+.tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);font-weight:400;vertical-align:middle;line-height:1.5}
 .tbl td.r{text-align:right;white-space:nowrap}
 .tbl td.c{text-align:center}
 .tbl td.bi{font-size:11px;color:var(--color-text-secondary);line-height:1.55}
@@ -399,7 +402,7 @@ body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-prima
 .td-date{white-space:nowrap;font-size:12px;color:var(--color-text-secondary);min-width:68px}
 .td-cat{white-space:nowrap;min-width:64px;text-align:center}
 .td-ttl{min-width:190px;max-width:215px}
-.td-ttl a{color:var(--color-text-info);text-decoration:none;font-size:12px;line-height:1.45}
+.td-ttl a{color:var(--color-text-info);text-decoration:none;font-size:12px;line-height:1.45;font-weight:400}
 .td-ttl a:hover{text-decoration:underline}
 .td-src{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
 .td-sum{font-size:12px;color:var(--color-text-secondary);line-height:1.65}
@@ -453,7 +456,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
         : ''}
     </tbody>
   </table>
-  ${_buildMarketCards(supply, d.breadth, date)}
+  ${_buildMarketCards(supply, d.breadth, date, prevMd)}
 </div>
 
 <!-- ══ 2. KOSPI 5거래일 추이 ══ -->
@@ -468,8 +471,8 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
   </div>
   <table class="tbl" style="margin-top:6px">
     <colgroup><col style="width:64px"><col style="width:88px"><col style="width:100px"><col style="width:80px"><col></colgroup>
-    <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th></tr></thead>
-    <tbody>${histRows || '<tr><td colspan="5" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
+    <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
+    <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
   </table>
 </div>
 
