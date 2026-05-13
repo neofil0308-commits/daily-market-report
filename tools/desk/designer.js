@@ -226,7 +226,11 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   if (!rawCrypto?.btc) return '';
   const { btc, eth, fearGreed, btcDominance, top10 } = rawCrypto;
   const fgColor = fearGreed?.value >= 60 ? COLOR.up : fearGreed?.value <= 30 ? COLOR.dn : COLOR.neu;
-  const rows = (top10 ?? []).slice(0, 5).map(coin => `
+  // top10에서 BTC·ETH는 상단 고정 행과 중복되므로 제외
+  const filteredTop10 = (top10 ?? []).filter(coin =>
+    !['BTC', 'ETH'].includes(coin.symbol?.toUpperCase())
+  ).slice(0, 5);
+  const rows = filteredTop10.map(coin => `
     <tr>
       <td class="c">${coin.rank}</td>
       <td style="font-weight:500">${coin.symbol}</td>
@@ -419,7 +423,7 @@ body{font-size:14px;background:#f5f5f5;padding:16px;color:var(--color-text-prima
 .ntbl{width:100%;border-collapse:collapse;font-size:13px}
 .ntbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);text-align:center}
 .ntbl th.l{text-align:left}
-.ntbl td{padding:9px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top}
+.ntbl td{padding:9px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;font-weight:400}
 .ntbl tr:last-child td{border-bottom:none}
 .td-date{white-space:nowrap;font-size:12px;color:var(--color-text-secondary);min-width:68px}
 .td-cat{white-space:nowrap;min-width:64px;text-align:center}
