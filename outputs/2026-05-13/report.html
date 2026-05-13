@@ -5,11 +5,11 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --fn:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif;
+  --fn:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
   --up:#E24B4A;--dn:#378ADD;--neu:#888;
-  --color-text-primary:#1e2330;
-  --color-text-secondary:#555;
-  --color-text-tertiary:#888;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#666;
+  --color-text-tertiary:#999;
   --color-text-info:#2563eb;
   --color-text-success:#16a34a;
   --color-text-warning:#d97706;
@@ -22,17 +22,16 @@
   --border-radius-md:6px;
 }
 body,div,span,td,th,a,p{font-family:var(--fn)!important}
-body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-primary)}
-.wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:8px;padding:32px 36px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)}
+.wrap{max-width:720px;margin:0 auto}
 .hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
 .hdr-title{font-size:20px;font-weight:600}
 .hdr-date{font-size:12px;color:var(--color-text-secondary)}
 .hdr-headline{font-size:13px;color:var(--color-text-info);margin-top:6px;font-weight:500;display:block}
 .sec{margin:0 0 2rem}
-.sec-title{font-size:15px;font-weight:700;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-secondary);padding-bottom:6px;margin-bottom:12px}
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sec-title{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-secondary);padding-bottom:5px;margin-bottom:12px}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{font-size:11px;font-weight:700;color:#333;background:#eceef2;padding:7px 8px;border-bottom:1px solid #ced2da;white-space:nowrap;text-align:center}
+.tbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);white-space:nowrap;text-align:center}
 .tbl th.l{text-align:left}
 .tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);font-weight:400;vertical-align:middle;line-height:1.5}
 .tbl td.r{text-align:right;white-space:nowrap}
@@ -40,7 +39,9 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
 .tbl td.bi{font-size:11px;color:var(--color-text-secondary);line-height:1.55}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--color-background-secondary)}
+.chg{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .chg-val{font-size:13px;font-weight:400;white-space:nowrap}
+.chg-lbl{font-size:10px;color:var(--color-text-secondary);white-space:nowrap}
 .up{color:var(--up)}.dn{color:var(--dn)}.neu{color:var(--neu)}
 .bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
 .bar-row .nm{min-width:40px;color:var(--color-text-secondary)}
@@ -51,18 +52,18 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
 .sup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .sup-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:11px 13px}
 .sup-card .st{font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:7px}
-.chart-wrap{position:relative;width:100%;height:220px;margin-bottom:6px}
+.chart-wrap{position:relative;width:100%;height:195px;margin-bottom:6px}
 .summary-box{background:var(--color-background-info);border:1px solid #dbe8ff;border-radius:8px;padding:14px 18px;margin-bottom:1.8rem}
 .summary-box .s-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-info);margin-bottom:10px}
 .s-badge{display:inline-block;font-size:10px;font-weight:700;background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px}
 .ntbl{width:100%;border-collapse:collapse;font-size:13px}
-.ntbl th{font-size:11px;font-weight:700;color:#333;background:#eceef2;padding:7px 8px;border-bottom:1px solid #ced2da;text-align:center}
+.ntbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);text-align:center}
 .ntbl th.l{text-align:left}
 .ntbl td{padding:9px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;font-weight:400}
 .ntbl tr:last-child td{border-bottom:none}
 .td-date{white-space:nowrap;font-size:12px;color:var(--color-text-secondary);min-width:68px}
 .td-cat{white-space:nowrap;min-width:64px;text-align:center}
-.td-ttl{min-width:190px;max-width:320px}
+.td-ttl{min-width:190px;max-width:215px}
 .td-ttl a{color:var(--color-text-info);text-decoration:none;font-size:12px;line-height:1.45;font-weight:400}
 .td-ttl a:hover{text-decoration:underline}
 .td-src{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
@@ -73,78 +74,67 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
 .t-mac{background:var(--color-background-warning);color:var(--color-text-warning)}
 .note{font-size:11px;color:var(--color-text-tertiary);margin-top:5px;line-height:1.7}
 .divider{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0}
-@media(max-width:900px){
-  .wrap{padding:24px 20px}
-  .td-sum{display:none}
-}
-@media(max-width:600px){
-  body{padding:10px 8px}
-  .wrap{padding:16px 14px;border-radius:4px}
-  .hdr{flex-wrap:wrap;gap:4px}
-  .hdr-title{font-size:17px}
-  .hdr-date{font-size:11px}
-  .sec-title{font-size:14px}
-  .sec{margin-bottom:1.5rem}
-  .tbl-wrap{margin:0 -2px}
-  .tbl,.ntbl{min-width:480px}
-  .tbl th,.tbl td{padding:6px 6px;font-size:12px}
-  .ntbl th,.ntbl td{padding:7px 6px;font-size:12px}
-  .td-sum{display:none}
-  .sup-grid{grid-template-columns:1fr}
-  .chart-wrap{height:170px}
-  .summary-box{padding:11px 13px}
-}
+@media(max-width:600px){body{padding:10px}.td-sum{display:none}}
 </style>
 </head>
 <body><div class="wrap">
 
 <!-- HEADER -->
 <div class="hdr">
-  <span class="hdr-title">일일 시장 리포트</span>
+  <span class="hdr-title">📊 일일 시장 리포트</span>
   <span class="hdr-date">2026.05.13 (수) 종가 기준 — 한국경제 · 네이버증권</span>
 </div>
-
+<div style="margin-top:-1.2rem;margin-bottom:1.8rem"><span class="hdr-headline">📌 코스피, 7844.01 사상 최고치 안착…반도체 랠리 속 SK하이닉스 신고가 경신</span></div>
 
 <!-- AI SUMMARY -->
-
+<div class="summary-box"><div class="s-title"><span class="s-badge">✦ AI</span> Summary</div><p style="margin:4px 0;font-size:13px;color:var(--color-text-primary);line-height:1.7">• KOSPI가 2.63%(200.86p) 상승하며 7844.01로 사상 최고치를 경신, 견조한 시장 흐름을 보였습니다.</p><p style="margin:4px 0;font-size:13px;color:var(--color-text-primary);line-height:1.7">• SK하이닉스가 장중 신고가를 기록하는 등 반도체 섹터가 지수 상승을 강력하게 견인했습니다.</p><p style="margin:4px 0;font-size:13px;color:var(--color-text-primary);line-height:1.7">• 미국 인플레이션 우려 및 외국인 매도세 지속으로 원/달러 환율이 1500원 돌파를 위협하며 불안정한 모습을 보였습니다.</p><p style="margin:4px 0;font-size:13px;color:var(--color-text-primary);line-height:1.7">• 비트코인 및 이더리움은 가격 강세를 유지했으나, '공포' 심리 확산으로 단기 조정 가능성이 높게 점쳐지고 있습니다.</p><p style="margin:4px 0;font-size:13px;color:var(--color-text-primary);line-height:1.7">• 시장의 주요 테마는 반도체, 환율, 금리, 실적, 그리고 지정학적 리스크입니다.</p></div>
 
 <!-- ══ 1. 국내 증시 ══ -->
 <div class="sec">
   <div class="sec-title">국내 증시</div>
-  <div class="tbl-wrap"><table class="tbl">
+  <table class="tbl">
     <thead><tr><th class="l">구분</th><th>당일(05/13) 종가</th><th>전일(05/12) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       <tr>
-  <td>KOSPI</td><td class="r">7,716.37</td><td class="r">7,643.15</td>
-  <td class="r"><span class="chg-val up">▲ +73.22 (+0.96%)</span></td>
-  <td class="bi">―</td>
+  <td>KOSPI</td><td class="r">7,844.01</td><td class="r">7,643.15</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +200.86 (+2.63%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
+  <td class="bi">2.63% 급등</td>
 </tr>
       <tr>
-  <td>KOSDAQ</td><td class="r">1,168.00</td><td class="r">1,179.29</td>
-  <td class="r"><span class="chg-val dn">▼ 11.29 (-0.96%)</span></td>
-  <td class="bi">―</td>
+  <td>KOSDAQ</td><td class="r">1,176.93</td><td class="r">1,179.29</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 2.36 (-0.20%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
+  <td class="bi">0.2% 소폭 하락</td>
 </tr>
-      <tr><td>KOSPI 거래대금</td><td class="r">27.69조원</td><td class="r">27.62조원</td><td class="r"><div class="chg"><span class="chg-val up">▲ +0.07조원 (+0.25%)</span></div></td><td class="bi">일중 누적</td></tr>
+      <tr><td>KOSPI 거래대금</td><td class="r">50.46조원</td><td class="r">50.46조원</td><td class="r"><div class="chg"><span class="chg-val neu">― 0.00조원 (0.00%)</span></div></td><td class="bi">거래대금 50.46조원</td></tr>
       <tr>
-  <td>미국 VIX (참고)</td><td class="r">17.99</td><td class="r">18.38</td>
-  <td class="r"><span class="chg-val dn">▼ 0.39 (-2.12%)</span></td>
-  <td class="bi">Yahoo ^VIX — VKOSPI 수집 불가 시 대체</td>
+  <td>미국 VIX (참고)</td><td class="r">17.94</td><td class="r">17.99</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 0.05 (-0.28%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
+  <td class="bi">VIX 소폭 하락</td>
 </tr>
-      <tr><td>KOSPI 시가총액</td><td class="r">6,848.78조원</td><td class="r">―</td><td class="r"><span class="neu">―</span></td><td class="bi"></td></tr>
+      <tr><td>KOSPI 시가총액</td><td class="r">6,920.89조원</td><td class="r">―</td><td class="c neu">―</td><td class="bi"></td></tr>
     </tbody>
-  </table></div>
+  </table>
   <div class="sup-grid"><div class="sup-card">
-      <div class="st">시장 강도 (상승/하락 종목)</div>
+      <div class="st">📈 시장 강도 (상승/하락 종목)</div>
       
       <div class="bar-row">
         <span class="nm">상승</span>
-        <div class="bwrap"><div class="bfill b-buy" style="width:40%"></div></div>
-        <span class="val up">362</span>
+        <div class="bwrap"><div class="bfill b-buy" style="width:31%"></div></div>
+        <span class="val up">281</span>
       </div>
       <div class="bar-row">
         <span class="nm">하락</span>
-        <div class="bwrap"><div class="bfill b-sell" style="width:60%"></div></div>
-        <span class="val dn">514</span>
+        <div class="bwrap"><div class="bfill b-sell" style="width:69%"></div></div>
+        <span class="val dn">602</span>
       </div>
       
     </div></div>
@@ -155,12 +145,13 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
   <div class="sec-title">KOSPI 최근 5거래일 종가 추이 &amp; 거래대금</div>
   <div class="chart-wrap">
     <!-- 이메일 폴백: quickchart 이미지 -->
-    <img id="kChartImg" src="https://quickchart.io/chart?w=660&h=200&backgroundColor=white&c=%7B%22type%22%3A%22bar%22%2C%22data%22%3A%7B%22labels%22%3A%5B%2205%2F07%22%2C%2205%2F08%22%2C%2205%2F11%22%2C%2205%2F12%22%2C%2205%2F13%22%5D%2C%22datasets%22%3A%5B%7B%22type%22%3A%22line%22%2C%22label%22%3A%22KOSPI%20%EC%A2%85%EA%B0%80%22%2C%22data%22%3A%5B7490.05%2C7498%2C7822.24%2C7643.15%2C7758.93%5D%2C%22borderColor%22%3A%22%23E24B4A%22%2C%22backgroundColor%22%3A%22rgba(226%2C75%2C74%2C0.08)%22%2C%22borderWidth%22%3A2%2C%22pointBackgroundColor%22%3A%22%23E24B4A%22%2C%22pointRadius%22%3A4%2C%22fill%22%3Atrue%2C%22yAxisID%22%3A%22A%22%7D%2C%7B%22type%22%3A%22bar%22%2C%22label%22%3A%22%EA%B1%B0%EB%9E%98%EB%8C%80%EA%B8%88%22%2C%22data%22%3A%5B51.11%2C40.79%2C51.84%2C67.11%2C27.62%5D%2C%22backgroundColor%22%3A%22rgba(55%2C138%2C221%2C0.22)%22%2C%22borderColor%22%3A%22rgba(55%2C138%2C221%2C0.55)%22%2C%22borderWidth%22%3A1%2C%22yAxisID%22%3A%22B%22%7D%5D%7D%2C%22options%22%3A%7B%22legend%22%3A%7B%22display%22%3Afalse%7D%2C%22scales%22%3A%7B%22xAxes%22%3A%5B%7B%22ticks%22%3A%7B%22fontSize%22%3A10%7D%7D%5D%2C%22yAxes%22%3A%5B%7B%22id%22%3A%22A%22%2C%22position%22%3A%22left%22%2C%22ticks%22%3A%7B%22min%22%3A7300%2C%22max%22%3A8000%2C%22fontSize%22%3A10%7D%7D%2C%7B%22id%22%3A%22B%22%2C%22position%22%3A%22right%22%2C%22ticks%22%3A%7B%22min%22%3A0%2C%22max%22%3A94%2C%22fontSize%22%3A10%7D%7D%5D%7D%7D%7D" alt="KOSPI 차트" style="width:100%;height:auto;display:block;border-radius:4px">
+    <img id="kChartImg" src="https://quickchart.io/chart?w=660&h=200&backgroundColor=white&c=%7B%22type%22%3A%22bar%22%2C%22data%22%3A%7B%22labels%22%3A%5B%2205%2F07%22%2C%2205%2F08%22%2C%2205%2F11%22%2C%2205%2F12%22%2C%2205%2F13%22%5D%2C%22datasets%22%3A%5B%7B%22type%22%3A%22line%22%2C%22label%22%3A%22KOSPI%20%EC%A2%85%EA%B0%80%22%2C%22data%22%3A%5B7490.05%2C7498%2C7822.24%2C7643.15%2C7844.01%5D%2C%22borderColor%22%3A%22%23E24B4A%22%2C%22backgroundColor%22%3A%22rgba(226%2C75%2C74%2C0.08)%22%2C%22borderWidth%22%3A2%2C%22pointBackgroundColor%22%3A%22%23E24B4A%22%2C%22pointRadius%22%3A4%2C%22fill%22%3Atrue%2C%22yAxisID%22%3A%22A%22%7D%2C%7B%22type%22%3A%22bar%22%2C%22label%22%3A%22%EA%B1%B0%EB%9E%98%EB%8C%80%EA%B8%88%22%2C%22data%22%3A%5B51.11%2C40.79%2C51.84%2C67.11%2C50.46%5D%2C%22backgroundColor%22%3A%22rgba(55%2C138%2C221%2C0.22)%22%2C%22borderColor%22%3A%22rgba(55%2C138%2C221%2C0.55)%22%2C%22borderWidth%22%3A1%2C%22yAxisID%22%3A%22B%22%7D%5D%7D%2C%22options%22%3A%7B%22legend%22%3A%7B%22display%22%3Afalse%7D%2C%22scales%22%3A%7B%22xAxes%22%3A%5B%7B%22ticks%22%3A%7B%22fontSize%22%3A10%7D%7D%5D%2C%22yAxes%22%3A%5B%7B%22id%22%3A%22A%22%2C%22position%22%3A%22left%22%2C%22ticks%22%3A%7B%22min%22%3A7300%2C%22max%22%3A8100%2C%22fontSize%22%3A10%7D%7D%2C%7B%22id%22%3A%22B%22%2C%22position%22%3A%22right%22%2C%22ticks%22%3A%7B%22min%22%3A0%2C%22max%22%3A94%2C%22fontSize%22%3A10%7D%7D%5D%7D%7D%7D" alt="KOSPI 차트" style="width:100%;height:auto;display:block;border-radius:4px">
     <!-- 브라우저/Notion: Chart.js 캔버스 -->
     <canvas id="kChart" role="img" aria-label="코스피 최근 5거래일 종가 추이"
       style="display:none;width:100%;height:195px"></canvas>
   </div>
-  <div class="tbl-wrap"><table class="tbl" style="margin-top:6px">
+  <table class="tbl" style="margin-top:6px">
+    <colgroup><col style="width:64px"><col style="width:88px"><col style="width:100px"><col style="width:80px"><col></colgroup>
     <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
     <tbody><tr>
       <td>05/07 (목)</td>
@@ -192,197 +183,344 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
       <td class="bi">―</td>
     </tr><tr>
       <td>05/13 (수)</td>
-      <td class="r">7,758.93</td>
-      <td class="r"><span class="up">▲ +115.78</span></td>
-      <td class="r"><span class="up">+1.51%</span></td>
-      <td class="r">27.62조원</td>
+      <td class="r">7,844.01</td>
+      <td class="r"><span class="up">▲ +200.86</span></td>
+      <td class="r"><span class="up">+2.63%</span></td>
+      <td class="r">50.46조원</td>
       <td class="bi">―</td>
     </tr></tbody>
-  </table></div>
+  </table>
 </div>
 
 <!-- ══ 3. 해외 증시 ══ -->
 <div class="sec">
   <div class="sec-title">해외 증시</div>
-  <div class="tbl-wrap"><table class="tbl">
+  <table class="tbl">
+    <colgroup><col style="width:195px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>전일(05/13) 종가</th><th>전전일(05/12) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       <tr>
   <td>다우존스</td><td class="r">49,760.56</td><td class="r">49,704.47</td>
-  <td class="r"><span class="chg-val up">▲ +56.09 (+0.11%)</span></td>
-  <td class="bi">―</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +56.09 (+0.11%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
+  <td class="bi">다우 소폭 상승</td>
 </tr>
       <tr>
   <td>S&amp;P 500</td><td class="r">7,400.96</td><td class="r">7,412.84</td>
-  <td class="r"><span class="chg-val dn">▼ 11.88 (-0.16%)</span></td>
-  <td class="bi">―</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 11.88 (-0.16%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
+  <td class="bi">S&P500 소폭 하락</td>
 </tr>
       <tr>
   <td>나스닥</td><td class="r">26,088.20</td><td class="r">26,274.13</td>
-  <td class="r"><span class="chg-val dn">▼ 185.93 (-0.71%)</span></td>
-  <td class="bi">―</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 185.93 (-0.71%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
+  <td class="bi">나스닥 0.71% 하락</td>
 </tr>
       <tr>
   <td>필라델피아 반도체(SOX)</td><td class="r">11,717.26</td><td class="r">12,081.04</td>
-  <td class="r"><span class="chg-val dn">▼ 363.78 (-3.01%)</span></td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 363.78 (-3.01%)</span>
+    <span class="chg-lbl">(급락)</span>
+  </div></td>
+  <td class="bi">필라델피아 반도체 급락</td>
+</tr>
+      <tr>
+  <td>닛케이225</td><td class="r">63,272.11</td><td class="r">62,742.57</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +529.54 (+0.84%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
+  <td class="bi">닛케이 0.84% 상승</td>
+</tr>
+      <tr>
+  <td>DAX (독일)</td><td class="r">24,116.66</td><td class="r">23,954.93</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +161.73 (+0.68%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
   <td class="bi">―</td>
 </tr>
       <tr>
-  <td>닛케이225</td><td class="r">62,886.15</td><td class="r">62,742.57</td>
-  <td class="r"><span class="chg-val up">▲ +143.58 (+0.23%)</span></td>
-  <td class="bi">―</td>
-</tr>
-      <tr>
-  <td>DAX (독일)</td><td class="r">23,954.93</td><td class="r">24,350.28</td>
-  <td class="r"><span class="chg-val dn">▼ 395.35 (-1.62%)</span></td>
-  <td class="bi">―</td>
-</tr>
-      <tr>
-  <td>항셍지수</td><td class="r">26,236.19</td><td class="r">26,347.91</td>
-  <td class="r"><span class="chg-val dn">▼ 111.72 (-0.42%)</span></td>
-  <td class="bi">―</td>
+  <td>항셍지수</td><td class="r">26,388.44</td><td class="r">26,347.91</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +40.53 (+0.15%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
+  <td class="bi">항셍 0.15% 상승</td>
 </tr>
     </tbody>
-  </table></div>
+  </table>
 </div>
 
 <!-- ══ 4. 환율 · 금리 ══ -->
 <div class="sec">
   <div class="sec-title">환율 · 금리</div>
-  <div class="tbl-wrap"><table class="tbl">
+  <table class="tbl">
+    <colgroup><col style="width:195px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(05/13)</th><th>전일(05/12)</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       <tr>
-  <td>원/달러 환율</td><td class="r">1,497원</td><td class="r">1,474원</td>
-  <td class="r"><span class="chg-val up">▲ +23.03 (+1.56%)</span></td>
-  <td class="bi">―</td>
+  <td>원/달러 환율</td><td class="r">1,490원</td><td class="r">1,474원</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +15.81 (+1.07%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
+  <td class="bi">원/달러 환율 상승</td>
 </tr>
       <tr>
-  <td>달러 인덱스</td><td class="r">98.30</td><td class="r">98.29</td>
-  <td class="r"><span class="chg-val up">▲ +0.01 (+0.01%)</span></td>
-  <td class="bi">―</td>
+  <td>달러 인덱스</td><td class="r">98.58</td><td class="r">98.29</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +0.29 (+0.30%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
+  <td class="bi">달러 인덱스 상승</td>
 </tr>
       <tr>
   <td>미 국채 10년물</td><td class="r">4.46%</td><td class="r">4.41%</td>
-  <td class="r"><span class="chg-val up">▲ +0.05 (+1.13%)</span></td>
-  <td class="bi">―</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +0.05 (+1.13%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
+  <td class="bi">미 10년물 금리 상승</td>
 </tr>
       <tr>
   <td>미 국채 2년물</td><td class="r">3.60%</td><td class="r">3.60%</td>
-  <td class="r"><span class="chg-val neu">― 0.00 (0.00%)</span></td>
+  <td class="r"><div class="chg">
+    <span class="chg-val neu">― 0.00 (0.00%)</span>
+    <span class="chg-lbl">(보합)</span>
+  </div></td>
   <td class="bi">단기금리 — 연준 정책 민감</td>
 </tr>
-      <tr><td>6월 FOMC 동결확률</td><td class="r">52%</td><td class="r">52%</td><td class="r"><span class="neu">0.00%p</span></td><td class="bi">CME FedWatch</td></tr><tr><td>9월 인하 가능성</td><td class="r">44%</td><td class="r">48%</td><td class="r"><span class="dn">4.00%p</span></td><td class="bi">CME FedWatch</td></tr>
+      <tr><td>6월 FOMC 동결확률</td><td class="r">52%</td><td class="r">52%</td><td class="c"><span class="neu">0.00%p</span></td><td class="bi">CME FedWatch</td></tr><tr><td>9월 인하 가능성</td><td class="r">44%</td><td class="r">44%</td><td class="c"><span class="neu">0.00%p</span></td><td class="bi">CME FedWatch</td></tr>
     </tbody>
-  </table></div>
+  </table>
 </div>
 
 <!-- ══ 5. 원자재 · 비철금속 ══ -->
 <div class="sec">
   <div class="sec-title">원자재 · 비철금속</div>
-  <div class="tbl-wrap"><table class="tbl">
+  <table class="tbl">
+    <colgroup><col style="width:210px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(05/13) 시세</th><th>전일(05/12) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       <tr>
-  <td>금 (선물, oz)</td><td class="r">$4,707.20</td><td class="r">$4,677.60</td>
-  <td class="r"><span class="chg-val up">▲ +29.60 (+0.63%)</span></td>
-  <td class="bi">안전자산 수요</td>
+  <td>🥇 금 (선물, oz)</td><td class="r">$4,695.10</td><td class="r">$4,677.60</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +17.50 (+0.37%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
+  <td class="bi">금값 0.37% 상승</td>
 </tr>
       <tr>
-  <td>금 (국내 순금 1돈)</td><td class="r">848,004원</td><td class="r">841,592원</td>
-  <td class="r"><span class="chg-val up">▲ +6,412.00 (+0.76%)</span></td>
+  <td>🥇 금 (국내 순금 1돈)</td><td class="r">842,821원</td><td class="r">841,592원</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +1,229.00 (+0.15%)</span>
+    <span class="chg-lbl">(소폭 상승)</span>
+  </div></td>
   <td class="bi">살 때 기준</td>
 </tr>
       <tr>
-  <td>은 (COMEX, oz)</td><td class="r">$87.58</td><td class="r">$85.13</td>
-  <td class="r"><span class="chg-val up">▲ +2.45 (+2.88%)</span></td>
+  <td>⚪ 은 (COMEX, oz)</td><td class="r">$86.88</td><td class="r">$85.13</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +1.75 (+2.06%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
   <td class="bi">태양광·반도체 수요</td>
 </tr>
       <tr>
-  <td>백금 (COMEX, oz)</td><td class="r">$2,130.20</td><td class="r">$2,110.00</td>
-  <td class="r"><span class="chg-val up">▲ +20.20 (+0.96%)</span></td>
+  <td>⚪ 백금 (COMEX, oz)</td><td class="r">$2,139.00</td><td class="r">$2,110.00</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +29.00 (+1.37%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
   <td class="bi">귀금속 동조</td>
 </tr>
       <tr>
-  <td>WTI 원유 (bbl)</td><td class="r">$101.56</td><td class="r">$102.18</td>
-  <td class="r"><span class="chg-val dn">▼ 0.62 (-0.61%)</span></td>
-  <td class="bi">―</td>
+  <td>🛢️ WTI 원유 (bbl)</td><td class="r">$101.67</td><td class="r">$102.18</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 0.51 (-0.50%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
+  <td class="bi">WTI 유가 0.5% 하락</td>
 </tr>
       <tr>
-  <td>구리 (COMEX, lb)</td><td class="r">$6.68</td><td class="r">$6.49</td>
-  <td class="r"><span class="chg-val up">▲ +0.19 (+2.93%)</span></td>
-  <td class="bi">경기 선행 지표</td>
+  <td>🔴 구리 (COMEX, lb)</td><td class="r">$6.63</td><td class="r">$6.49</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val up">▲ +0.14 (+2.16%)</span>
+    <span class="chg-lbl">(상승)</span>
+  </div></td>
+  <td class="bi">구리 가격 2.16% 상승</td>
 </tr>
       <tr>
-  <td>알루미늄 (LME, t)</td><td class="r">$3,551.25</td><td class="r">$3,652.50</td>
-  <td class="r"><span class="chg-val dn">▼ 101.25 (-2.77%)</span></td>
+  <td>🩶 알루미늄 (LME, t)</td><td class="r">$3,617.50</td><td class="r">$3,652.50</td>
+  <td class="r"><div class="chg">
+    <span class="chg-val dn">▼ 35.00 (-0.96%)</span>
+    <span class="chg-lbl">(소폭 하락)</span>
+  </div></td>
   <td class="bi">그린에너지 수요</td>
 </tr>
       
       
     </tbody>
-  </table></div>
+  </table>
   <div class="note">※ 은·백금은 Yahoo Finance 선물 기준. 알루미늄·아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
 </div>
 
 
+<div class="sec">
+  <div class="sec-title">블록체인 · 코인</div>
+  <table class="tbl">
+    <colgroup><col style="width:36px"><col style="width:72px"><col><col style="width:130px"></colgroup>
+    <thead><tr><th>#</th><th class="l">심볼</th><th>시세(USD)</th><th>24h 변동</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="c">—</td><td style="font-weight:600">BTC</td>
+        <td class="r">$81,150.00</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ +0.37%</span></div></td>
+      </tr>
+      <tr>
+        <td class="c">—</td><td style="font-weight:600">ETH</td>
+        <td class="r">$2,318.55</td>
+        <td class="r"><div class="chg"><span class="chg-val up">▲ +1.23%</span></div></td>
+      </tr>
+      
+    <tr>
+      <td class="c">3</td>
+      <td style="font-weight:500">USDT</td>
+      <td class="r">$1.00</td>
+      <td class="r"><div class="chg">
+        <span class="chg-val up">― 0.00%</span>
+      </div></td>
+    </tr>
+    <tr>
+      <td class="c">4</td>
+      <td style="font-weight:500">BNB</td>
+      <td class="r">$684.31</td>
+      <td class="r"><div class="chg">
+        <span class="chg-val up">▲ +3.61%</span>
+      </div></td>
+    </tr>
+    <tr>
+      <td class="c">5</td>
+      <td style="font-weight:500">XRP</td>
+      <td class="r">$1.46</td>
+      <td class="r"><div class="chg">
+        <span class="chg-val up">▲ +0.42%</span>
+      </div></td>
+    </tr>
+    <tr>
+      <td class="c">6</td>
+      <td style="font-weight:500">USDC</td>
+      <td class="r">$1.00</td>
+      <td class="r"><div class="chg">
+        <span class="chg-val up">▲ +0.01%</span>
+      </div></td>
+    </tr>
+    <tr>
+      <td class="c">7</td>
+      <td style="font-weight:500">SOL</td>
+      <td class="r">$95.76</td>
+      <td class="r"><div class="chg">
+        <span class="chg-val dn">▼ 0.08%</span>
+      </div></td>
+    </tr>
+    </tbody>
+  </table>
+  <div style="margin-top:8px;display:flex;gap:16px;font-size:12px;color:var(--color-text-secondary)">
+    <span>😱 Fear &amp; Greed: <b style="color:#888888">42 (Fear)</b></span>
+    <span>BTC 도미넌스: <b>58.21%</b></span>
+  </div>
+  <div class="note" style="margin-top:6px">💡 비트코인과 이더리움이 가격 강세를 유지하나, '공포' 심리가 확산되며 단기 조정 가능성이 높고 비트코인 도미넌스는 높은 수준을 유지하고 있습니다.</div>
+</div>
 
 
 <!-- ══ 6. 주요 뉴스 ══ -->
 <div class="sec">
   <div class="sec-title">주요 뉴스</div>
-  <div class="tbl-wrap"><table class="ntbl">
+  <table class="ntbl">
     <thead><tr><th class="l" style="width:68px">일자</th><th style="width:64px">구분</th><th class="l" style="width:210px">제목 / 출처</th><th class="l">요약</th></tr></thead>
     <tbody><tr>
       <td class="td-date">05/13</td>
       <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
-      <td class="td-ttl"><a href="https://www.yna.co.kr/view/AKR20260513074700008?input=1195m" target="_blank">코스피 장중 상승전환해 7,700선 등락…코스닥은 내려</a><div class="td-src">📰 yna.co.kr</div></td>
-      <td class="td-sum">· 코스피200선물시장에서도 개인과 기관이 각각 504억원과 2천536억원 매수 우위다.<br>· 외국인은 3천73억원...</td>
+      <td class="td-ttl"><a href="https://news.einfomax.co.kr/news/articleView.html?idxno=4414670" target="_blank">[외환-마감] 외인 주식 팔자 vs 네고·당국 경계…1,490원선 턱걸이</a><div class="td-src">📰 news.einfomax.co.kr</div></td>
+      <td class="td-sum">· 미국 물가 동향 주시 속 원/달러 환율은 1,490원 선을 유지했습니다.<br>· 외국인이 달러 선물을 매수했지만 당국 경계감과 네고 물량으로 급등은 제한되었습니다.<br>· 코스피는 2.63% 상승하여 7,844.01에 마감했고, 코스닥은 소폭 하락했습니다.</td>
     </tr><tr>
       <td class="td-date">05/13</td>
       <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
-      <td class="td-ttl"><a href="http://www.the-biz.co.kr/news/articleView.html?idxno=720522" target="_blank">'AI국민배당금'이슈는 사라졌다?...코스피, 상승반전 7700대 회복</a><div class="td-src">📰 the-biz.co.kr</div></td>
-      <td class="td-sum">· 하지만 아시아 주요 증시들도 그 시간께 지수가 동반 급하락했다는 점에서 김 정책실장의 제안이 시장에...<br>· 수급별로는 개인과 기관이 각각 2조690억원, 2809억원 순매수 중이고 외국인이 2조4956억원 순매도 중이다....</td>
-    </tr><tr>
-      <td class="td-date">05/13</td>
-      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
-      <td class="td-ttl"><a href="https://www.smartbizn.com/news/articleView.html?idxno=143705" target="_blank">美 물가 충격에 코스피 7450선 후퇴···외국인 8500억 순매도</a><div class="td-src">📰 smartbizn.com</div></td>
-      <td class="td-sum">· 금리 민감도가 높은 중소형주 중심의 러셀2000지수는 0.97% 하락해 주요 지수 가운데 가장 큰 낙폭을...<br>· 기관이 각각 1308억원, 131억원을 순매수했고, 외국인이 1350억원 순매도 중이다.</td>
+      <td class="td-ttl"><a href="https://www.financialpost.co.kr/news/articleView.html?idxno=258999" target="_blank">코스피, 아침 '삼성 결렬 타격' 딛고 또 사상 최고 경신…7844선 안착</a><div class="td-src">📰 financialpost.co.kr</div></td>
+      <td class="td-sum">· 코스피 지수는 외국인의 집중적인 매도세에도 불구하고 사상 최고치를 경신하며 7844선에 안착했습니다.<br>· 코스닥은 전일 대비 0.20% 하락 마감했습니다.<br>· 외환시장은 증시 상승 흐름과 연동되는 모습을 보였습니다.</td>
     </tr><tr>
       <td class="td-date">05/12</td>
       <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
       <td class="td-ttl"><a href="https://www.ajunews.com/view/20260513071611692" target="_blank">[아주증시포커스] '팔천피' 코앞인데…코스닥은 코스피 수익률 절반 못...</a><div class="td-src">📰 ajunews.com</div></td>
-      <td class="td-sum">· 등 코스닥 종목 3개가 순매수 상위 10위권에 포함.<br>· -시장에서는 현재 증시 상승세를 두고 '코스피만의...</td>
+      <td class="td-sum">· 코스피가 사상 최고치 경신을 이어가는 반면, 코스닥은 상대적으로 부진한 수익률을 기록했습니다.<br>· 순매수 상위 10위권에 코스닥 종목 3개가 포함되었음에도, 시장은 코스피 위주의 상승세로 평가되고 있습니다.<br>· SK 자사주 처분, 동양 유상증자 등 주요 공시가 발표되었습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://www.thereport.co.kr/news/articleView.html?idxno=87813" target="_blank">코스피, 하루 만에 급반등…미·중 기대감에 7844 마감</a><div class="td-src">📰 thereport.co.kr</div></td>
+      <td class="td-sum">· 코스피가 미·중 정상회담 기대감에 힘입어 하루 만에 급반등하며 7844에 마감했습니다.<br>· SK하이닉스와 현대차 등 시가총액 상위 종목들이 크게 오르며 지수 상승을 주도했습니다.<br>· 기관과 개인이 순매수하며 지수 방어에 나선 반면, 외국인은 순매도했습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://www.goodkyung.com/news/articleView.html?idxno=286934" target="_blank">코스피, 장중 급락 딛고 7840선 사상 최고 마감…개인·기관 '저가매수'...</a><div class="td-src">📰 goodkyung.com</div></td>
+      <td class="td-sum">· 코스피가 장중 급락세를 딛고 개인과 기관의 저가 매수세에 힘입어 7840선 사상 최고치로 마감했습니다.<br>· 외국인과 기관은 순매도 포지션을 보였습니다.<br>· 코오롱티슈진이 급락하고 HLB, 에코프로비엠 등 주요 바이오·2차전지 종목은 약세를 나타냈습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://biz.newdaily.co.kr/site/data/html/2026/05/13/2026051300269.html" target="_blank">&quot;미장 따로, 국장 따로&quot; … 코스피, 개인·기관 '3.6조' 매수에 사상 최...</a><div class="td-src">📰 biz.newdaily.co.kr</div></td>
+      <td class="td-sum">· 코스피가 개인과 기관의 총 3.6조 원에 달하는 순매수세에 힘입어 사상 최고치를 경신했습니다.<br>· 외국인은 홀로 3.7조 원을 순매도하며 차익 실현에 나섰습니다.<br>· 이러한 수급 불균형 속에서도 국내 증시는 강세를 보였습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://www.ppss.kr/news/articleView.html?idxno=295909" target="_blank">코스피, 2.63% 급등 7,844 마감...종가 사상 최고치 또 경신</a><div class="td-src">📰 ppss.kr</div></td>
+      <td class="td-sum">· 코스피가 전 거래일 대비 2.63% 급등한 7,844.01에 마감하며 종가 기준 사상 최고치를 또다시 경신했습니다.<br>· 미국과 중국 정상회담에 대한 기대감과 저가 매수세가 유입되며 국내 증시의 장중 반등을 이끌었습니다.<br>· 변동성 높은 장세 속에서도 강한 상승 동력을 보여주었습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://www.delighti.co.kr/news/articleView.html?idxno=116353" target="_blank">코스피, 7,844로 마감해 최고치 경신...SK하이닉스 199만원 장중 신고가</a><div class="td-src">📰 delighti.co.kr</div></td>
+      <td class="td-sum">· 코스피가 7,844로 마감하며 또다시 사상 최고치를 경신했습니다.<br>· SK하이닉스는 장 초반 약세 출발했으나 상승 전환하여 장중 199만원 신고가를 기록하고 7.68% 상승 마감했습니다.<br>· 국내 증시 대장주들이 '전약후강'의 모습을 보이며 지수 상승을 주도했습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
+      <td class="td-ttl"><a href="https://www.businesspost.co.kr/BP?command=article_view&num=437763" target="_blank">[오늘의 주목주] '아틀라스 기대감' 현대모비스 18%대 올라, 코스피 7840...</a><div class="td-src">📰 businesspost.co.kr</div></td>
+      <td class="td-sum">· 반도체 테마가 국내 증시를 견인하는 가운데 소부장(소재·부품·장비) 업종에도 수급이 쏠렸습니다.<br>· 코스닥은 전날보다 0.20% 하락한 1176.93으로 장을 마감했습니다.<br>· 코스피는 사상 최고치를 경신하며 강세를 이어갔습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
+      <td class="td-ttl"><a href="https://www.fntoday.co.kr/news/articleView.html?idxno=384292" target="_blank">환율, 1,500원 선 위협…미 인플레 우려에 외환시장 출렁</a><div class="td-src">📰 fntoday.co.kr</div></td>
+      <td class="td-sum">· 미국발 인플레이션 공포 확산으로 원/달러 환율이 장중 1,500원 선을 위협하며 외환시장이 크게 출렁였습니다.<br>· 미 연준의 금리 인하 기대감이 꺾이면서 달러 강세가 지속되는 양상입니다.<br>· 이는 국내 외환시장의 불안정성을 심화시키는 요인으로 작용했습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
+      <td class="td-ttl"><a href="https://www.fntoday.co.kr/news/articleView.html?idxno=384294" target="_blank">코스피, 극심한 변동성 속 사상 최고치 경신…'8,000 피' 목전</a><div class="td-src">📰 fntoday.co.kr</div></td>
+      <td class="td-sum">· 미국 4월 소비자물가지수(CPI)가 시장 예상치를 웃돌며 인플레이션 우려가 커져 연준의 금리 인하 가능성이 낮아졌습니다.<br>· 이에 따라 원/달러 환율은 0.7원 오른 1,490원에 마감하며 외환시장이 불안한 모습을 보였습니다.<br>· 코스피는 극심한 변동성 속에서도 사상 최고치를 경신하며 8,000피를 눈앞에 두게 되었습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
+      <td class="td-ttl"><a href="https://www.g-enews.com/view.php?ud=202605131654493907bb91c46fcd_1" target="_blank">美인플레이션 우려·외국인 매도행진에 환율 1500원 위협</a><div class="td-src">📰 g-enews.com</div></td>
+      <td class="td-sum">· 미국 인플레이션 우려와 외국인 투자자의 국내 증시 대규모 순매도 지속으로 원/달러 환율이 1,500원을 위협했습니다.<br>· 미국 4월 CPI가 시장 예상치를 상회하며 인플레이션 우려가 커졌고, 이는 연준의 금리 인하 가능성을 낮춰 달러 강세가 이어졌습니다.<br>· 이러한 복합적인 요인들이 외환시장에 불안정성을 가중시키고 있습니다.</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
+      <td class="td-ttl"><a href="http://www.sisacast.kr/news/articleView.html?idxno=95834" target="_blank">[生기업TALK] 미래에셋증권, 증권업계 '또' 금자탑…1분기 순이익 1조원...</a><div class="td-src">📰 sisacast.kr</div></td>
+      <td class="td-sum">· 국내 증시 복귀 종목 선택에도 영향을 미친 것으로 풀이된다.<br>· RIA란 해외주식에 투자했던 자금을 국내 자본시장으로 다시 유도하기 위해 정부가 올해 한시적으로 도입한 특별 계좌이다.</td>
     </tr><tr>
       <td class="td-date">05/12</td>
-      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
-      <td class="td-ttl"><a href="http://www.economytalk.kr/news/articleView.html?idxno=421295" target="_blank">코스피 '8천피' 눈앞 빚투 급증…금감원 &quot;과열 리스크 점검&quot;</a><div class="td-src">📰 economytalk.kr</div></td>
-      <td class="td-sum">· 이날 한국거래소에 따르면 코스피는 전장보다 179.09포인트(2.29%) 떨어진 7643.15에 장을 마감했고, 코스닥은...<br>· 최근 코스피가 연일 사상 최고치 행진을 이어가면서 국내 증시의 시가총액도 7000조 원을 넘어섰다.</td>
+      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
+      <td class="td-ttl"><a href="https://www.gukjenews.com/news/articleView.html?idxno=3580156" target="_blank">[칼럼] '전쟁 추경' 그리고 또하나의 그늘</a><div class="td-src">📰 gukjenews.com</div></td>
+      <td class="td-sum">· 반도체와 증시 호황으로 세수가 크게 늘어난 것인데 이 초과 세수를 활용하면 적자 국채를 발행하지 않아도 되기 때문에 이 추경을 &quot;빚내지 않은 추경&quot;이라고 주장하고 있다.<br>· 따라서 &quot;외환시장 영향의 최소화&quot; 즉, 국채...</td>
     </tr><tr>
       <td class="td-date">05/12</td>
-      <td class="td-cat"><span class="tag t-mkt">시장전반</span></td>
-      <td class="td-ttl"><a href="https://www.mhns.co.kr/news/articleView.html?idxno=747278" target="_blank">[박근종 칼럼] 금리 인상 신호에도 역대급 '빚투' 지속, 경각심을 갖고...</a><div class="td-src">📰 mhns.co.kr</div></td>
-      <td class="td-sum">· 한국거래소에 따르면 이날 코스피는 전 거래일보다 4.32% 급등한 7,822.24로 장을 마감했다.<br>· 개장 직후 3.7...</td>
-    </tr><tr>
-      <td class="td-date">05/13</td>
       <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
-      <td class="td-ttl"><a href="https://www.mt.co.kr/stock/2026/05/13/2026051311065888949" target="_blank">미국 물가 충격 두고 외인-개미 힘겨루기</a><div class="td-src">📰 mt.co.kr</div></td>
-      <td class="td-sum">· 연준의 연내 금리 인하 기대가 사실상 사라졌다는 평가도 제기됐다.<br>· 미국 CPI 충격은 원/달러 환율에...</td>
-    </tr><tr>
-      <td class="td-date">05/13</td>
-      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
-      <td class="td-ttl"><a href="https://m.skyedaily.com/news_view.html?ID=303975" target="_blank">美 CPI 쇼크 제한적?…국내 증시, 유가가 더 큰 변수</a><div class="td-src">📰 m.skyedaily.com</div></td>
-      <td class="td-sum">· 교보증권 리서치센터 미국 4월 소비자물가지수(CPI)가 시장 예상치를 웃돌며 다시 인플레이션 경계감을...<br>· 수치는 연준의 금리 인하 기대를 약화시키고 달러 강세, 글로벌 증시 변동성 확대로 이어질 수 있다”고 말했다....</td>
-    </tr><tr>
-      <td class="td-date">05/13</td>
-      <td class="td-cat"><span class="tag t-mac">거시경제</span></td>
-      <td class="td-ttl"><a href="https://news.einfomax.co.kr/news/articleView.html?idxno=4414544" target="_blank">서울환시 &quot;美 CPI 상승에 연준 금리인하 기대 소멸…달러-원 하단 높여&quot;</a><div class="td-src">📰 news.einfomax.co.kr</div></td>
-      <td class="td-sum">· 13일 서울 외환시장 전문가들은 예상치를 웃돈 미국의 4월 소비자물가지수(CPI)로 인해 달러-원 환율이 1...<br>· 100달러선을 웃돌고, 인플레이션이 재가속할 우려가 커진 만큼 전문가들은 미 연방준비제도(Fed·연준)의 금리인...</td>
-    </tr><tr>
-      <td class="td-date">05/13</td>
-      <td class="td-cat"><span class="tag t-corp">산업·기업</span></td>
-      <td class="td-ttl"><a href="https://www.newspim.com/news/view/20260513000503" target="_blank">[종합] 삼성전자 &quot;최악 막겠다&quot;...정부도 &quot;파업은 안돼&quot; 우려</a><div class="td-src">📰 뉴스핌</div></td>
-      <td class="td-sum">· 이어 &quot;노조는 경영실적에 따른 회사 측의 유연한 제도화를 거부하고 경직된 제도화만을 시종 고수하고 있다...<br>· 삼성전자가 국내 반도체 수출과 투자, 고용에서 차지하는 비중이 큰 만큼 파업이나 생산 차질이 현실화할...</td>
+      <td class="td-ttl"><a href="https://www.ksmnews.co.kr/news/view.php?idx=604782" target="_blank">반도체 초격차의 갈림길, 성과급 논쟁을 넘어서야 할 때</a><div class="td-src">📰 ksmnews.co.kr</div></td>
+      <td class="td-sum">· 최근 국내 증시는 호황을 이어가고 있지만, 그 이면을 들여다보면 반도체를 중심으로 한 일부 산업의 실적이...<br>· 미칠 영향을 충분히 고려했는지가 핵심이다.</td>
     </tr><tr>
       <td class="td-date">05/12</td>
       <td class="td-cat"><span class="tag t-corp">산업·기업</span></td>
@@ -391,22 +529,27 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
     </tr><tr>
       <td class="td-date">05/13</td>
       <td class="td-cat"><span class="tag t-corp">산업·기업</span></td>
-      <td class="td-ttl"><a href="https://www.kmaeil.com/news/articleView.html?idxno=639998" target="_blank">삼성전자 총파업 우려에...金총리 &quot;어떠한 경우에도 파업 않도록 대화 ...</a><div class="td-src">📰 kmaeil.com</div></td>
-      <td class="td-sum">· 반도체 업황 회복 기대감에 힘입어 주가가 상승 흐름을 이어가던 상황에서 노사 갈등이 돌발 변수로 떠오르자...<br>· 삼성전자 노사 갈등이 장기화될 경우 반도체 공급망과 수출에 미칠 영향이 적지 않은 만큼, 향후 추가 협상...</td>
+      <td class="td-ttl"><a href="http://www.yonhapnewstv.co.kr/news/MYH20260513173130fcW" target="_blank">[퇴근길머니] '8천피' 향해 다시 질주…총파업에도 46만전자?</a><div class="td-src">📰 yonhapnewstv.co.kr</div></td>
+      <td class="td-sum">· 삼성전자 총파업 우려가 커지면서 오늘 주가도 장 초반 급락했는데, 정작 목표주가는 더 높아졌다고요?...<br>· 미국 어플라이드 머티어리얼즈 실적 발표는 AI 반도체 투자 사이클 지속 여부를 확인할 핵심 이벤트입니다....</td>
     </tr><tr>
       <td class="td-date">05/13</td>
       <td class="td-cat"><span class="tag t-corp">산업·기업</span></td>
-      <td class="td-ttl"><a href="https://www.newstree.kr/newsView/ntr202605120020" target="_blank">[윤미경칼럼] 삼성전자 노조 '공정과 탐욕' 사이</a><div class="td-src">📰 newstree.kr</div></td>
-      <td class="td-sum">· 실제 협상 결렬 직후인 13일 오전 삼성전자 주가는 5% 넘게 폭락중이다.<br>· 정부는 &quot;파업은 절대 안된다&quot;며 발을 동동 구르고 있다.</td>
+      <td class="td-ttl"><a href="https://www.mt.co.kr/industry/2026/05/13/2026051315123238309" target="_blank">&quot;한 번 떠난 고객 안 돌아온다&quot;…'자멸' 막는 '합의'가 절실</a><div class="td-src">📰 mt.co.kr</div></td>
+      <td class="td-sum">· 한국개발연구원(KDI)에 따르면 반도체 수출이 10% 감소하면 국내총생산(GDP)이 0.78% 줄어든다.<br>· 글로벌 파운드리...</td>
+    </tr><tr>
+      <td class="td-date">05/13</td>
+      <td class="td-cat"><span class="tag t-corp">산업·기업</span></td>
+      <td class="td-ttl"><a href="https://www.cnbizm.com/news/articleView.html?idxno=302837" target="_blank">초기업노조 요구에 싸늘한 여론…삼성전자 노조, 왜 고립됐나</a><div class="td-src">📰 cnbizm.com</div></td>
+      <td class="td-sum">· 이 요구를 2026년 삼성전자 실적 전망에 대입하면 약 40조~45조 원의 성과급 지급이 필요하다는 계산이 나온다....<br>· 2~3주가 추가로 소요될 수 있다&quot;고 분석했다.</td>
     </tr></tbody>
-  </table></div>
+  </table>
 </div>
 
 <!-- FOOTER -->
 <div class="divider"></div>
 <div class="note" style="line-height:1.9">
-  출처: Yahoo Finance · 네이버금융 · CoinGecko · DART · CME FedWatch<br>
-  본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+  📌 출처: Yahoo Finance · 네이버금융 · CoinGecko · DART · CME FedWatch<br>
+  ⚠️ 본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
 </div>
 
 </div><!-- /wrap -->
@@ -430,12 +573,12 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
         labels: ["05/07(목)","05/08(금)","05/11(월)","05/12(화)","05/13(수)"],
         datasets: [
           { type:'line', label:'KOSPI 종가',
-            data: [7490.05,7498,7822.24,7643.15,7758.93],
+            data: [7490.05,7498,7822.24,7643.15,7844.01],
             borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)',
             borderWidth:2, pointBackgroundColor:'#E24B4A', pointRadius:4,
             fill:true, tension:0.3, yAxisID:'yL' },
           { type:'bar', label:'거래대금(조원)',
-            data: [51.11,40.79,51.84,67.11,27.62],
+            data: [51.11,40.79,51.84,67.11,50.46],
             backgroundColor: isDark ? 'rgba(55,138,221,0.30)' : 'rgba(55,138,221,0.22)',
             borderColor: isDark ? 'rgba(55,138,221,0.65)' : 'rgba(55,138,221,0.55)',
             borderWidth:1, yAxisID:'yR' }
@@ -455,7 +598,7 @@ body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-
         },
         scales:{
           x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11}} },
-          yL:{ position:'left', min:7300, max:8000, grid:{color:gc},
+          yL:{ position:'left', min:7300, max:8100, grid:{color:gc},
                ticks:{color:tc, font:{size:11}, callback:function(v){ return v.toLocaleString(); }} },
           yR:{ position:'right', min:0, max:94, grid:{drawOnChartArea:false},
                ticks:{color:tc, font:{size:11}, callback:function(v){ return v.toFixed(0)+'조'; }} }
