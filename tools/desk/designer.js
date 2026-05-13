@@ -228,7 +228,7 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
 <div class="sec">
   <div class="sec-title">블록체인 · 코인</div>
   <table class="tbl">
-    <thead><tr><th>#</th><th class="l">심볼</th><th class="r">시세(USD)</th><th class="r">24h 변동</th></tr></thead>
+    <thead><tr><th>순위</th><th class="l">심볼</th><th>시세(USD)</th><th>24h 변동</th></tr></thead>
     <tbody>
       <tr>
         <td class="c">—</td><td style="font-weight:600">BTC</td>
@@ -267,7 +267,7 @@ function _buildAnalystSection(tfAnalyst) {
 <div class="sec">
   <div class="sec-title">애널리스트 리포트</div>
   <table class="tbl">
-    <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th class="r">목표가</th><th class="l">핵심 논거</th></tr></thead>
+    <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th>목표가</th><th class="l">핵심 논거</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
 </div>`;
@@ -377,9 +377,8 @@ body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)
 .sec{margin:0 0 2rem}
 .sec-title{font-size:15px;font-weight:700;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-secondary);padding-bottom:6px;margin-bottom:12px}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);white-space:nowrap;text-align:center}
+.tbl th{font-size:11px;font-weight:700;color:#333;background:#ececec;padding:7px 8px;border-bottom:1px solid #d0d0d0;white-space:nowrap;text-align:center}
 .tbl th.l{text-align:left}
-.tbl th.r{text-align:right}
 .tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);font-weight:400;vertical-align:middle;line-height:1.5}
 .tbl td.r{text-align:right;white-space:nowrap}
 .tbl td.c{text-align:center}
@@ -402,7 +401,7 @@ body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)
 .summary-box .s-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-info);margin-bottom:10px}
 .s-badge{display:inline-block;font-size:10px;font-weight:700;background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px}
 .ntbl{width:100%;border-collapse:collapse;font-size:13px}
-.ntbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);text-align:center}
+.ntbl th{font-size:11px;font-weight:700;color:#333;background:#ececec;padding:7px 8px;border-bottom:1px solid #d0d0d0;text-align:center}
 .ntbl th.l{text-align:left}
 .ntbl td{padding:9px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;font-weight:400}
 .ntbl tr:last-child td{border-bottom:none}
@@ -438,7 +437,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">국내 증시</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd}) 종가</th><th class="r">전일(${prevMd}) 종가</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
       ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev), rn.kosdaq)}
@@ -474,7 +473,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       style="display:none;width:100%;height:195px"></canvas>
   </div>
   <table class="tbl" style="margin-top:6px">
-    <thead><tr><th class="l">날짜</th><th class="r">KOSPI 종가</th><th class="r">전일比</th><th class="r">등락률</th><th class="r">거래대금</th><th class="l">주요 이슈</th></tr></thead>
+    <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
     <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
   </table>
 </div>
@@ -483,7 +482,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">해외 증시</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th class="r">전일(${dateMd}) 종가</th><th class="r">전전일(${prevMd}) 종가</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th>전일(${dateMd}) 종가</th><th>전전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev),    rn.dow)}
       ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev),  rn.sp500)}
@@ -500,7 +499,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">환율 · 금리</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd})</th><th class="r">전일(${prevMd})</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th>당일(${dateMd})</th><th>전일(${prevMd})</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원', rn.usdKrw)}
       ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev),             rn.dxy)}
@@ -527,7 +526,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">원자재 · 비철금속</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd}) 시세</th><th class="r">전일(${prevMd}) 시세</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 시세</th><th>전일(${prevMd}) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
       ${trow('금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원',   '살 때 기준')}
