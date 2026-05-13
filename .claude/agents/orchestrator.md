@@ -34,6 +34,26 @@ model: sonnet
 5. Notion DB에 해당 날짜 항목 존재 여부
 
 ## GitHub Actions 스케줄
-- 주 실행: `0 23 * * 0-4` (08:00 KST 월~금)
-- 백업 실행: `0 1 * * 1-5` (10:00 KST 월~금)
-- 수동: workflow_dispatch
+
+| 워크플로우 | 파일 | 실행 시각 (KST) | cron-job.org jobId |
+|-----------|------|----------------|--------------------|
+| Daily Market Report | `daily-report.yml` | 08:00 (주) / 10:00 (백업) | 7594591 |
+| Supply Snapshot | `supply-collect.yml` | 16:40 (장 마감 후) | 7594700 |
+
+> GA Free Plan cron은 수 시간 지연될 수 있다. cron-job.org가 `workflow_dispatch` API를 호출해 두 워크플로우 모두 보장한다.
+
+## supply-collect.yml 개요
+- 실행: `node tools/collectors/supply_snapshot.js`
+- 수집: KOSPI 수급(외국인·기관·개인) + VKOSPI
+- 저장: `outputs/{date}/supply.json` → git commit·push
+- **16:30 KST 이전 실행 시 당일 데이터 없음** (Naver API 실시간 전용)
+- supply.json 없으면 리포트의 수급 카드가 "시장 강도" 카드로 자동 대체됨
+
+## 진단 체크리스트
+문제가 생기면 이 순서로 확인한다:
+1. `outputs/{date}/data.json` 존재 여부 (수집 성공 여부)
+2. `outputs/{date}/report.html` 존재 여부 (HTML 생성 성공 여부)
+3. `outputs/{date}/sent.flag` 존재 여부 (Gmail 발송 완료 여부)
+4. `outputs/{date}/supply.json` 존재 여부 (수급 스냅샷 수집 여부)
+5. GitHub Actions 탭 → run log 확인
+6. Notion DB에 해당 날짜 항목 존재 여부
