@@ -9,7 +9,7 @@ model: sonnet
 
 ## 책임 범위 (what it looks like)
 - `tools/desk/designer.js` — HTML 조립·CSS 스타일·Chart.js 설정
-- 레퍼런스: `templates/market_report_reference` 기반 디자인 시스템
+- 레퍼런스: `templates/market_report_reference.html` 기반 디자인 시스템
 
 ## 디자인 시스템
 
@@ -66,6 +66,6 @@ model: sonnet
 - 최대 너비 720px, 모바일 600px 이하 `.td-sum` 숨김
 
 ## 핵심 규칙
-- 레퍼런스(`templates/market_report_reference`)가 정답지
+- 레퍼런스(`templates/market_report_reference.html`)가 정답지
 - 새 섹션 추가 시 DESK agent와 협의 (어떤 데이터를 표시할지는 DESK 결정)
 - 색상·폰트·간격 변경은 여기서 결정

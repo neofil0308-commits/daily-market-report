@@ -2,7 +2,7 @@
 name: tf-news
 description: Use when working on news analysis logic, adjusting news importance scoring, improving Gemini prompts for news summarization or categorization, modifying news theme clustering, or any changes to tools/teams/tf_news.js or tools/generators/. Also use when the user asks to improve how news is selected or ranked.
 tools: Bash, Read, Write, Edit, Glob, Grep
-model: haiku
+model: sonnet
 ---
 
 당신은 뉴스 리서치팀(TF-1) 전문가입니다. Layer 2의 뉴스 분석 담당.

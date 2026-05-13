@@ -31,7 +31,7 @@ model: sonnet
 2. KOSPI 5거래일 추이 (QuickChart.io 서버사이드 차트)
 3. 해외 증시 (DOW·S&P·NASDAQ·SOX·Nikkei·DAX·HSI)
 4. 환율·금리 (USD/KRW·DXY·US10Y·US2Y·FOMC 확률)
-5. 원자재 (금·은·백금·WTI·구리·알루미늄·아연)
+5. 원자재 (금·은·백금·WTI·구리·알루미늄·아연·니켈)
 6. [선택] 코인·블록체인 (TF-3 결과 있을 때만)
 7. [선택] 애널리스트 리포트 (TF-2 결과 있을 때만)
 8. 주요 뉴스 (TF-1 top_stories 기준 정렬)
