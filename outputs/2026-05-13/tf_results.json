@@ -2,42 +2,18 @@
   "news": {
     "findings": [
       {
-        "headline": "[외환-마감] 외인 주식 팔자 vs 네고·당국 경계…1,490원선 턱걸이",
-        "theme": "환율",
-        "importance": 7,
-        "market_impact": "KOSPI/KOSDAQ 단기 하락 압력 (외국인 매도 지속 및 고환율은 증시 부담)",
-        "verified": false,
-        "source_url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4414670"
-      },
-      {
-        "headline": "코스피, 아침 '삼성 결렬 타격' 딛고 또 사상 최고 경신…7844선 안착",
+        "headline": "코스피, 하루 만에 급반등…미·중 기대감에 7844 마감",
         "theme": "실적",
         "importance": 9,
-        "market_impact": "KOSPI 단기 강한 상승, KOSDAQ 단기 약세",
-        "verified": false,
-        "source_url": "https://www.financialpost.co.kr/news/articleView.html?idxno=258999"
-      },
-      {
-        "headline": "[아주증시포커스] '팔천피' 코앞인데…코스닥은 코스피 수익률 절반 못...",
-        "theme": "실적",
-        "importance": 6,
-        "market_impact": "KOSPI 단기 상승, KOSDAQ 단기 약세 (양시장 간 괴리 심화)",
-        "verified": false,
-        "source_url": "https://www.ajunews.com/view/20260513071611692"
-      },
-      {
-        "headline": "코스피, 하루 만에 급반등…미·중 기대감에 7844 마감",
-        "theme": "지정학",
-        "importance": 8,
-        "market_impact": "KOSPI 단기 강한 상승",
+        "market_impact": "KOSPI 단기 상승 압력",
         "verified": false,
         "source_url": "https://www.thereport.co.kr/news/articleView.html?idxno=87813"
       },
       {
         "headline": "코스피, 장중 급락 딛고 7840선 사상 최고 마감…개인·기관 '저가매수'...",
-        "theme": "반도체",
-        "importance": 9,
-        "market_impact": "KOSPI 단기 강한 상승 (개인/기관 저가 매수), KOSDAQ/바이오/2차전지 단기 약세",
+        "theme": "실적",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 상승 압력, KOSDAQ 단기 하락 압력",
         "verified": false,
         "source_url": "https://www.goodkyung.com/news/articleView.html?idxno=286934"
       },
@@ -45,128 +21,104 @@
         "headline": "&quot;미장 따로, 국장 따로&quot; … 코스피, 개인·기관 '3.6조' 매수에 사상 최...",
         "theme": "실적",
         "importance": 9,
-        "market_impact": "KOSPI 단기 강한 상승 (개인/기관 매수세)",
+        "market_impact": "KOSPI 단기 상승 압력",
         "verified": false,
         "source_url": "https://biz.newdaily.co.kr/site/data/html/2026/05/13/2026051300269.html"
       },
       {
-        "headline": "코스피, 2.63% 급등 7,844 마감...종가 사상 최고치 또 경신",
-        "theme": "지정학",
-        "importance": 8,
-        "market_impact": "KOSPI 단기 강한 상승",
-        "verified": false,
-        "source_url": "https://www.ppss.kr/news/articleView.html?idxno=295909"
-      },
-      {
-        "headline": "코스피, 7,844로 마감해 최고치 경신...SK하이닉스 199만원 장중 신고가",
-        "theme": "반도체",
-        "importance": 9,
-        "market_impact": "KOSPI 단기 강한 상승 (SK하이닉스 주도)",
-        "verified": false,
-        "source_url": "https://www.delighti.co.kr/news/articleView.html?idxno=116353"
-      },
-      {
-        "headline": "[오늘의 주목주] '아틀라스 기대감' 현대모비스 18%대 올라, 코스피 7840...",
-        "theme": "반도체",
-        "importance": 7,
-        "market_impact": "KOSPI 단기 상승, KOSDAQ 단기 약세",
-        "verified": false,
-        "source_url": "https://www.businesspost.co.kr/BP?command=article_view&num=437763"
-      },
-      {
-        "headline": "환율, 1,500원 선 위협…미 인플레 우려에 외환시장 출렁",
+        "headline": "[외환-마감] 외인 주식 팔자 vs 네고·당국 경계…1,490원선 턱걸이",
         "theme": "환율",
-        "importance": 8,
-        "market_impact": "KOSPI/KOSDAQ 단기 하락 압력 (고환율은 증시 부담)",
+        "importance": 7,
+        "market_impact": "환율 단기 상승 압력",
         "verified": false,
-        "source_url": "https://www.fntoday.co.kr/news/articleView.html?idxno=384292"
+        "source_url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4414670"
+      },
+      {
+        "headline": "코스피, 아침 '삼성 결렬 타격' 딛고 또 사상 최고 경신…7844선 안착",
+        "theme": "반도체",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 상승 압력, KOSDAQ 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.financialpost.co.kr/news/articleView.html?idxno=258999"
+      },
+      {
+        "headline": "[아주증시포커스] '팔천피' 코앞인데…코스닥은 코스피 수익률 절반 못...",
+        "theme": "실적",
+        "importance": 7,
+        "market_impact": "KOSPI/KOSDAQ 단기 양극화 심화",
+        "verified": false,
+        "source_url": "https://www.ajunews.com/view/20260513071611692"
       },
       {
         "headline": "코스피, 극심한 변동성 속 사상 최고치 경신…'8,000 피' 목전",
         "theme": "금리",
         "importance": 8,
-        "market_impact": "KOSPI 단기 강한 상승 (변동성에도 최고치 경신), 환율 상승 압력",
+        "market_impact": "KOSPI 단기 상승 압력, 환율 단기 상승 압력",
         "verified": false,
         "source_url": "https://www.fntoday.co.kr/news/articleView.html?idxno=384294"
       },
       {
-        "headline": "美인플레이션 우려·외국인 매도행진에 환율 1500원 위협",
+        "headline": "환율, 1,500원 선 위협…미 인플레 우려에 외환시장 출렁",
         "theme": "환율",
-        "importance": 8,
-        "market_impact": "KOSPI/KOSDAQ 단기 하락 압력 (고환율, 외국인 매도)",
+        "importance": 9,
+        "market_impact": "환율 단기 상승 압력, 증시 전반에 하방 압력",
+        "verified": false,
+        "source_url": "https://www.fntoday.co.kr/news/articleView.html?idxno=384292"
+      },
+      {
+        "headline": "美인플레이션 우려·외국인 매도행진에 환율 1500원 위협",
+        "theme": "금리",
+        "importance": 9,
+        "market_impact": "환율 단기 상승 압력, 증시 전반에 하방 압력",
         "verified": false,
         "source_url": "https://www.g-enews.com/view.php?ud=202605131654493907bb91c46fcd_1"
       },
       {
-        "headline": "[生기업TALK] 미래에셋증권, 증권업계 '또' 금자탑…1분기 순이익 1조원...",
-        "theme": "실적",
-        "importance": 6,
-        "market_impact": "KOSPI/KOSDAQ 단기 긍정적 (증권사 실적 호조는 시장 활성화 반영), 환율 부담 존재",
-        "verified": false,
-        "source_url": "http://www.sisacast.kr/news/articleView.html?idxno=95834"
-      },
-      {
-        "headline": "[칼럼] '전쟁 추경' 그리고 또하나의 그늘",
-        "theme": "지정학",
-        "importance": 4,
-        "market_impact": "중립",
-        "verified": false,
-        "source_url": "https://www.gukjenews.com/news/articleView.html?idxno=3580156"
-      },
-      {
-        "headline": "반도체 초격차의 갈림길, 성과급 논쟁을 넘어서야 할 때",
-        "theme": "반도체",
-        "importance": 6,
-        "market_impact": "중립 (산업의 구조적 문제, 단기 영향 미미)",
-        "verified": false,
-        "source_url": "https://www.ksmnews.co.kr/news/view.php?idx=604782"
-      },
-      {
-        "headline": "外人 폭풍매도, 코스피 '출렁'...LG · 한화는 '껑충'",
-        "theme": "실적",
-        "importance": 7,
-        "market_impact": "KOSPI/KOSDAQ 혼조 (외국인 매도 압력 속 일부 종목 상승)",
-        "verified": false,
-        "source_url": "http://www.choicenews.co.kr/news/articleView.html?idxno=165157"
-      },
-      {
         "headline": "[퇴근길머니] '8천피' 향해 다시 질주…총파업에도 46만전자?",
         "theme": "반도체",
-        "importance": 7,
-        "market_impact": "KOSPI 단기 상승 압력 (AI 반도체 투자 사이클 기대감)",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 상승 압력(AI 반도체), 삼성전자 불확실성",
         "verified": false,
         "source_url": "http://www.yonhapnewstv.co.kr/news/MYH20260513173130fcW"
       },
       {
         "headline": "&quot;한 번 떠난 고객 안 돌아온다&quot;…'자멸' 막는 '합의'가 절실",
         "theme": "반도체",
-        "importance": 6,
-        "market_impact": "중립",
+        "importance": 7,
+        "market_impact": "반도체 산업 전반에 중립",
         "verified": false,
         "source_url": "https://www.mt.co.kr/industry/2026/05/13/2026051315123238309"
       },
       {
         "headline": "초기업노조 요구에 싸늘한 여론…삼성전자 노조, 왜 고립됐나",
         "theme": "반도체",
-        "importance": 5,
-        "market_impact": "중립 (단기 영향 미미, 장기적 기업 경영 불확실성)",
+        "importance": 7,
+        "market_impact": "삼성전자 단기 하방 압력 또는 불확실성 증폭",
         "verified": false,
         "source_url": "https://www.cnbizm.com/news/articleView.html?idxno=302837"
+      },
+      {
+        "headline": "外人 폭풍매도, 코스피 '출렁'...LG · 한화는 '껑충'",
+        "theme": "실적",
+        "importance": 6,
+        "market_impact": "KOSPI/KOSDAQ 단기 변동성 증가, 일부 섹터 하락 압력",
+        "verified": false,
+        "source_url": "http://www.choicenews.co.kr/news/articleView.html?idxno=165157"
       }
     ],
     "top_stories": [
-      "코스피, 아침 '삼성 결렬 타격' 딛고 또 사상 최고 경신…7844선 안착",
-      "코스피, 7,844로 마감해 최고치 경신...SK하이닉스 199만원 장중 신고가",
-      "美인플레이션 우려·외국인 매도행진에 환율 1500원 위협"
+      "코스피, 하루 만에 급반등…미·중 기대감에 7844 마감",
+      "\"미장 따로, 국장 따로\" … 코스피, 개인·기관 '3.6조' 매수에 사상 최...",
+      "환율, 1,500원 선 위협…미 인플레 우려에 외환시장 출렁"
     ],
     "themes": [
       "반도체",
-      "환율",
       "금리",
+      "환율",
       "실적",
-      "지정학"
+      "바이오"
     ],
-    "confidence": 0.9,
+    "confidence": 0.95,
     "model_used": "gemini-2.5-flash"
   },
   "analyst": {
@@ -181,19 +133,19 @@
     "findings": [
       {
         "asset": "BTC",
-        "price_usd": 81150,
-        "key_level": "$80,000 지지선 형성 및 $82,000 저항선 테스트 시도",
+        "price_usd": 81183,
+        "key_level": "80,000 지지선 테스트 및 82,000 저항선 주목",
         "importance": 8
       },
       {
         "asset": "ETH",
-        "price_usd": 2318.55,
-        "key_level": "$2,300 지지선 확인 및 $2,400 저항선 테스트 시도",
+        "price_usd": 2317.34,
+        "key_level": "2,300 지지선 유지 여부 확인",
         "importance": 7
       }
     ],
     "signal": "조정 구간",
-    "market_summary": "비트코인과 이더리움이 가격 강세를 유지하나, '공포' 심리가 확산되며 단기 조정 가능성이 높고 비트코인 도미넌스는 높은 수준을 유지하고 있습니다.",
+    "market_summary": "비트코인과 이더리움은 24시간 동안 소폭 상승했으나, 시장 심리는 '공포' 단계(42)에 머물며 전체적인 조정 국면이 지속되고 있습니다. 주요 자산의 지지선 유지 여부가 중요한 관건이 될 것입니다.",
     "kr_stocks_impact": [
       {
         "company": "카카오",
@@ -208,7 +160,7 @@
       {
         "company": "위메이드",
         "ticker": "112040",
-        "expected_direction": "negative"
+        "expected_direction": "neutral"
       },
       {
         "company": "NHN",
@@ -221,8 +173,8 @@
       "value": 42,
       "label": "Fear"
     },
-    "btc_dominance": 58.21,
-    "confidence": 0.85,
+    "btc_dominance": 58.2,
+    "confidence": 0.8,
     "model_used": "gemini-2.5-flash"
   }
 }
