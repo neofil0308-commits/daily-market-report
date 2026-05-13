@@ -227,7 +227,7 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   return `
 <div class="sec">
   <div class="sec-title">블록체인 · 코인</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>순위</th><th class="l">심볼</th><th>시세(USD)</th><th>24h 변동</th></tr></thead>
     <tbody>
       <tr>
@@ -242,7 +242,7 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
       </tr>` : ''}
       ${rows}
     </tbody>
-  </table>
+  </table></div>
   <div style="margin-top:8px;display:flex;gap:16px;font-size:12px;color:var(--color-text-secondary)">
     ${fearGreed ? `<span>😱 Fear &amp; Greed: <b style="color:${fgColor}">${fearGreed.value} (${fearGreed.label})</b></span>` : ''}
     ${btcDominance ? `<span>BTC 도미넌스: <b>${btcDominance}%</b></span>` : ''}
@@ -266,10 +266,10 @@ function _buildAnalystSection(tfAnalyst) {
   return `
 <div class="sec">
   <div class="sec-title">애널리스트 리포트</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th>목표가</th><th class="l">핵심 논거</th></tr></thead>
     <tbody>${rows}</tbody>
-  </table>
+  </table></div>
 </div>`;
 }
 
@@ -368,14 +368,15 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
   --border-radius-md:6px;
 }
 body,div,span,td,th,a,p{font-family:var(--fn)!important}
-body{font-size:14px;background:#f5f7fa;padding:20px;color:var(--color-text-primary)}
-.wrap{max-width:720px;margin:0 auto;background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-primary)}
+.wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:8px;padding:32px 36px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 .hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
 .hdr-title{font-size:20px;font-weight:600}
 .hdr-date{font-size:12px;color:var(--color-text-secondary)}
 .hdr-headline{font-size:13px;color:var(--color-text-info);margin-top:6px;font-weight:500;display:block}
 .sec{margin:0 0 2rem}
 .sec-title{font-size:15px;font-weight:700;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-secondary);padding-bottom:6px;margin-bottom:12px}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{font-size:11px;font-weight:700;color:#333;background:#eceef2;padding:7px 8px;border-bottom:1px solid #ced2da;white-space:nowrap;text-align:center}
 .tbl th.l{text-align:left}
@@ -396,7 +397,7 @@ body{font-size:14px;background:#f5f7fa;padding:20px;color:var(--color-text-prima
 .sup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .sup-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:11px 13px}
 .sup-card .st{font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:7px}
-.chart-wrap{position:relative;width:100%;height:195px;margin-bottom:6px}
+.chart-wrap{position:relative;width:100%;height:220px;margin-bottom:6px}
 .summary-box{background:var(--color-background-info);border:1px solid #dbe8ff;border-radius:8px;padding:14px 18px;margin-bottom:1.8rem}
 .summary-box .s-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-info);margin-bottom:10px}
 .s-badge{display:inline-block;font-size:10px;font-weight:700;background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px}
@@ -407,7 +408,7 @@ body{font-size:14px;background:#f5f7fa;padding:20px;color:var(--color-text-prima
 .ntbl tr:last-child td{border-bottom:none}
 .td-date{white-space:nowrap;font-size:12px;color:var(--color-text-secondary);min-width:68px}
 .td-cat{white-space:nowrap;min-width:64px;text-align:center}
-.td-ttl{min-width:190px;max-width:215px}
+.td-ttl{min-width:190px;max-width:320px}
 .td-ttl a{color:var(--color-text-info);text-decoration:none;font-size:12px;line-height:1.45;font-weight:400}
 .td-ttl a:hover{text-decoration:underline}
 .td-src{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
@@ -418,7 +419,27 @@ body{font-size:14px;background:#f5f7fa;padding:20px;color:var(--color-text-prima
 .t-mac{background:var(--color-background-warning);color:var(--color-text-warning)}
 .note{font-size:11px;color:var(--color-text-tertiary);margin-top:5px;line-height:1.7}
 .divider{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0}
-@media(max-width:600px){body{padding:10px}.td-sum{display:none}}
+@media(max-width:900px){
+  .wrap{padding:24px 20px}
+  .td-sum{display:none}
+}
+@media(max-width:600px){
+  body{padding:10px 8px}
+  .wrap{padding:16px 14px;border-radius:4px}
+  .hdr{flex-wrap:wrap;gap:4px}
+  .hdr-title{font-size:17px}
+  .hdr-date{font-size:11px}
+  .sec-title{font-size:14px}
+  .sec{margin-bottom:1.5rem}
+  .tbl-wrap{margin:0 -2px}
+  .tbl,.ntbl{min-width:480px}
+  .tbl th,.tbl td{padding:6px 6px;font-size:12px}
+  .ntbl th,.ntbl td{padding:7px 6px;font-size:12px}
+  .td-sum{display:none}
+  .sup-grid{grid-template-columns:1fr}
+  .chart-wrap{height:170px}
+  .summary-box{padding:11px 13px}
+}
 </style>
 </head>
 <body><div class="wrap">
@@ -436,7 +457,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <!-- ══ 1. 국내 증시 ══ -->
 <div class="sec">
   <div class="sec-title">국내 증시</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
@@ -458,7 +479,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
         ? `<tr><td>KOSPI 시가총액</td><td class="r">${N(d.marketCap)}조원</td><td class="r">―</td><td class="r"><span class="neu">―</span></td><td class="bi"></td></tr>`
         : ''}
     </tbody>
-  </table>
+  </table></div>
   ${_buildMarketCards(supply, d.breadth, date, prevMd, dateMd, d.supplyToday)}
 </div>
 
@@ -472,16 +493,16 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <canvas id="kChart" role="img" aria-label="코스피 최근 5거래일 종가 추이"
       style="display:none;width:100%;height:195px"></canvas>
   </div>
-  <table class="tbl" style="margin-top:6px">
+  <div class="tbl-wrap"><table class="tbl" style="margin-top:6px">
     <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
     <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
-  </table>
+  </table></div>
 </div>
 
 <!-- ══ 3. 해외 증시 ══ -->
 <div class="sec">
   <div class="sec-title">해외 증시</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="l">구분</th><th>전일(${dateMd}) 종가</th><th>전전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev),    rn.dow)}
@@ -492,13 +513,13 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       ${o.dax?.today != null ? trow('DAX (독일)', o.dax, N(o.dax?.today), N(o.dax?.prev)) : ''}
       ${trow('항셍지수',               o.hsi,    N(o.hsi?.today),    N(o.hsi?.prev),    rn.hsi)}
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <!-- ══ 4. 환율 · 금리 ══ -->
 <div class="sec">
   <div class="sec-title">환율 · 금리</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="l">구분</th><th>당일(${dateMd})</th><th>전일(${prevMd})</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원', rn.usdKrw)}
@@ -519,13 +540,13 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
         ].join('');
       })()}
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <!-- ══ 5. 원자재 · 비철금속 ══ -->
 <div class="sec">
   <div class="sec-title">원자재 · 비철금속</div>
-  <table class="tbl">
+  <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 시세</th><th>전일(${prevMd}) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
@@ -538,7 +559,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       ${c.zinc?.today != null ? trow('아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
       ${c.nickel?.today != null ? trow('니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
     </tbody>
-  </table>
+  </table></div>
   <div class="note">※ 은·백금은 Yahoo Finance 선물 기준. 알루미늄·아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
 </div>
 
@@ -548,10 +569,10 @@ ${analystSection}
 <!-- ══ 6. 주요 뉴스 ══ -->
 <div class="sec">
   <div class="sec-title">주요 뉴스</div>
-  <table class="ntbl">
+  <div class="tbl-wrap"><table class="ntbl">
     <thead><tr><th class="l" style="width:68px">일자</th><th style="width:64px">구분</th><th class="l" style="width:210px">제목 / 출처</th><th class="l">요약</th></tr></thead>
     <tbody>${newsRows}</tbody>
-  </table>
+  </table></div>
 </div>
 
 <!-- FOOTER -->
