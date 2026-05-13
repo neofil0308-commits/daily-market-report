@@ -97,7 +97,10 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
     if (live?.today != null) d.vkospi = live;
   }
 
-  const summaryMap    = await _buildSummaryMap(news ?? [], pipelineData);
+  const [summaryMap, rowNotes] = await Promise.all([
+    _buildSummaryMap(news ?? [], pipelineData),
+    _buildRowNotes(pipelineData),
+  ]);
   const chartUrl      = _buildChartUrl(histDisp);     // 이메일 폴백용 quickchart
   const chartScript   = _buildChartScript(histDisp);  // Chart.js 인라인 스크립트
 
@@ -111,7 +114,7 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
     date, d, o, fx, c, news: news ?? [],
     histDisp, histAll, chartUrl, chartScript,
     summaryHtml, cryptoSection, analystSection,
-    summaryMap,
+    summaryMap, rowNotes,
     headline: editorialPlan.headline,
   });
 
@@ -286,7 +289,8 @@ function _buildAnalystSection(tfAnalyst) {
 // ── 최종 HTML 조립 ────────────────────────────────────────────────────────────
 
 function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
-  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, headline }) {
+  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, rowNotes, headline }) {
+  const rn = rowNotes ?? {};
 
   const supply = d.supply ?? {};
 
@@ -454,19 +458,19 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <colgroup><col style="width:160px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
-      ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev))}
-      ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev))}
+      ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
+      ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev), rn.kosdaq)}
       ${(d.volumeBn != null || prevDayTvBn != null)
-        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td><td class="bi">일중 누적</td></tr>`
+        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td><td class="bi">${rn.volume || '일중 누적'}</td></tr>`
         : ''}
       ${d.vkospi?.today != null
         ? trow(
             d.vkospi.source === 'vix_fallback' ? '미국 VIX (참고)' : 'VKOSPI (공포지수)',
             d.vkospi,
             N(d.vkospi.today), N(d.vkospi.prev),
-            d.vkospi.source === 'vix_fallback'
+            rn.vkospi || (d.vkospi.source === 'vix_fallback'
               ? 'Yahoo ^VIX — VKOSPI 수집 불가 시 대체'
-              : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정'
+              : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
           )
         : ''}
       ${d.marketCap != null
@@ -501,13 +505,13 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <colgroup><col style="width:195px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>전일(${dateMd}) 종가</th><th>전전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
-      ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev))}
-      ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev))}
-      ${trow('나스닥',                 o.nasdaq, N(o.nasdaq?.today), N(o.nasdaq?.prev))}
-      ${trow('필라델피아 반도체(SOX)', o.sox,    N(o.sox?.today),    N(o.sox?.prev))}
-      ${trow('닛케이225',              o.nikkei, N(o.nikkei?.today), N(o.nikkei?.prev))}
+      ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev),    rn.dow)}
+      ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev),  rn.sp500)}
+      ${trow('나스닥',                 o.nasdaq, N(o.nasdaq?.today), N(o.nasdaq?.prev), rn.nasdaq)}
+      ${trow('필라델피아 반도체(SOX)', o.sox,    N(o.sox?.today),    N(o.sox?.prev),    rn.sox)}
+      ${trow('닛케이225',              o.nikkei, N(o.nikkei?.today), N(o.nikkei?.prev), rn.nikkei)}
       ${o.dax?.today != null ? trow('DAX (독일)', o.dax, N(o.dax?.today), N(o.dax?.prev)) : ''}
-      ${trow('항셍지수',               o.hsi,    N(o.hsi?.today),    N(o.hsi?.prev))}
+      ${trow('항셍지수',               o.hsi,    N(o.hsi?.today),    N(o.hsi?.prev),    rn.hsi)}
     </tbody>
   </table>
 </div>
@@ -519,10 +523,10 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <colgroup><col style="width:195px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(${dateMd})</th><th>전일(${prevMd})</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
-      ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원')}
-      ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev))}
-      ${trow('미 국채 10년물',  fx.us10y,  N(fx.us10y?.today) + '%',     N(fx.us10y?.prev) + '%')}
-      ${fx.us2y?.today != null ? trow('미 국채 2년물', fx.us2y, N(fx.us2y?.today) + '%', N(fx.us2y?.prev) + '%', '단기금리 — 연준 정책 민감') : ''}
+      ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원', rn.usdKrw)}
+      ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev),             rn.dxy)}
+      ${trow('미 국채 10년물',  fx.us10y,  N(fx.us10y?.today) + '%',     N(fx.us10y?.prev) + '%',     rn.us10y)}
+      ${fx.us2y?.today != null ? trow('미 국채 2년물', fx.us2y, N(fx.us2y?.today) + '%', N(fx.us2y?.prev) + '%', rn.us2y || '단기금리 — 연준 정책 민감') : ''}
       ${(() => {
         const f = fx.fomc ?? {};
         const fRow = (lbl, today, prev, note) => {
@@ -547,12 +551,12 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <colgroup><col style="width:210px"><col style="width:90px"><col style="width:90px"><col><col style="width:44%"></colgroup>
     <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 시세</th><th>전일(${prevMd}) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
     <tbody>
-      ${trow('🥇 금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev), '안전자산 수요')}
-      ${trow('🥇 금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원', '살 때 기준')}
+      ${trow('🥇 금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
+      ${trow('🥇 금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원',   '살 때 기준')}
       ${c.silver?.today  != null ? trow('⚪ 은 (COMEX, oz)',     c.silver,   '$' + N(c.silver?.today),   '$' + N(c.silver?.prev),   '태양광·반도체 수요') : ''}
       ${c.platinum?.today != null ? trow('⚪ 백금 (COMEX, oz)',  c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev), '귀금속 동조') : ''}
-      ${trow('🛢️ WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev))}
-      ${trow('🔴 구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev), '경기 선행 지표')}
+      ${trow('🛢️ WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev),         rn.wti     || '')}
+      ${trow('🔴 구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev),      rn.copper  || '경기 선행 지표')}
       ${c.aluminum?.today != null ? trow('🩶 알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
       ${c.zinc?.today != null ? trow('🔵 아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
       ${c.nickel?.today != null ? trow('⚫ 니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
@@ -606,6 +610,58 @@ ${JSON.stringify(news.slice(0, 12).map(n => ({ url: n.url, title: n.title, body:
     JSON.parse(raw).forEach(item => { if (item.url && item.summary) map.set(item.url, item.summary); });
   } catch {}
   return map;
+}
+
+async function _buildRowNotes(pipelineData) {
+  const empty = {
+    kospi:'', kosdaq:'', vkospi:'', volume:'', marketCap:'',
+    dow:'', sp500:'', nasdaq:'', sox:'', nikkei:'', hsi:'',
+    usdKrw:'', dxy:'', us10y:'', us2y:'',
+    gold:'', wti:'', copper:'',
+  };
+  try {
+    const { domestic: d, overseas: o, fxRates: fx, commodities: c } = pipelineData ?? {};
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) return empty;
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
+
+    const prompt = `다음 시장 데이터를 보고 각 항목의 "비고" 컬럼에 들어갈 짧은 한 줄 설명을 작성하세요.
+- 투자자가 읽기 좋은 맥락 설명 (예: "외국인 순매수 전환 + 반도체 강세 주도")
+- 각 항목 15자 이내, 사실 기반, 추측 금지
+- 데이터가 없는 항목은 빈 문자열("")
+
+데이터:
+${JSON.stringify({
+  kospi:    d?.kospi,
+  kosdaq:   d?.kosdaq,
+  vkospi:   d?.vkospi,
+  volumeBn: d?.volumeBn,
+  dow:      o?.dow,
+  sp500:    o?.sp500,
+  nasdaq:   o?.nasdaq,
+  sox:      o?.sox,
+  nikkei:   o?.nikkei,
+  hsi:      o?.hsi,
+  usdKrw:   fx?.usdKrw,
+  dxy:      fx?.dxy,
+  us10y:    fx?.us10y,
+  gold:     c?.gold,
+  wti:      c?.wti,
+  copper:   c?.copper,
+}, null, 2)}
+
+반드시 아래 JSON 형식으로만 응답 (마크다운 코드블록 없이):
+{"kospi":"...","kosdaq":"...","vkospi":"...","volume":"...","marketCap":"","dow":"...","sp500":"...","nasdaq":"...","sox":"...","nikkei":"...","hsi":"...","usdKrw":"...","dxy":"...","us10y":"...","us2y":"...","gold":"...","wti":"...","copper":"..."}`;
+
+    const res = await model.generateContent(prompt);
+    const raw = res.response.text().replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
+    return { ...empty, ...JSON.parse(raw) };
+  } catch (e) {
+    console.warn('[designer] rowNotes 생성 실패 (무시):', e.message);
+    return empty;
+  }
 }
 
 async function _naverIdxLive(symbol) {
