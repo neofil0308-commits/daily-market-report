@@ -141,11 +141,13 @@ function _supplyBar(name, val, maxAbs) {
   </div>`;
 }
 
-function _buildMarketCards(supply, breadth, date, prevMd) {
-  const hasSupply  = supply?.foreign != null || supply?.institution != null || supply?.individual != null;
-  const hasBreadth = breadth?.advancing != null || breadth?.intraHigh != null;
-  if (!hasSupply && !hasBreadth) return '';
+function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday) {
+  const hasSupply      = supply?.foreign != null || supply?.institution != null || supply?.individual != null;
+  const hasSupplyToday = supplyToday?.foreign != null || supplyToday?.institution != null || supplyToday?.individual != null;
+  const hasBreadth     = breadth?.advancing != null || breadth?.intraHigh != null;
+  if (!hasSupply && !hasSupplyToday && !hasBreadth) return '';
 
+  // 첫 번째 카드: 전일 수급
   const supplyCard = hasSupply ? (() => {
     const { foreign, institution, individual } = supply;
     const maxAbs = Math.max(Math.abs(foreign ?? 0), Math.abs(institution ?? 0), Math.abs(individual ?? 0), 1);
@@ -158,7 +160,19 @@ function _buildMarketCards(supply, breadth, date, prevMd) {
     </div>`;
   })() : '';
 
-  const breadthCard = hasBreadth ? (() => {
+  // 두 번째 카드: 당일 수급 우선, 없으면 breadth, 둘 다 없으면 생략
+  let secondCard = '';
+  if (hasSupplyToday) {
+    const { foreign, institution, individual } = supplyToday;
+    const maxAbs = Math.max(Math.abs(foreign ?? 0), Math.abs(institution ?? 0), Math.abs(individual ?? 0), 1);
+    const titleDate = dateMd ?? date?.slice(5)?.replace('-', '/') ?? '';
+    secondCard = `<div class="sup-card">
+      <div class="st">📌 당일(${titleDate}) 수급</div>
+      ${_supplyBar('외국인', foreign, maxAbs)}
+      ${_supplyBar('기관', institution, maxAbs)}
+      ${_supplyBar('개인', individual, maxAbs)}
+    </div>`;
+  } else if (hasBreadth) {
     const { advancing, declining, unchanged, intraHigh, intraLow } = breadth ?? {};
     const total = (advancing ?? 0) + (declining ?? 0) + (unchanged ?? 0);
     const advPct = total > 0 ? Math.round((advancing ?? 0) / total * 100) : null;
@@ -176,15 +190,19 @@ function _buildMarketCards(supply, breadth, date, prevMd) {
     const hlStr = (intraHigh != null && intraLow != null)
       ? `<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">장중 ${N(intraHigh)} ↕ ${N(intraLow)}</div>`
       : '';
-    return `<div class="sup-card">
+    secondCard = `<div class="sup-card">
       <div class="st">📈 시장 강도 (상승/하락 종목)</div>
       ${bars}
       ${hlStr}
     </div>`;
-  })() : '';
+  }
 
-  if (!supplyCard && !breadthCard) return '';
-  return `<div class="sup-grid">${supplyCard}${breadthCard}</div>`;
+  if (!supplyCard && !secondCard) return '';
+  // 카드가 하나뿐이면 grid 없이 단독 표시
+  if (!supplyCard || !secondCard) {
+    return `<div class="sup-grid">${supplyCard}${secondCard}</div>`;
+  }
+  return `<div class="sup-grid">${supplyCard}${secondCard}</div>`;
 }
 
 // ── AI 요약 섹션 ───────────────────────────────────────────────────────────────
@@ -438,6 +456,9 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <tbody>
       ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev))}
       ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev))}
+      ${(d.volumeBn != null || prevDayTvBn != null)
+        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td><td class="bi">일중 누적</td></tr>`
+        : ''}
       ${d.vkospi?.today != null
         ? trow(
             d.vkospi.source === 'vix_fallback' ? '미국 VIX (참고)' : 'VKOSPI (공포지수)',
@@ -448,15 +469,12 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
               : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정'
           )
         : ''}
-      ${(d.volumeBn != null || prevDayTvBn != null)
-        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td><td class="bi">일중 누적</td></tr>`
-        : ''}
       ${d.marketCap != null
         ? `<tr><td>KOSPI 시가총액</td><td class="r">${N(d.marketCap)}조원</td><td class="r">―</td><td class="c neu">―</td><td class="bi"></td></tr>`
         : ''}
     </tbody>
   </table>
-  ${_buildMarketCards(supply, d.breadth, date, prevMd)}
+  ${_buildMarketCards(supply, d.breadth, date, prevMd, dateMd, d.supplyToday)}
 </div>
 
 <!-- ══ 2. KOSPI 5거래일 추이 ══ -->
@@ -535,10 +553,12 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       ${c.platinum?.today != null ? trow('⚪ 백금 (COMEX, oz)',  c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev), '귀금속 동조') : ''}
       ${trow('🛢️ WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev))}
       ${trow('🔴 구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev), '경기 선행 지표')}
-      ${c.aluminum?.today != null ? trow('🩶 알루미늄 (선물)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
+      ${c.aluminum?.today != null ? trow('🩶 알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
+      ${c.zinc?.today != null ? trow('🔵 아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
+      ${c.nickel?.today != null ? trow('⚫ 니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
     </tbody>
   </table>
-  <div class="note">※ 은·백금·알루미늄은 Yahoo Finance 선물 기준. 아연·니켈은 LME 데이터 추후 추가 예정.</div>
+  <div class="note">※ 은·백금은 Yahoo Finance 선물 기준. 알루미늄·아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
 </div>
 
 ${cryptoSection}
@@ -548,8 +568,7 @@ ${analystSection}
 <div class="sec">
   <div class="sec-title">주요 뉴스</div>
   <table class="ntbl">
-    <colgroup><col style="width:68px"><col style="width:64px"><col style="width:210px"><col></colgroup>
-    <thead><tr><th class="l">일자</th><th>구분</th><th class="l">제목 / 출처</th><th class="l">요약</th></tr></thead>
+    <thead><tr><th class="l" style="width:68px">일자</th><th style="width:64px">구분</th><th class="l" style="width:210px">제목 / 출처</th><th class="l">요약</th></tr></thead>
     <tbody>${newsRows}</tbody>
   </table>
 </div>
