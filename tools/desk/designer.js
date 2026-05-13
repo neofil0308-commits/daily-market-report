@@ -12,27 +12,12 @@ const sgn = v => v == null ? '' : v > 0 ? '+' : '';
 const dir = v => v == null ? 'neu' : v > 0 ? 'up' : v < 0 ? 'dn' : 'neu';
 const COLOR = { up: '#E24B4A', dn: '#378ADD', neu: '#888888' };
 
-function autoLabel(pct) {
-  if (pct == null) return '';
-  if (pct >= 3)           return '급등';
-  if (pct >= 1)           return '상승';
-  if (pct >= 0.1)         return '소폭 상승';
-  if (Math.abs(pct) < 0.1) return '보합';
-  if (pct > -1)           return '소폭 하락';
-  if (pct > -3)           return '하락';
-  return '급락';
-}
-
-// 변동 셀 — .chg 패턴 (레퍼런스 스타일)
+// 변동 셀 — 수치만 표시
 const chgCell = (obj) => {
   const d = obj?.diff;
   const p = obj?.pct;
   if (d == null) return '<span class="neu">―</span>';
-  const label = autoLabel(p);
-  return `<div class="chg">
-    <span class="chg-val ${dir(d)}">${arr(d)} ${sgn(d)}${N(Math.abs(d))} (${sgn(p)}${N(p)}%)</span>
-    <span class="chg-lbl">(${label})</span>
-  </div>`;
+  return `<span class="chg-val ${dir(d)}">${arr(d)} ${sgn(d)}${N(Math.abs(d))} (${sgn(p)}${N(p)}%)</span>`;
 };
 
 // 표 행 헬퍼
@@ -156,7 +141,7 @@ function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday) {
     const maxAbs = Math.max(Math.abs(foreign ?? 0), Math.abs(institution ?? 0), Math.abs(individual ?? 0), 1);
     const titleDate = prevMd ?? date?.slice(5)?.replace('-', '/') ?? '';
     return `<div class="sup-card">
-      <div class="st">🏦 KOSPI 수급 — 전일(${titleDate}) 종가</div>
+      <div class="st">KOSPI 수급 — 전일(${titleDate}) 종가</div>
       ${_supplyBar('외국인', foreign, maxAbs)}
       ${_supplyBar('기관', institution, maxAbs)}
       ${_supplyBar('개인', individual, maxAbs)}
@@ -170,7 +155,7 @@ function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday) {
     const maxAbs = Math.max(Math.abs(foreign ?? 0), Math.abs(institution ?? 0), Math.abs(individual ?? 0), 1);
     const titleDate = dateMd ?? date?.slice(5)?.replace('-', '/') ?? '';
     secondCard = `<div class="sup-card">
-      <div class="st">📌 당일(${titleDate}) 수급</div>
+      <div class="st">당일(${titleDate}) 수급</div>
       ${_supplyBar('외국인', foreign, maxAbs)}
       ${_supplyBar('기관', institution, maxAbs)}
       ${_supplyBar('개인', individual, maxAbs)}
@@ -194,7 +179,7 @@ function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday) {
       ? `<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">장중 ${N(intraHigh)} ↕ ${N(intraLow)}</div>`
       : '';
     secondCard = `<div class="sup-card">
-      <div class="st">📈 시장 강도 (상승/하락 종목)</div>
+      <div class="st">시장 강도 (상승/하락 종목)</div>
       ${bars}
       ${hlStr}
     </div>`;
@@ -243,7 +228,7 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
 <div class="sec">
   <div class="sec-title">블록체인 · 코인</div>
   <table class="tbl">
-    <thead><tr><th>#</th><th class="l">심볼</th><th>시세(USD)</th><th>24h 변동</th></tr></thead>
+    <thead><tr><th>#</th><th class="l">심볼</th><th class="r">시세(USD)</th><th class="r">24h 변동</th></tr></thead>
     <tbody>
       <tr>
         <td class="c">—</td><td style="font-weight:600">BTC</td>
@@ -282,7 +267,7 @@ function _buildAnalystSection(tfAnalyst) {
 <div class="sec">
   <div class="sec-title">애널리스트 리포트</div>
   <table class="tbl">
-    <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th>목표가</th><th class="l">핵심 논거</th></tr></thead>
+    <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th class="r">목표가</th><th class="l">핵심 논거</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
 </div>`;
@@ -366,7 +351,7 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --fn:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --fn:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif;
   --up:#E24B4A;--dn:#378ADD;--neu:#888;
   --color-text-primary:#1a1a1a;
   --color-text-secondary:#666;
@@ -390,19 +375,18 @@ body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)
 .hdr-date{font-size:12px;color:var(--color-text-secondary)}
 .hdr-headline{font-size:13px;color:var(--color-text-info);margin-top:6px;font-weight:500;display:block}
 .sec{margin:0 0 2rem}
-.sec-title{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-secondary);padding-bottom:5px;margin-bottom:12px}
+.sec-title{font-size:15px;font-weight:700;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-secondary);padding-bottom:6px;margin-bottom:12px}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);white-space:nowrap;text-align:center}
 .tbl th.l{text-align:left}
+.tbl th.r{text-align:right}
 .tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);font-weight:400;vertical-align:middle;line-height:1.5}
 .tbl td.r{text-align:right;white-space:nowrap}
 .tbl td.c{text-align:center}
 .tbl td.bi{font-size:11px;color:var(--color-text-secondary);line-height:1.55}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--color-background-secondary)}
-.chg{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .chg-val{font-size:13px;font-weight:400;white-space:nowrap}
-.chg-lbl{font-size:10px;color:var(--color-text-secondary);white-space:nowrap}
 .up{color:var(--up)}.dn{color:var(--dn)}.neu{color:var(--neu)}
 .bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
 .bar-row .nm{min-width:40px;color:var(--color-text-secondary)}
@@ -442,10 +426,10 @@ body{font-size:14px;background:#fff;padding:20px;color:var(--color-text-primary)
 
 <!-- HEADER -->
 <div class="hdr">
-  <span class="hdr-title">📊 일일 시장 리포트</span>
+  <span class="hdr-title">일일 시장 리포트</span>
   <span class="hdr-date">${dateFull} 종가 기준 — 한국경제 · 네이버증권</span>
 </div>
-${headline ? `<div style="margin-top:-1.2rem;margin-bottom:1.8rem"><span class="hdr-headline">📌 ${headline}</span></div>` : ''}
+${headline ? `<div style="margin-top:-1.2rem;margin-bottom:1.8rem"><span class="hdr-headline">${headline}</span></div>` : ''}
 
 <!-- AI SUMMARY -->
 ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-badge">✦ AI</span> Summary</div>${summaryHtml}</div>` : ''}
@@ -454,7 +438,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">국내 증시</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd}) 종가</th><th class="r">전일(${prevMd}) 종가</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
       ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev), rn.kosdaq)}
@@ -490,7 +474,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       style="display:none;width:100%;height:195px"></canvas>
   </div>
   <table class="tbl" style="margin-top:6px">
-    <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
+    <thead><tr><th class="l">날짜</th><th class="r">KOSPI 종가</th><th class="r">전일比</th><th class="r">등락률</th><th class="r">거래대금</th><th class="l">주요 이슈</th></tr></thead>
     <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
   </table>
 </div>
@@ -499,7 +483,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">해외 증시</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th>전일(${dateMd}) 종가</th><th>전전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th class="r">전일(${dateMd}) 종가</th><th class="r">전전일(${prevMd}) 종가</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev),    rn.dow)}
       ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev),  rn.sp500)}
@@ -516,7 +500,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">환율 · 금리</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd})</th><th>전일(${prevMd})</th><th>변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd})</th><th class="r">전일(${prevMd})</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
     <tbody>
       ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원', rn.usdKrw)}
       ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev),             rn.dxy)}
@@ -543,17 +527,17 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 <div class="sec">
   <div class="sec-title">원자재 · 비철금속</div>
   <table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 시세</th><th>전일(${prevMd}) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
+    <thead><tr><th class="l">구분</th><th class="r">당일(${dateMd}) 시세</th><th class="r">전일(${prevMd}) 시세</th><th class="r">변동</th><th class="l">비고</th></tr></thead>
     <tbody>
-      ${trow('🥇 금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
-      ${trow('🥇 금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원',   '살 때 기준')}
-      ${c.silver?.today  != null ? trow('⚪ 은 (COMEX, oz)',     c.silver,   '$' + N(c.silver?.today),   '$' + N(c.silver?.prev),   '태양광·반도체 수요') : ''}
-      ${c.platinum?.today != null ? trow('⚪ 백금 (COMEX, oz)',  c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev), '귀금속 동조') : ''}
-      ${trow('🛢️ WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev),         rn.wti     || '')}
-      ${trow('🔴 구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev),      rn.copper  || '경기 선행 지표')}
-      ${c.aluminum?.today != null ? trow('🩶 알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
-      ${c.zinc?.today != null ? trow('🔵 아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
-      ${c.nickel?.today != null ? trow('⚫ 니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
+      ${trow('금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
+      ${trow('금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원',   '살 때 기준')}
+      ${c.silver?.today  != null ? trow('은 (COMEX, oz)',     c.silver,   '$' + N(c.silver?.today),   '$' + N(c.silver?.prev),   '태양광·반도체 수요') : ''}
+      ${c.platinum?.today != null ? trow('백금 (COMEX, oz)',  c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev), '귀금속 동조') : ''}
+      ${trow('WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev),         rn.wti     || '')}
+      ${trow('구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev),      rn.copper  || '경기 선행 지표')}
+      ${c.aluminum?.today != null ? trow('알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
+      ${c.zinc?.today != null ? trow('아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
+      ${c.nickel?.today != null ? trow('니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
     </tbody>
   </table>
   <div class="note">※ 은·백금은 Yahoo Finance 선물 기준. 알루미늄·아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
@@ -574,8 +558,8 @@ ${analystSection}
 <!-- FOOTER -->
 <div class="divider"></div>
 <div class="note" style="line-height:1.9">
-  📌 출처: Yahoo Finance · 네이버금융 · CoinGecko · DART · CME FedWatch<br>
-  ⚠️ 본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+  출처: Yahoo Finance · 네이버금융 · CoinGecko · DART · CME FedWatch<br>
+  본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
 </div>
 
 </div><!-- /wrap -->
