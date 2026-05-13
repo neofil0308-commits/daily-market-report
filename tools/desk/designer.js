@@ -717,7 +717,10 @@ function _buildChartUrl(histDisp) {
   return 'https://quickchart.io/chart?w=660&h=200&backgroundColor=white&c=' + encodeURIComponent(JSON.stringify(cfg));
 }
 
-// ── 뉴스카드 요약 이메일 빌더 (Gmail 호환 — 모든 스타일 인라인) ───────────────
+
+// ── 이메일 카드 빌더 (Morning Brew / The Hustle 스타일 대시보드 뉴스레터) ─────
+// Gmail 호환: 인라인 스타일 전용, CSS 변수·table 태그·style 블록 금지
+// 최대 너비 600px, 배경 카드 컬러링으로 등락 방향 즉시 인지
 
 export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl) {
   const d  = pipelineData?.domestic    ?? {};
@@ -728,121 +731,207 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   const dateStr = pipelineData?.date ?? new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
 
   // ── 날짜 표기 ──────────────────────────────────────────────────────────────
-  const dtObj = new Date(dateStr + 'T00:00:00+09:00');
-  const pad   = n => String(n).padStart(2,'0');
-  const KO    = ['일','월','화','수','목','금','토'];
-  const MM    = pad(dtObj.getMonth()+1);
-  const DD    = pad(dtObj.getDate());
+  const dtObj     = new Date(dateStr + 'T00:00:00+09:00');
+  const pad       = n => String(n).padStart(2,'0');
+  const KO        = ['일','월','화','수','목','금','토'];
+  const MM        = pad(dtObj.getMonth()+1);
+  const DD        = pad(dtObj.getDate());
   const dateLabel = `${dtObj.getFullYear()}.${MM}.${DD} (${KO[dtObj.getDay()]})`;
-  const baseMd    = `${MM}/${DD}`;  // 기준시각 표기용
+  const baseMd    = `${MM}/${DD}`;
 
-  // ── 등락 헬퍼 (인라인 스타일 전용 — CSS 변수 사용 불가) ──────────────────
-  const UP  = '#E24B4A';
-  const DN  = '#378ADD';
-  const NEU = '#888888';
-  const clr  = v => v == null ? NEU : v > 0 ? UP : v < 0 ? DN : NEU;
-  const ar   = v => v == null ? '―' : v > 0 ? '▲' : v < 0 ? '▼' : '―';
-  const sg   = v => v == null ? '' : v > 0 ? '+' : '';
-  const fmt  = (v, dec=2) => v == null ? 'N/A' : Number(v).toLocaleString('ko-KR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
-  const fmtI = v => v == null ? 'N/A' : Math.round(v).toLocaleString('ko-KR');
-
-  // ── 공통 스타일 상수 ──────────────────────────────────────────────────────
-  const CARD = 'background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.07)';
+  // ── 상수 ───────────────────────────────────────────────────────────────────
   const FONT = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
 
-  // ⑪ 섹션 제목 + 기준시각 헬퍼
-  const sectionTitle = (title, meta = '') =>
-    `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
-      <span style="font-size:15px;font-weight:700;color:#1e2330;font-family:${FONT}">${title}</span>
-      ${meta ? `<span style="font-size:11px;color:#999;font-family:${FONT}">${meta}</span>` : ''}
+  // ── 데이터 헬퍼 ────────────────────────────────────────────────────────────
+  const dir  = v => v == null ? 'neu' : v > 0 ? 'up' : v < 0 ? 'down' : 'neu';
+  const fmtI = v => v == null ? 'N/A' : Math.round(v).toLocaleString('ko-KR');
+  const fmt2 = v => v == null ? 'N/A' : Number(v).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const ar   = v => v == null ? '―' : v > 0 ? '▲' : v < 0 ? '▼' : '―';
+  const sg   = v => v > 0 ? '+' : '';
+
+  // arrowStr: ▲ +73.22 / ▼ −11.29
+  const arrowStr = diff => diff == null ? '―' : `${ar(diff)}&nbsp;${sg(diff)}${fmt2(Math.abs(diff))}`;
+  // pctStr: (+0.96%) / (−0.96%)
+  const pctStr   = pct  => pct  == null ? ''  : `(${sg(pct)}${fmt2(pct)}%)`;
+
+  // ── 섹션 구분선 ────────────────────────────────────────────────────────────
+  const DIVIDER = `<div style="height:1px;background:#f0f2f5"></div>`;
+
+  // ── 섹션 헤더 헬퍼 ─────────────────────────────────────────────────────────
+  const secHdr = (emoji, title, meta) =>
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <span style="font-size:13px;font-weight:700;color:#1a1f2e;white-space:nowrap;font-family:${FONT}">${emoji} ${title}</span>
+      <div style="flex:1;height:1px;background:#e8eaed"></div>
+      ${meta ? `<span style="font-size:11px;color:#9aa0ab;white-space:nowrap;font-family:${FONT}">${meta}</span>` : ''}
     </div>`;
 
-  // ① 라벨 SemiBold + ⑤ 패딩 축소 + ⑥ 왼쪽 정렬 — 지수 셀
-  const indexCell = (label, val, diff, pct, valFmt='int') => {
-    const color  = clr(diff);
-    const valStr = valFmt === 'int' ? fmtI(val) : fmt(val);
-    const chgStr = diff != null
-      ? `${ar(diff)} ${sg(diff)}${fmt(Math.abs(diff))} (${sg(pct)}${fmt(pct)}%)`
-      : '―';
-    return `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px 12px;text-align:left">
-      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:5px;font-family:${FONT}">${label}</div>
-      <div style="font-size:26px;font-weight:700;color:#1e2330;line-height:1;font-family:${FONT}">${val != null ? valStr : 'N/A'}</div>
-      <div style="font-size:13px;color:${color};margin-top:6px;font-weight:500;font-family:${FONT}">${chgStr}</div>
+  // ── 카드 컴포넌트 헬퍼 ─────────────────────────────────────────────────────
+  // direction: 'up' | 'down' | 'neu'
+  const indexCard = (label, valueStr, aStr, pStr, direction, valueFontSize) => {
+    const fs    = valueFontSize || '22px';
+    const bg    = direction === 'up'   ? '#fff8f8' : direction === 'down' ? '#f0f5ff' : '#f8f9fb';
+    const bdr   = direction === 'up'   ? '#ffd6d6' : direction === 'down' ? '#c7d9ff' : '#e8eaed';
+    const color = direction === 'up'   ? '#E24B4A' : direction === 'down' ? '#378ADD' : '#888888';
+    return `<div style="flex:1;min-width:0;background:${bg};border:1px solid ${bdr};border-radius:10px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:6px;font-family:${FONT}">${label}</div>
+      <div style="font-size:${fs};font-weight:700;color:#1a1f2e;margin-bottom:5px;line-height:1.1;font-family:${FONT}">${valueStr}</div>
+      <div style="font-size:12px;font-weight:500;color:${color};font-family:${FONT}">${aStr}&nbsp;${pStr}</div>
     </div>`;
   };
 
-  // ① ⑤ ⑥ — 원자재·환율 셀
-  const dataCell = (label, valStr, diffStr, diffColor) =>
-    `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px 12px;text-align:left">
-      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:5px;font-family:${FONT}">${label}</div>
-      <div style="font-size:17px;font-weight:700;color:#1e2330;font-family:${FONT}">${valStr}</div>
-      <div style="font-size:13px;color:${diffColor};margin-top:5px;font-weight:500;font-family:${FONT}">${diffStr}</div>
-    </div>`;
+  // ── 1. 헤더 ────────────────────────────────────────────────────────────────
+  const headerHtml = `<div style="background:#1a1f2e;padding:0 24px">
+  <div style="border-top:3px solid #E24B4A;padding:20px 0 18px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="color:#fff;font-size:18px;font-weight:700;font-family:${FONT}">일일 시장 리포트</div>
+        <div style="color:#8892a4;font-size:11px;margin-top:4px;font-family:${FONT}">Korea Market Daily</div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:#e8eaed;font-size:13px;font-weight:600;font-family:${FONT}">${dateLabel}</div>
+        <div style="color:#8892a4;font-size:11px;margin-top:3px;font-family:${FONT}">장 마감 기준</div>
+      </div>
+    </div>
+  </div>
+</div>`;
 
-  // ── 1. 요약문 — ② 내용 없으면 카드 자체 숨김 ───────────────────────────
-  const summaryBullets = editorialPlan?.summary_bullets ?? [];
-  const topStories     = tfResults?.news?.top_stories   ?? [];
-  let summaryHtml = '';
-  if (summaryBullets.length) {
-    summaryHtml = summaryBullets
-      .map(b => `<p style="margin:0 0 8px;font-size:14px;color:#1e2330;line-height:1.75;font-family:${FONT}">${b.replace(/^[•·\-]\s*/,'• ')}</p>`)
-      .join('');
-  } else if (topStories.length) {
-    summaryHtml = topStories
-      .map(s => `<p style="margin:0 0 8px;font-size:14px;color:#1e2330;line-height:1.75;font-family:${FONT}">• ${s}</p>`)
-      .join('');
+  // ── 2. 증시 섹션 (2열 2행: KOSPI·KOSDAQ / S&P 500·NASDAQ) ─────────────────
+  const mktCards = [];
+  const mktDefs = [
+    { label: 'KOSPI',   obj: d.kospi,  valFn: v => fmtI(v) },
+    { label: 'KOSDAQ',  obj: d.kosdaq, valFn: v => fmtI(v) },
+    { label: 'S&P 500', obj: o.sp500,  valFn: v => fmt2(v) },
+    { label: 'NASDAQ',  obj: o.nasdaq, valFn: v => fmt2(v) },
+  ];
+  for (const m of mktDefs) {
+    if (m.obj?.today != null) {
+      mktCards.push(indexCard(
+        m.label,
+        m.valFn(m.obj.today),
+        arrowStr(m.obj.diff),
+        pctStr(m.obj.pct),
+        dir(m.obj.diff),
+        '22px'
+      ));
+    }
   }
-  // 내용 없으면 summaryHtml = '' → 카드 렌더링 안 함
 
-  // ── 2. 증시 카드 — 2×2 ───────────────────────────────────────────────────
-  const mktRow1 = `<div style="display:flex;gap:8px;margin-bottom:8px">
-    ${indexCell('KOSPI',  d.kospi?.today,  d.kospi?.diff,  d.kospi?.pct)}
-    ${indexCell('KOSDAQ', d.kosdaq?.today, d.kosdaq?.diff, d.kosdaq?.pct)}
-  </div>`;
-  const mktRow2 = `<div style="display:flex;gap:8px">
-    ${indexCell('S&amp;P 500', o.sp500?.today,  o.sp500?.diff,  o.sp500?.pct,  'dec')}
-    ${indexCell('NASDAQ',      o.nasdaq?.today, o.nasdaq?.diff, o.nasdaq?.pct, 'dec')}
-  </div>`;
+  const mktRowHtml = [];
+  for (let i = 0; i < mktCards.length; i += 2) {
+    const pair = mktCards.slice(i, i + 2);
+    const mb   = i < mktCards.length - 2 ? ';margin-bottom:10px' : '';
+    mktRowHtml.push(`<div style="display:flex;gap:10px${mb}">${pair.join('')}</div>`);
+  }
 
-  // ── 3. 환율·원자재 카드 ───────────────────────────────────────────────────
-  const usdChg    = fx.usdKrw?.diff != null ? `${ar(fx.usdKrw.diff)} ${sg(fx.usdKrw.diff)}${fmt(Math.abs(fx.usdKrw.diff))}원` : '―';
-  const goldChg   = c.gold?.diff    != null ? `${ar(c.gold.diff)} ${sg(c.gold.diff)}$${fmt(Math.abs(c.gold.diff))}` : '―';
-  const silverChg = c.silver?.diff  != null ? `${ar(c.silver.diff)} ${sg(c.silver.diff)}$${fmt(Math.abs(c.silver.diff))}` : '―';
-  const copperChg = c.copper?.diff  != null ? `${ar(c.copper.diff)} ${sg(c.copper.diff)}$${fmt(Math.abs(c.copper.diff))}` : '―';
+  const mktSection = mktRowHtml.length ? `<div style="padding:20px 24px 16px">
+  ${secHdr('📊', '증시', `${baseMd} 종가`)}
+  ${mktRowHtml.join('')}
+</div>` : '';
 
-  const fxRow1 = `<div style="display:flex;gap:8px;margin-bottom:8px">
-    ${dataCell('달러/원', fx.usdKrw?.today != null ? fmtI(fx.usdKrw.today)+'원' : 'N/A', usdChg,    clr(fx.usdKrw?.diff))}
-    ${dataCell('금 (oz)', c.gold?.today    != null ? '$'+fmt(c.gold.today)       : 'N/A', goldChg,   clr(c.gold?.diff))}
-  </div>`;
-  const fxRow2 = `<div style="display:flex;gap:8px">
-    ${dataCell('은 (oz)',   c.silver?.today != null ? '$'+fmt(c.silver.today) : 'N/A', silverChg, clr(c.silver?.diff))}
-    ${dataCell('구리 (lb)', c.copper?.today != null ? '$'+fmt(c.copper.today) : 'N/A', copperChg, clr(c.copper?.diff))}
-  </div>`;
+  // ── 3. 환율·원자재 섹션 (3열 2행) ─────────────────────────────────────────
+  // Row 1: 달러/원, 금, 은
+  // Row 2: 구리, WTI(null이면 생략), DXY(null이면 생략)
+  const calcPct = (diff, today) =>
+    diff != null && today ? diff / today * 100 : null;
 
-  // ── 4. 코인 카드 ─────────────────────────────────────────────────────────
+  const fxRow1 = [];
+  if (fx.usdKrw?.today != null) {
+    const diff = fx.usdKrw.diff;
+    fxRow1.push(indexCard('달러/원', fmtI(fx.usdKrw.today)+'원',
+      arrowStr(diff), pctStr(calcPct(diff, fx.usdKrw.today)), dir(diff), '18px'));
+  }
+  if (c.gold?.today != null) {
+    const diff = c.gold.diff;
+    fxRow1.push(indexCard('금 (oz)', '$'+fmt2(c.gold.today),
+      arrowStr(diff), pctStr(calcPct(diff, c.gold.today)), dir(diff), '18px'));
+  }
+  if (c.silver?.today != null) {
+    const diff = c.silver.diff;
+    fxRow1.push(indexCard('은 (oz)', '$'+fmt2(c.silver.today),
+      arrowStr(diff), pctStr(calcPct(diff, c.silver.today)), dir(diff), '18px'));
+  }
+
+  const fxRow2 = [];
+  if (c.copper?.today != null) {
+    const diff = c.copper.diff;
+    fxRow2.push(indexCard('구리 (lb)', '$'+fmt2(c.copper.today),
+      arrowStr(diff), pctStr(calcPct(diff, c.copper.today)), dir(diff), '18px'));
+  }
+  if (c.wti?.today != null) {
+    const diff = c.wti.diff;
+    fxRow2.push(indexCard('WTI (bbl)', '$'+fmt2(c.wti.today),
+      arrowStr(diff), pctStr(calcPct(diff, c.wti.today)), dir(diff), '18px'));
+  }
+  if (fx.dxy?.today != null) {
+    const diff = fx.dxy.diff;
+    fxRow2.push(indexCard('DXY', fmt2(fx.dxy.today),
+      arrowStr(diff), pctStr(calcPct(diff, fx.dxy.today)), dir(diff), '18px'));
+  }
+
+  const fxSection = (fxRow1.length || fxRow2.length) ? `<div style="padding:16px 24px">
+  ${secHdr('💱', '환율 · 원자재', `${baseMd} 기준`)}
+  ${fxRow1.length ? `<div style="display:flex;gap:10px;margin-bottom:10px">${fxRow1.join('')}</div>` : ''}
+  ${fxRow2.length ? `<div style="display:flex;gap:10px">${fxRow2.join('')}</div>` : ''}
+</div>` : '';
+
+  // ── 4. 코인 섹션 (3열 1행) ─────────────────────────────────────────────────
   const btc   = cr.btc ?? null;
   const eth   = cr.eth ?? null;
-  const top10 = (cr.top10 ?? []).filter(x => !['BTC','ETH'].includes(x.symbol?.toUpperCase())).slice(0,2);
+  const top10 = (cr.top10 ?? []).filter(x => !['BTC','ETH'].includes(x.symbol?.toUpperCase())).slice(0,1);
 
-  const coinCell = (symbol, priceStr, chg24h) => {
-    const color  = clr(chg24h);
-    const chgStr = chg24h != null ? `${ar(chg24h)} ${sg(chg24h)}${fmt(Math.abs(chg24h))}%` : '―';
-    return `<div style="flex:1;min-width:0;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px 12px;text-align:left">
-      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:5px;font-family:${FONT}">${symbol}</div>
-      <div style="font-size:15px;font-weight:700;color:#1e2330;font-family:${FONT}">${priceStr}</div>
-      <div style="font-size:13px;color:${color};margin-top:4px;font-weight:500;font-family:${FONT}">${chgStr}</div>
-    </div>`;
-  };
+  const coinCards = [];
+  if (btc) {
+    const chg    = btc.change24h;
+    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
+    coinCards.push(indexCard('BTC', btc.price != null ? '$'+fmtI(btc.price) : 'N/A', chgStr, '', dir(chg), '18px'));
+  }
+  if (eth) {
+    const chg    = eth.change24h;
+    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
+    coinCards.push(indexCard('ETH', eth.price != null ? '$'+fmtI(eth.price) : 'N/A', chgStr, '', dir(chg), '18px'));
+  }
+  for (const x of top10) {
+    const chg    = x.change24h;
+    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
+    coinCards.push(indexCard(x.symbol ?? '―', x.priceUsd != null ? '$'+fmt2(x.priceUsd) : 'N/A', chgStr, '', dir(chg), '18px'));
+  }
 
-  const coinCells = [
-    btc  ? coinCell('BTC', btc.price  != null ? '$'+fmt(btc.price)  : 'N/A', btc.change24h)  : '',
-    eth  ? coinCell('ETH', eth.price  != null ? '$'+fmt(eth.price)  : 'N/A', eth.change24h)  : '',
-    ...top10.map(x => coinCell(x.symbol, x.priceUsd != null ? '$'+fmt(x.priceUsd) : 'N/A', x.change24h)),
-  ].filter(Boolean);
-  const hasCoin  = coinCells.length > 0;
-  const coinGrid = `<div style="display:flex;gap:8px;flex-wrap:wrap">${coinCells.join('')}</div>`;
+  const coinSection = coinCards.length ? `<div style="padding:16px 24px">
+  ${secHdr('₿', '코인', '24h 변동')}
+  <div style="display:flex;gap:10px">${coinCards.join('')}</div>
+</div>` : '';
 
-  // ── 5. 뉴스 — ⑦ 태그→세로선, ⑧ 행간 1.75, 패딩 14px ────────────────────
+  // ── 0. 시장 요약 섹션 (Gemini 결과 있을 때만 표시) ───────────────────────
+  const summaryBullets = editorialPlan?.summary_bullets ?? [];
+  const topStories     = tfResults?.news?.top_stories   ?? [];
+  const themes         = tfResults?.news?.themes        ?? [];
+
+  let summarySection = '';
+  const summaryLines = summaryBullets.length ? summaryBullets
+    : topStories.length ? topStories
+    : [];
+
+  if (summaryLines.length) {
+    const bullets = summaryLines.map(s =>
+      `<div style="display:flex;gap:8px;margin-bottom:9px;align-items:flex-start">
+        <span style="color:#2563eb;font-size:14px;flex-shrink:0;line-height:1.6">•</span>
+        <span style="font-size:13px;color:#2d3748;line-height:1.65;font-family:${FONT}">${String(s).replace(/^[•·\-]\s*/,'')}</span>
+      </div>`
+    ).join('');
+
+    const themePills = themes.length
+      ? `<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${
+          themes.map(t => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:${FONT}">${t}</span>`).join('')
+        }</div>`
+      : '';
+
+    summarySection = `<div style="padding:20px 24px 16px;background:#f8faff;border-bottom:1px solid #e0eaff">
+  ${secHdr('💡', '오늘의 시장 요약')}
+  ${bullets}${themePills}
+</div>`;
+  }
+
+  // ── 5. 뉴스 섹션 ──────────────────────────────────────────────────────────
   const rawFindings = tfResults?.news?.findings ?? [];
   const rawNews     = pipelineData?.news        ?? [];
 
@@ -859,31 +948,75 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
       if (newsItems.length >= 6) break;
       if (!newsItems.includes(f)) newsItems.push(f);
     }
-    newsItems = newsItems.map(f => ({ category: f.theme ?? f.category ?? '시장전반', title: f.headline ?? f.title ?? '' }));
+    newsItems = newsItems.map(f => ({
+      category: f.theme ?? f.category ?? '시장전반',
+      title: f.headline ?? f.title ?? '',
+      impact: f.market_impact ?? '',
+    }));
   } else if (rawNews.length) {
-    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '' }));
+    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', impact: '' }));
   }
 
-  // ⑦ 카테고리별 세로선 색상
-  const lineColor = cat => {
-    if (cat?.includes('산업') || cat?.includes('기업')) return '#16a34a';
-    if (cat?.includes('거시') || cat?.includes('금리') || cat?.includes('환율')) return '#d97706';
-    if (cat?.includes('반도체') || cat?.includes('기술')) return '#7c3aed';
-    if (cat?.includes('지정학') || cat?.includes('정치')) return '#dc2626';
-    if (cat?.includes('코인') || cat?.includes('블록')) return '#0891b2';
-    return '#2563eb';
+  // 뉴스 태그 색상
+  const chipStyle = cat => {
+    const s = cat ?? '';
+    if (s.includes('반도체') || s.includes('기술') || s.includes('AI') || s.includes('테크'))
+      return { bg: '#f5f3ff', txt: '#7c3aed' };
+    if (s.includes('산업') || s.includes('기업') || s.includes('종목'))
+      return { bg: '#f0fdf4', txt: '#16a34a' };
+    if (s.includes('거시') || s.includes('금리') || s.includes('환율') || s.includes('연준') || s.includes('FOMC'))
+      return { bg: '#fffbeb', txt: '#d97706' };
+    if (s.includes('지정학') || s.includes('정치') || s.includes('무역') || s.includes('관세'))
+      return { bg: '#fff1f2', txt: '#e11d48' };
+    if (s.includes('코인') || s.includes('블록') || s.includes('가상'))
+      return { bg: '#ecfeff', txt: '#0891b2' };
+    return { bg: '#eff6ff', txt: '#2563eb' };
   };
 
-  const newsRows = newsItems.map((n, i) => `
-    <div style="display:flex;align-items:flex-start;gap:0;padding:14px 0;${i < newsItems.length-1 ? 'border-bottom:1px solid #f0f0f0' : ''}">
-      <div style="flex-shrink:0;width:3px;min-height:18px;background:${lineColor(n.category)};border-radius:2px;margin-right:12px;margin-top:3px"></div>
-      <div>
-        <div style="font-size:11px;font-weight:600;color:${lineColor(n.category)};margin-bottom:3px;font-family:${FONT}">${n.category}</div>
-        <div style="font-size:13px;color:#1e2330;line-height:1.75;font-family:${FONT}">${n.title || '제목 없음'}</div>
+  const newsRows = newsItems.map((n, i) => {
+    const chip   = chipStyle(n.category);
+    const isLast = i === newsItems.length - 1;
+    const impactHtml = n.impact
+      ? `<div style="font-size:11px;color:#6b7280;margin-top:5px;line-height:1.5;font-family:${FONT}">${n.impact}</div>`
+      : '';
+    return `<div style="padding:12px 0;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
+      <div style="margin-bottom:5px">
+        <span style="display:inline-block;background:${chip.bg};color:${chip.txt};font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-right:7px;font-family:${FONT}">${n.category}</span>
       </div>
-    </div>`).join('');
+      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.65;font-family:${FONT}">${n.title || '제목 없음'}</div>
+      ${impactHtml}
+    </div>`;
+  }).join('');
 
+  const newsSection = newsItems.length ? `<div style="padding:16px 24px 20px">
+  ${secHdr('📰', '주요 뉴스')}
+  ${newsRows}
+</div>` : '';
+
+  // ── 6. CTA 섹션 ────────────────────────────────────────────────────────────
   const url = reportUrl || '#';
+  const ctaHtml = `<div style="background:#f8f9fb;padding:20px 24px;text-align:center;border-top:1px solid #edeef0">
+  <a href="${url}" target="_blank"
+     style="display:inline-block;background:#1a1f2e;color:#fff;font-size:14px;font-weight:600;padding:12px 36px;border-radius:8px;text-decoration:none;font-family:${FONT}">
+    전체 리포트 보기 →
+  </a>
+  <div style="margin-top:14px;font-size:11px;color:#9aa0ab;line-height:1.8;font-family:${FONT}">
+    출처: Yahoo Finance · 네이버금융 · CoinGecko<br>
+    본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+  </div>
+</div>`;
+
+  // ── 조립 ───────────────────────────────────────────────────────────────────
+  const sections = [
+    summarySection,
+    mktSection,
+    mktSection  && (fxSection || coinSection || newsSection) ? DIVIDER : '',
+    fxSection,
+    fxSection   && (coinSection || newsSection)              ? DIVIDER : '',
+    coinSection,
+    coinSection && newsSection                               ? DIVIDER : '',
+    newsSection,
+  ].filter(Boolean).join('');
 
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -892,58 +1025,18 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>시장 리포트 ${dateStr}</title>
 </head>
-<body style="margin:0;padding:0;background:#f5f7fa;font-family:${FONT}">
-<div style="max-width:600px;margin:0 auto;padding:24px 16px">
+<body style="margin:0;padding:20px 16px;background:#f0f2f5;font-family:${FONT}">
 
-  <!-- 헤더 -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <div style="font-size:18px;font-weight:700;color:#1e2330;font-family:${FONT}">일일 시장 리포트</div>
-    <div style="font-size:12px;color:#888;font-family:${FONT}">${dateLabel}</div>
-  </div>
+<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08)">
 
-  <!-- ② 요약문 카드 — 내용 없으면 숨김 -->
-  ${summaryHtml ? `<div style="${CARD};border-left:4px solid #2563eb">
-    ${sectionTitle('오늘의 시장 요약')}
-    ${summaryHtml}
-  </div>` : ''}
+  ${headerHtml}
 
-  <!-- 증시 카드 — ⑪ 기준시각 표기 -->
-  <div style="${CARD}">
-    ${sectionTitle('증시', `${baseMd} 종가 기준`)}
-    ${mktRow1}${mktRow2}
-  </div>
+  ${sections}
 
-  <!-- 환율·원자재 카드 — ⑪ 기준시각 표기 -->
-  <div style="${CARD}">
-    ${sectionTitle('환율 · 원자재', `${baseMd} 종가 기준`)}
-    ${fxRow1}${fxRow2}
-  </div>
-
-  <!-- 코인 카드 — ⑪ 기준시각 표기 -->
-  ${hasCoin ? `<div style="${CARD}">
-    ${sectionTitle('암호화폐', '24h 변동')}
-    ${coinGrid}
-  </div>` : ''}
-
-  <!-- 뉴스 카드 -->
-  ${newsItems.length ? `<div style="${CARD}">
-    ${sectionTitle('주요 뉴스')}
-    ${newsRows}
-  </div>` : ''}
-
-  <!-- ③ 전체 리포트 버튼 — Outlined 스타일 -->
-  <div style="text-align:center;margin:20px 0 16px">
-    <a href="${url}" target="_blank"
-       style="display:inline-block;border:1.5px solid #2563eb;color:#2563eb;background:transparent;font-size:14px;font-weight:600;padding:11px 32px;border-radius:8px;text-decoration:none;font-family:${FONT}">전체 리포트 보기 →</a>
-  </div>
-
-  <!-- ⑨ 푸터 — 12px #888 -->
-  <div style="text-align:center;font-size:12px;color:#888;line-height:1.9;font-family:${FONT}">
-    출처: Yahoo Finance · 네이버금융 · CoinGecko · CME FedWatch<br>
-    본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
-  </div>
+  ${ctaHtml}
 
 </div>
+
 </body>
 </html>`;
 }
