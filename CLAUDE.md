@@ -11,17 +11,18 @@ Layer 2 — TF RESEARCH TEAMS  도메인별 AI 분석 (병렬 실행)
 Layer 3 — THE DESK         선별·교차검증·편집·발행 (최종 결정권)
 ```
 
-### Layer 1: Data Pipeline (`tools/pipeline/`)
+### Layer 1: Data Pipeline (`tools/collectors/`)
 | 파일 | 수집 대상 | 의존 API |
 |------|-----------|----------|
-| `index.js` | 전체 집약 진입점 | — |
-| `market_feed.js` | 증시·환율·금리·원자재 | Yahoo Finance, Naver |
-| `news_feed.js` | 원시 뉴스 헤드라인 | Naver Search API |
-| `dart_feed.js` | 증권사 공시·리포트 | OpenDART API |
-| `crypto_feed.js` | 코인 시세·온체인 | CoinGecko, Alternative.me |
+| `domestic.js` | KOSPI·KOSDAQ·시가총액·5거래일 히스토리 | Yahoo `^KS11`, Naver |
+| `overseas.js` | DOW·S&P·NASDAQ·SOX·Nikkei·DAX·HSI | Yahoo Finance v8 |
+| `fx_rates.js` | USD/KRW·DXY·US10Y·US2Y·FOMC 확률 | Yahoo (ZQ 선물) |
+| `commodities.js` | 금(USD/KRW)·은·백금·WTI·구리·알루미늄·아연·니켈 | Yahoo, Naver |
+| `news.js` | 원시 뉴스 헤드라인 | Naver Search API |
+| `supply_snapshot.js` | KOSPI 수급(외국인·기관·개인)·VKOSPI | Naver (16:40 KST 전용) |
 
-기존 `tools/collectors/`는 `market_feed.js`와 `news_feed.js`로 래핑되었다.
 수집 실패 시 항상 `null` 또는 `[]`를 반환하고 파이프라인을 중단하지 않는다.
+`tools/pipeline/`은 향후 orchestrator.js 전용 신규 피드 디렉토리 (현재 GA 미사용).
 
 ### Layer 2: TF Research Teams (`tools/teams/`)
 | 파일 | 역할 | 모델 | 입력 |
