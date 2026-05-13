@@ -57,3 +57,7 @@ model: sonnet
 2. `tools/pipeline/index.js`에 import 추가
 3. `tools/validators/data_validator.js`에 검증 로직 추가
 4. `tools/orchestrator.js`의 Layer 1 수집 목록에 추가
+
+## 작업 컨텍스트
+작업 시작 전 `docs/작업일지.md` 최근 항목의 **미완/다음 세션** 을 확인한다.
+작업 완료 후 해당 항목을 업데이트한다.

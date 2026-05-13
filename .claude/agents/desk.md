@@ -74,3 +74,7 @@ HTML 링크      url
 `tools/preview_send.js`는 GA 워크플로우에서 직접 호출된다.
 이 파일 수정 시 반드시 `node tools/preview_send.js` 로컬 테스트 후 커밋.
 HTML 변경 시 Gmail·웹·Notion 세 환경 모두 확인.
+
+## 작업 컨텍스트
+작업 시작 전 `docs/작업일지.md` 최근 항목의 **미완/다음 세션** 을 확인한다.
+작업 완료 후 해당 항목을 업데이트한다.

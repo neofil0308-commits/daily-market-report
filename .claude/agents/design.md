@@ -69,3 +69,7 @@ model: sonnet
 - 레퍼런스(`templates/market_report_reference.html`)가 정답지
 - 새 섹션 추가 시 DESK agent와 협의 (어떤 데이터를 표시할지는 DESK 결정)
 - 색상·폰트·간격 변경은 여기서 결정
+
+## 작업 컨텍스트
+작업 시작 전 `docs/작업일지.md` 최근 항목의 **미완/다음 세션** 을 확인한다.
+작업 완료 후 해당 항목을 업데이트한다.

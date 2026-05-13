@@ -57,3 +57,7 @@ model: sonnet
 4. `outputs/{date}/supply.json` 존재 여부 (수급 스냅샷 수집 여부)
 5. GitHub Actions 탭 → run log 확인
 6. Notion DB에 해당 날짜 항목 존재 여부
+
+## 작업 컨텍스트
+작업 시작 전 `docs/작업일지.md` 최근 항목의 **미완/다음 세션** 을 확인한다.
+작업 완료 후 해당 항목을 업데이트한다.
