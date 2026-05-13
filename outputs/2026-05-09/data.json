@@ -1,0 +1,207 @@
+{
+  "date": "2026-05-09",
+  "meta": {
+    "krHoliday": true,
+    "usHoliday": false
+  },
+  "domestic": {
+    "isHoliday": true
+  },
+  "overseas": {
+    "dax": {
+      "today": 24338.63,
+      "prev": 24663.61,
+      "diff": -324.98,
+      "pct": -1.32,
+      "direction": "down",
+      "type": "지수"
+    },
+    "sox": {
+      "today": 11775.5,
+      "prev": 11160.99,
+      "diff": 614.51,
+      "pct": 5.51,
+      "direction": "up",
+      "type": "지수"
+    },
+    "dow": {
+      "today": 49609.16,
+      "prev": 49596.97,
+      "diff": 12.19,
+      "pct": 0.02,
+      "direction": "up",
+      "type": "지수"
+    },
+    "nasdaq": {
+      "today": 26247.08,
+      "prev": 25806.2,
+      "diff": 440.88,
+      "pct": 1.71,
+      "direction": "up",
+      "type": "지수"
+    },
+    "nikkei": {
+      "today": 62713.65,
+      "prev": 62833.84,
+      "diff": -120.19,
+      "pct": -0.19,
+      "direction": "down",
+      "type": "지수"
+    },
+    "sp500": {
+      "today": 7398.93,
+      "prev": 7337.11,
+      "diff": 61.82,
+      "pct": 0.84,
+      "direction": "up",
+      "type": "지수"
+    },
+    "hsi": {
+      "today": 26393.71,
+      "prev": 26626.28,
+      "diff": -232.57,
+      "pct": -0.87,
+      "direction": "down",
+      "type": "지수"
+    }
+  },
+  "fxRates": {
+    "usdKrw": {
+      "today": 1461.48,
+      "prev": 1454.79,
+      "diff": 6.69,
+      "pct": 0.46,
+      "direction": "up",
+      "type": "환율"
+    },
+    "dxy": {
+      "today": 97.84,
+      "prev": 98.25,
+      "diff": -0.41,
+      "pct": -0.42,
+      "direction": "down",
+      "type": "지수"
+    },
+    "us10y": {
+      "today": 4.36,
+      "prev": 4.39,
+      "diff": -0.03,
+      "pct": -0.68,
+      "direction": "down",
+      "type": "금리"
+    },
+    "us2y": {
+      "today": 3.6,
+      "prev": 3.6,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "금리"
+    },
+    "fomc": {
+      "junHoldPct": 0,
+      "sepCutPct": 100,
+      "currentRate": 4.5
+    }
+  },
+  "commodities": {
+    "goldKrw": {
+      "today": 831627,
+      "prev": 824010,
+      "diff": 7617,
+      "pct": 0.92,
+      "direction": "up",
+      "type": "원화"
+    },
+    "wti": {
+      "today": 94.68,
+      "prev": 94.81,
+      "diff": -0.13,
+      "pct": -0.14,
+      "direction": "down",
+      "type": "달러"
+    },
+    "platinum": {
+      "today": 2069.3,
+      "prev": 2048.1,
+      "diff": 21.2,
+      "pct": 1.04,
+      "direction": "up",
+      "type": "달러"
+    },
+    "zinc": {
+      "today": 2297,
+      "prev": 2297,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "달러"
+    },
+    "silver": {
+      "today": 80.83,
+      "prev": 79.7,
+      "diff": 1.13,
+      "pct": 1.42,
+      "direction": "up",
+      "type": "달러"
+    },
+    "copper": {
+      "today": 6.28,
+      "prev": 6.13,
+      "diff": 0.15,
+      "pct": 2.45,
+      "direction": "up",
+      "type": "달러"
+    },
+    "gold": {
+      "today": 4723.7,
+      "prev": 4699.8,
+      "diff": 23.9,
+      "pct": 0.51,
+      "direction": "up",
+      "type": "달러"
+    },
+    "aluminum": {
+      "today": 3456.75,
+      "prev": 3480,
+      "diff": -23.25,
+      "pct": -0.67,
+      "direction": "down",
+      "type": "달러"
+    }
+  },
+  "news": [
+    {
+      "category": "시장",
+      "date": "2026-05-09",
+      "title": "[김이코의 기업분석]삼성전자·SK하이닉스, 지금이라도 사야 하나",
+      "source": "mediapen.com",
+      "url": "https://www.mediapen.com/news/view/1097852",
+      "body": "[미디어펜=편집국] 대한민국 증시가 역사상 최초로 코스피 7000 시대를 열었습니다. 지난 8일 마감한 코스피... 사이 코스닥과 중소형주 시장에도 서서히 온기가 퍼지고 있다는 점 또한 앞으로의 상황을 조금은 낙관하게... "
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-09",
+      "title": "김용범 &quot;반도체 호황에 역대급 초과세수 가능성… 재정도 유연해야&quot;",
+      "source": "hidomin.com",
+      "url": "https://www.hidomin.com/news/articleView.html?idxno=704535",
+      "body": "수출·기업 실적 역시 사상 최고 수준 흐름을 이어가고 있다고 설명했다. 이어 &quot;주가는 결국 이익의 함수... 높다&quot;며 &quot;삼성전자와 SK하이닉스의 법인세뿐 아니라 고소득 반도체 인력의 소득세, 무역흑자 확대 효과까지... "
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-09",
+      "title": "이창대 대표 &quot;반도체 강세 이어 2차전지도 업황 반전 기대&quot; [경제일타강...",
+      "source": "news.mtn.co.kr",
+      "url": "https://news.mtn.co.kr/news-detail/2026050717182329763",
+      "body": "이창대 대표가 최근 고평가 논란이 이어지는 SK하이닉스와 삼성전자 등 반도체 업종에 대해 여전히 상승... PER(주가수익비율)은 여전히 낮은 편&quot;이라고 말했다. 이어 &quot;SK하이닉스가 너무 고평가라서 더 이상 못 간다는... "
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-09",
+      "title": "7천피, 삼전닉스, 그리고 공매도 잔고 180조… 불장의 이면 [주간 증시해...",
+      "source": "thescoop.co.kr",
+      "url": "https://www.thescoop.co.kr/news/articleView.html?idxno=310142",
+      "body": "4월 30일 128만6000원이었던 SK하이닉스의 주가는 6일 160만1000원으로 수직 상승했다. 이후에도 주가 사상 최고치 경신 행진을 이어갔고. 8일 168만6000원으로 장을 마쳤다. 삼성전자도 마찬가지다. 4일 5.44%(종가... "
+    }
+  ]
+}

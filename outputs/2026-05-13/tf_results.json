@@ -1,0 +1,65 @@
+{
+  "news": {
+    "findings": [],
+    "top_stories": [],
+    "themes": [],
+    "confidence": 0,
+    "model_used": null
+  },
+  "analyst": {
+    "findings": [],
+    "sector_sentiment": {},
+    "consensus_changes": 0,
+    "alert_items": [],
+    "confidence": 0,
+    "model_used": null
+  },
+  "crypto": {
+    "findings": [
+      {
+        "asset": "BTC",
+        "price_usd": 81069,
+        "key_level": "$80,000 달러 지지선 확인 및 $82,000-$83,000 저항선",
+        "importance": 8
+      },
+      {
+        "asset": "ETH",
+        "price_usd": 2295.56,
+        "key_level": "$2,200 달러 지지선 확인 및 $2,400-$2,500 달러 저항선",
+        "importance": 7
+      }
+    ],
+    "signal": "조정 구간",
+    "market_summary": "BTC와 ETH가 소폭 하락하며 시장 심리는 'Fear' 구간에 진입, 투자자들의 관망세가 짙어지고 조정 국면에 진입했습니다.",
+    "kr_stocks_impact": [
+      {
+        "company": "카카오",
+        "ticker": "035720",
+        "expected_direction": "neutral"
+      },
+      {
+        "company": "카카오게임즈",
+        "ticker": "293490",
+        "expected_direction": "negative"
+      },
+      {
+        "company": "위메이드",
+        "ticker": "112040",
+        "expected_direction": "negative"
+      },
+      {
+        "company": "NHN",
+        "ticker": "181710",
+        "expected_direction": "neutral"
+      }
+    ],
+    "regulatory_alert": null,
+    "fear_greed": {
+      "value": 42,
+      "label": "Fear"
+    },
+    "btc_dominance": 58.3,
+    "confidence": 0.9,
+    "model_used": "gemini-2.5-flash"
+  }
+}

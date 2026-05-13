@@ -1,0 +1,322 @@
+{
+  "date": "2026-05-11",
+  "meta": {
+    "krHoliday": false,
+    "usHoliday": true
+  },
+  "domestic": {
+    "kospi": {
+      "diff": null,
+      "pct": null,
+      "direction": null,
+      "type": "지수"
+    },
+    "kosdaq": {
+      "diff": null,
+      "pct": null,
+      "direction": null,
+      "type": "지수"
+    },
+    "volumeBn": null,
+    "marketCap": null,
+    "supply": {
+      "foreign": null,
+      "institution": null,
+      "individual": null
+    },
+    "kospiHistory": [
+      {
+        "date": "04/29",
+        "close": 6690.9,
+        "volume": 717900
+      },
+      {
+        "date": "04/30",
+        "close": 6598.87,
+        "volume": 685500
+      },
+      {
+        "date": "05/04",
+        "close": 6936.99,
+        "volume": 873000
+      },
+      {
+        "date": "05/06",
+        "close": 7384.56,
+        "volume": 995700
+      },
+      {
+        "date": "05/07",
+        "close": 7490.05,
+        "volume": 767500
+      },
+      {
+        "date": "05/08",
+        "close": 7498,
+        "volume": 523100
+      }
+    ],
+    "vkospi": {
+      "today": null,
+      "prev": null,
+      "diff": null,
+      "pct": null,
+      "direction": null,
+      "type": "지수"
+    },
+    "isHoliday": false
+  },
+  "overseas": {
+    "nikkei": {
+      "today": 62713.65,
+      "prev": 62833.84,
+      "diff": -120.19,
+      "pct": -0.19,
+      "direction": "down",
+      "type": "지수"
+    },
+    "dax": {
+      "today": 24338.63,
+      "prev": 24663.61,
+      "diff": -324.98,
+      "pct": -1.32,
+      "direction": "down",
+      "type": "지수"
+    },
+    "nasdaq": {
+      "today": 26247.08,
+      "prev": 25806.2,
+      "diff": 440.88,
+      "pct": 1.71,
+      "direction": "up",
+      "type": "지수"
+    },
+    "dow": {
+      "today": 49609.16,
+      "prev": 49596.97,
+      "diff": 12.19,
+      "pct": 0.02,
+      "direction": "up",
+      "type": "지수"
+    },
+    "hsi": {
+      "today": 26393.71,
+      "prev": 26626.28,
+      "diff": -232.57,
+      "pct": -0.87,
+      "direction": "down",
+      "type": "지수"
+    },
+    "sp500": {
+      "today": 7398.93,
+      "prev": 7337.11,
+      "diff": 61.82,
+      "pct": 0.84,
+      "direction": "up",
+      "type": "지수"
+    },
+    "sox": {
+      "today": 11775.5,
+      "prev": 11160.99,
+      "diff": 614.51,
+      "pct": 5.51,
+      "direction": "up",
+      "type": "지수"
+    }
+  },
+  "fxRates": {
+    "usdKrw": {
+      "today": 1461.43,
+      "prev": 1454.79,
+      "diff": 6.64,
+      "pct": 0.46,
+      "direction": "up",
+      "type": "환율"
+    },
+    "dxy": {
+      "today": 98.01,
+      "prev": 97.84,
+      "diff": 0.17,
+      "pct": 0.17,
+      "direction": "up",
+      "type": "지수"
+    },
+    "us10y": {
+      "today": 4.36,
+      "prev": 4.39,
+      "diff": -0.03,
+      "pct": -0.68,
+      "direction": "down",
+      "type": "금리"
+    },
+    "us2y": {
+      "today": 3.6,
+      "prev": 3.6,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "금리"
+    },
+    "fomc": {
+      "junHoldPct": 52,
+      "sepCutPct": 52,
+      "currentRate": 3.75
+    }
+  },
+  "commodities": {
+    "goldKrw": {
+      "today": 831627,
+      "prev": 824010,
+      "diff": 7617,
+      "pct": 0.92,
+      "direction": "up",
+      "type": "원화"
+    },
+    "zinc": {
+      "today": 2297,
+      "prev": 2297,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "달러"
+    },
+    "aluminum": {
+      "today": 3461.25,
+      "prev": 3480,
+      "diff": -18.75,
+      "pct": -0.54,
+      "direction": "down",
+      "type": "달러"
+    },
+    "gold": {
+      "today": 4701.4,
+      "prev": 4720.4,
+      "diff": -19,
+      "pct": -0.4,
+      "direction": "down",
+      "type": "달러"
+    },
+    "copper": {
+      "today": 6.29,
+      "prev": 6.25,
+      "diff": 0.04,
+      "pct": 0.64,
+      "direction": "up",
+      "type": "달러"
+    },
+    "wti": {
+      "today": 98.22,
+      "prev": 95.42,
+      "diff": 2.8,
+      "pct": 2.93,
+      "direction": "up",
+      "type": "달러"
+    },
+    "platinum": {
+      "today": 2043.6,
+      "prev": 2047.2,
+      "diff": -3.6,
+      "pct": -0.18,
+      "direction": "down",
+      "type": "달러"
+    },
+    "silver": {
+      "today": 80.68,
+      "prev": 80.39,
+      "diff": 0.29,
+      "pct": 0.36,
+      "direction": "up",
+      "type": "달러"
+    }
+  },
+  "news": [
+    {
+      "category": "산업·기업",
+      "date": "2026-05-10",
+      "title": "원/달러 환율 &quot;AI 랠리 낙수효과에 1460원 초반 지지선 테스트 전망&quot;",
+      "source": "the-biz.co.kr",
+      "url": "http://www.the-biz.co.kr/news/articleView.html?idxno=720295",
+      "body": "기업 실적과 AI 랠리에 더 주목했다&quot;고 설명했다. 이어 &quot;국내 증시 역시 반도체 업종 중심의 상승 흐름이 이어질 가능성이 높고, 외국인 자금 순매수와 수출업체 이월 네고 물량도 환율 하락 압력을 키우는 요인&quot;이라고... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-10",
+      "title": "[오늘의 투자전략] 이번주 코스피 7320~7750 전망⋯미중 회담 앞두고 ‘...",
+      "source": "이투데이",
+      "url": "https://www.etoday.co.kr/news/view/2583095",
+      "body": "이투데이=임하은 기자 | 반도체주가 주도한 지난 주의 기록적인 상승 랠리 이후, 미국의 물가 지표 발표와... 대중 수출 추가 허용 여부가 핵심 관전 포인트로 꼽힌다. 한 연구원은 &quot;미국과 이란의 협상 진전 여부가... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-10",
+      "title": "삼전닉스 숨 고르자 돈 흐름 향한 곳은…‘피지컬AI·바이오’ 순환매 ...",
+      "source": "매일경제",
+      "url": "https://www.mk.co.kr/article/12042870",
+      "body": "화장품주가 실적 개선 기대 속에 상승했다. 증권가는 반도체 중심 상승세가 이어지는 가운데 범 AI 관련주로... 대신증권은 반도체·자동차·조선·화장품 등 수출주 강세가 이어지는 가운데 인터넷과 바이오 등 성장주... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "최고치 경신 코스피,…8천피 전인미답 고지 밟나",
+      "source": "jnilbo.com",
+      "url": "https://www.jnilbo.com/news/articleView.html?idxno=90000034178",
+      "body": "개인과 기관이 각각 3조9707억원, 1조2542억원 순매수하며 지수를 끌어 올렸다. 반면 외국인은 5조3117억원... 샌디스크(16.60%), 마이크론(15.49%), AMD(11.44%), 애플(2.05%), 엔비디아(1.75%) 등 주요 기술주가 상승 마감했고... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "[마켓뷰] '7천피' 기록한 코스피, '8천피' 갈까 차익실현 매물 쏟아질까",
+      "source": "yna.co.kr",
+      "url": "https://www.yna.co.kr/view/AKR20260511015700008?input=1195m",
+      "body": "개인과 기관이 각각 3조9천707억원, 1조2천542억원 순매수하며 지수를 끌어 올렸다. 반면 외국인은... 샌디스크(16.60%), 마이크론(15.49%), AMD(11.44%), 애플(2.05%), 엔비디아(1.75%) 등 주요 기술주가 상승 마감했고... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "[증시전망대] '7천피' 찍은 코스피, 이번 주엔 '8천피' 문 두드리나",
+      "source": "newsroad.co.kr",
+      "url": "http://www.newsroad.co.kr/news/articleView.html?idxno=59151",
+      "body": "개인과 기관은 각각 4조5981억원, 1조8663억원 순매수하며 외국인 매물을 고스란히 받아냈다. 종목별로 보면... 이번 주에는 국내외 주요 경제지표 발표도 줄줄이 예정돼 있다. 11일에는 한국의 5월 1~10일 수출 실적과... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "뉴욕증시 기술주 환호...나스닥·S&amp;P 500 지수 또 사상 최고치-[글로벌 ...",
+      "source": "wowtv.co.kr",
+      "url": "http://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202605110031&t=NN",
+      "body": "미국 증시 마감 시황 전해드리겠습니다. 먼저 전 일장 3대 지수 일제히 상승한 가운데, 다우 지수... 원 달러 환율은 1,462원에 거래됐고 역외환율에서는 1,461원에 거래됐습니다. (금) 이날 금과 은 선물도 상승세를 유지해... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "중동 불확실성과 위험선호 공존…환율, 1460원대 등락[외환브리핑]",
+      "source": "edaily.co.kr",
+      "url": "http://www.edaily.co.kr/news/newspath.asp?newsid=02072966645447936",
+      "body": "국내 증시가 재차 반등할 경우 위험 선호 심리가 확대되면서 환율에 하방 압력을 가할 것으로 보인다. 사진=연합뉴스 이날 서울외국환중개에 따르면 주말 뉴욕차액결제선물환(NDF) 시장에서 거래된 원·달러 1개월물은... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-10",
+      "title": "불확실한 중동보다 AI 랠리에 반응⋯&quot;1460원 초반 지지선 확인&quot; [환율전...",
+      "source": "이투데이",
+      "url": "https://www.etoday.co.kr/news/view/2583093",
+      "body": "이투데이=배근미 기자 | 11일 원·달러환율 등락 범위 1458~1470원 전망 증시 외국인 순매수, 수출업체 이월 네고 추격 매도 11일 원·달러환율이 1460원 초반대에서 지지선 테스트에 나설 것이라는 전망이 나왔다. 민경원... "
+    },
+    {
+      "category": "거시경제",
+      "date": "2026-05-10",
+      "title": "반도체 호황에도 고환율…한은 금리 셈법, '인상' 고민?",
+      "source": "서울신문",
+      "url": "http://www.metroseoul.co.kr/article/20260511500012",
+      "body": "◆ 환율이 물가 부담 키워 경상수지와 무역수지 흑자에도 환율이 높은 수준에 머무는 것은 중동 리스크와 글로벌 달러 선호, 외국인 자금 흐름, 미국 연방준비제도(Fed·연준)의 금리 경로 불확실성이 복합적으로 작용한... "
+    },
+    {
+      "category": "거시경제",
+      "date": "2026-05-10",
+      "title": "엔화의 배신: 1990년대 일본 금융위기를 심화시킨 환율의 이중주 [김성민...",
+      "source": "fntimes.com",
+      "url": "http://www.fntimes.com/html/view.php?ud=202605110515449322c1c16452b0_18",
+      "body": "1995년 엔/달러 환율이 79엔대까지 상승한 것은 환율이 더 이상 내외 금리차와 같은 금융 변수만으로 설명되기... 기대 인플레이션의 하락과 환율 충격이 맞물린 구조적 산물이었다. 결국 문제는 일시적인 물가 하락이... "
+    }
+  ]
+}

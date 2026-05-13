@@ -1,0 +1,203 @@
+{
+  "news": {
+    "findings": [
+      {
+        "headline": "‘사후조정’ 이정표는 시장경제 원칙[포럼]",
+        "theme": "반도체",
+        "importance": 3,
+        "market_impact": "중립",
+        "verified": false,
+        "source_url": "https://www.munhwa.com/article/11588332?ref=naver"
+      },
+      {
+        "headline": "[글로벌 마켓 리포트 5월 12일]",
+        "theme": "반도체, 실적",
+        "importance": 7,
+        "market_impact": "KOSPI 단기 상승 압력",
+        "verified": false,
+        "source_url": "https://www.newspim.com/news/view/20260512000342"
+      },
+      {
+        "headline": "반도체 질주에 “코스피 1만” 간다는데…숨은 변수는 금리·유가·CPI",
+        "theme": "반도체, 금리",
+        "importance": 9,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.donga.com/news/Economy/article/all/20260512/133903827/2"
+      },
+      {
+        "headline": "\"대중의 지혜가 군중의 광기로\"…'비둘기' 신성환이 남긴 마지막 환시 ...",
+        "theme": "환율, 금리",
+        "importance": 7,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4414299"
+      },
+      {
+        "headline": "신현송, 친정 BIS서 글로벌 기류 점검 … 환율·물가·금리 해법 실마리...",
+        "theme": "금리, 환율",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://biz.newdaily.co.kr/site/data/html/2026/05/12/2026051200099.html"
+      },
+      {
+        "headline": "코스피 신고가 랠리 속 지표는 '경고음'…고유가·국채금리 상승에 달러...",
+        "theme": "금리, 환율",
+        "importance": 10,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.news1.kr/finance/market-exr/6163540"
+      },
+      {
+        "headline": "[경제소식] 삼성증권, IBKR과 '외국인통합계좌' 서비스 오픈",
+        "theme": "기타",
+        "importance": 2,
+        "market_impact": "중립",
+        "verified": false,
+        "source_url": "http://www.4th.kr/news/articleView.html?idxno=2111619"
+      },
+      {
+        "headline": "7999.67 찍고 돌아선 코스피…외국인 순매도에 1%대 하락",
+        "theme": "환율",
+        "importance": 9,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.segye.com/newsView/20260512507600?OutUrl=naver"
+      },
+      {
+        "headline": "코스피, 외인 매도 폭탄에 7600선 붕괴…27만전자·185만닉스로 '뚝'[장중...",
+        "theme": "환율, 반도체",
+        "importance": 9,
+        "market_impact": "KOSPI/코스닥 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.newsway.co.kr/news/view?ud=2026051211061485962"
+      },
+      {
+        "headline": "8천 턱밑까지 갔던 코스피, 하락세 전환",
+        "theme": "환율",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://www.ytn.co.kr/_ln/0102_202605121142309410"
+      },
+      {
+        "headline": "'8000피' 코앞에 두고 급락 … 역대급 지수 랠리에 변동성도 확대 [마켓...",
+        "theme": "환율",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "verified": false,
+        "source_url": "https://biz.newdaily.co.kr/site/data/html/2026/05/12/2026051200101.html"
+      },
+      {
+        "headline": "[NXT 환시 존재감] 더는 무시 못 할 대체거래소 외국인 수급",
+        "theme": "환율",
+        "importance": 6,
+        "market_impact": "중립",
+        "verified": false,
+        "source_url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4414292"
+      },
+      {
+        "headline": "[오늘 일본은] 중동발 원료난에 日과자 포장도 바뀐다…칼비, 포테이토...",
+        "theme": "기타",
+        "importance": 4,
+        "market_impact": "중립",
+        "verified": false,
+        "source_url": "https://www.pointe.co.kr/news/articleView.html?idxno=79348"
+      },
+      {
+        "headline": "[굿모닝 마켓] 뉴욕증시, 중동 불안 뚫은 AI 랠리…또 최고치",
+        "theme": "실적",
+        "importance": 7,
+        "market_impact": "KOSPI 단기 상승 압력",
+        "verified": false,
+        "source_url": "https://biz.sbs.co.kr/article_hub/20000309634?division=NAVER"
+      },
+      {
+        "headline": "오늘 정무위 법안소위…스테이블코인법 상정 불발",
+        "theme": "기타",
+        "importance": 3,
+        "market_impact": "중립",
+        "verified": false,
+        "source_url": "http://www.edaily.co.kr/news/newspath.asp?newsid=02968406645448264"
+      },
+      {
+        "headline": "충청권 상장사 시총 한 달 새 26조 증가…반도체·로봇주 강세 견인",
+        "theme": "반도체",
+        "importance": 5,
+        "market_impact": "KOSPI 단기 상승 압력",
+        "verified": false,
+        "source_url": "https://www.ccdailynews.com/news/articleView.html?idxno=2415630"
+      }
+    ],
+    "top_stories": [
+      "코스피 신고가 랠리 속 지표는 '경고음'…고유가·국채금리 상승에 달러...",
+      "7999.67 찍고 돌아선 코스피…외국인 순매도에 1%대 하락",
+      "반도체 질주에 “코스피 1만” 간다는데…숨은 변수는 금리·유가·CPI"
+    ],
+    "themes": [
+      "환율",
+      "금리",
+      "반도체",
+      "실적"
+    ],
+    "confidence": 0.9,
+    "model_used": "gemini-2.5-flash"
+  },
+  "analyst": {
+    "findings": [],
+    "sector_sentiment": {},
+    "consensus_changes": 0,
+    "alert_items": [],
+    "confidence": 0,
+    "model_used": null
+  },
+  "crypto": {
+    "findings": [
+      {
+        "asset": "BTC",
+        "price_usd": 81226,
+        "key_level": "80,000 달러 지지선 유지 여부 중요, 상방 100,000 달러 저항선 목표",
+        "importance": 8
+      },
+      {
+        "asset": "ETH",
+        "price_usd": 2315.12,
+        "key_level": "2,300 달러대 지지선 테스트, 2,500 달러 단기 저항선",
+        "importance": 6
+      }
+    ],
+    "signal": "조정 구간",
+    "market_summary": "비트코인이 사상 최고가 부근에서 상승세를 멈추고 횡보하며 조정 국면에 진입했으며, 이더리움은 소폭 하락하며 상대적 약세를 보이는 중입니다. 전반적인 시장 심리는 중립 수준을 유지하고 있습니다.",
+    "kr_stocks_impact": [
+      {
+        "company": "카카오",
+        "ticker": "035720",
+        "expected_direction": "neutral"
+      },
+      {
+        "company": "카카오게임즈",
+        "ticker": "293490",
+        "expected_direction": "positive"
+      },
+      {
+        "company": "위메이드",
+        "ticker": "112040",
+        "expected_direction": "positive"
+      },
+      {
+        "company": "NHN",
+        "ticker": "181710",
+        "expected_direction": "neutral"
+      }
+    ],
+    "regulatory_alert": "국내 스테이블코인 법안의 정무위 법안소위 상정 불발로 관련 규제에 대한 불확실성이 지속될 것으로 예상됩니다.",
+    "fear_greed": {
+      "value": 49,
+      "label": "Neutral"
+    },
+    "btc_dominance": 58.27,
+    "confidence": 0.8,
+    "model_used": "gemini-2.5-flash"
+  }
+}

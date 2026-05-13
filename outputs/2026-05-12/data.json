@@ -1,0 +1,365 @@
+{
+  "date": "2026-05-12",
+  "meta": {
+    "krHoliday": false,
+    "usHoliday": false
+  },
+  "domestic": {
+    "kospi": {
+      "today": 7563.22,
+      "prev": 7822.24,
+      "diff": -259.02,
+      "pct": -3.31,
+      "direction": "down",
+      "type": "지수"
+    },
+    "kosdaq": {
+      "today": 1169.47,
+      "prev": 1207.34,
+      "diff": -37.87,
+      "pct": -3.14,
+      "direction": "down",
+      "type": "지수"
+    },
+    "volumeBn": 55.01,
+    "marketCap": null,
+    "supply": {
+      "foreign": null,
+      "institution": null,
+      "individual": null
+    },
+    "breadth": {
+      "intraHigh": null,
+      "intraLow": null,
+      "advancing": 112,
+      "declining": 773,
+      "unchanged": 14
+    },
+    "kospiHistory": [
+      {
+        "date": "05/04",
+        "dateISO": "2026-05-04",
+        "close": 6936.99,
+        "volume": 873009000,
+        "tradingValueBn": 42.7
+      },
+      {
+        "date": "05/06",
+        "dateISO": "2026-05-06",
+        "close": 7384.56,
+        "volume": 995692000,
+        "tradingValueBn": 60
+      },
+      {
+        "date": "05/07",
+        "dateISO": "2026-05-07",
+        "close": 7490.05,
+        "volume": 767462000,
+        "tradingValueBn": 51.11
+      },
+      {
+        "date": "05/08",
+        "dateISO": "2026-05-08",
+        "close": 7498,
+        "volume": 523091000,
+        "tradingValueBn": 40.79
+      },
+      {
+        "date": "05/11",
+        "dateISO": "2026-05-11",
+        "close": 7822.24,
+        "volume": 731279000,
+        "tradingValueBn": 51.84
+      },
+      {
+        "date": "05/12",
+        "dateISO": "2026-05-12",
+        "close": 7554.82,
+        "volume": 893504000,
+        "tradingValueBn": 54.94
+      }
+    ],
+    "vkospi": {
+      "today": 18.38,
+      "prev": 17.19,
+      "diff": 1.19,
+      "pct": 6.92,
+      "direction": "up",
+      "type": "지수",
+      "source": "vix_fallback",
+      "label": "미국 VIX (참고)"
+    },
+    "isHoliday": false
+  },
+  "overseas": {
+    "nasdaq": {
+      "today": 26274.13,
+      "prev": 26247.08,
+      "diff": 27.05,
+      "pct": 0.1,
+      "direction": "up",
+      "type": "지수"
+    },
+    "sp500": {
+      "today": 7412.84,
+      "prev": 7398.93,
+      "diff": 13.91,
+      "pct": 0.19,
+      "direction": "up",
+      "type": "지수"
+    },
+    "dow": {
+      "today": 49704.47,
+      "prev": 49609.16,
+      "diff": 95.31,
+      "pct": 0.19,
+      "direction": "up",
+      "type": "지수"
+    },
+    "dax": {
+      "today": 24350.28,
+      "prev": 24338.63,
+      "diff": 11.65,
+      "pct": 0.05,
+      "direction": "up",
+      "type": "지수"
+    },
+    "sox": {
+      "today": 12081.04,
+      "prev": 11775.5,
+      "diff": 305.54,
+      "pct": 2.59,
+      "direction": "up",
+      "type": "지수"
+    },
+    "hsi": {
+      "today": 26486.63,
+      "prev": 26406.84,
+      "diff": 79.79,
+      "pct": 0.3,
+      "direction": "up",
+      "type": "지수"
+    },
+    "nikkei": {
+      "today": 62614.9,
+      "prev": 62417.88,
+      "diff": 197.02,
+      "pct": 0.32,
+      "direction": "up",
+      "type": "지수"
+    }
+  },
+  "fxRates": {
+    "usdKrw": {
+      "today": 1483.28,
+      "prev": 1460.55,
+      "diff": 22.73,
+      "pct": 1.56,
+      "direction": "up",
+      "type": "환율"
+    },
+    "dxy": {
+      "today": 98.14,
+      "prev": 97.94,
+      "diff": 0.2,
+      "pct": 0.2,
+      "direction": "up",
+      "type": "지수"
+    },
+    "us10y": {
+      "today": 4.41,
+      "prev": 4.36,
+      "diff": 0.05,
+      "pct": 1.15,
+      "direction": "up",
+      "type": "금리"
+    },
+    "us2y": {
+      "today": 3.6,
+      "prev": 3.6,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "금리"
+    },
+    "fomc": {
+      "junHoldPct": 52,
+      "junHoldPctPrev": 52,
+      "sepCutPct": 48,
+      "sepCutPctPrev": 56,
+      "currentRate": 3.75
+    }
+  },
+  "commodities": {
+    "goldKrw": {
+      "today": 842374,
+      "prev": 843423,
+      "diff": -1049,
+      "pct": -0.12,
+      "direction": "down",
+      "type": "원화"
+    },
+    "aluminum": {
+      "today": 3512.75,
+      "prev": 3592.5,
+      "diff": -79.75,
+      "pct": -2.22,
+      "direction": "down",
+      "type": "달러"
+    },
+    "gold": {
+      "today": 4726.2,
+      "prev": 4718.7,
+      "diff": 7.5,
+      "pct": 0.16,
+      "direction": "up",
+      "type": "달러"
+    },
+    "wti": {
+      "today": 98.94,
+      "prev": 98.07,
+      "diff": 0.87,
+      "pct": 0.89,
+      "direction": "up",
+      "type": "달러"
+    },
+    "platinum": {
+      "today": 2109,
+      "prev": 2115.5,
+      "diff": -6.5,
+      "pct": -0.31,
+      "direction": "down",
+      "type": "달러"
+    },
+    "silver": {
+      "today": 86.8,
+      "prev": 85.49,
+      "diff": 1.31,
+      "pct": 1.53,
+      "direction": "up",
+      "type": "달러"
+    },
+    "copper": {
+      "today": 6.49,
+      "prev": 6.41,
+      "diff": 0.08,
+      "pct": 1.25,
+      "direction": "up",
+      "type": "달러"
+    }
+  },
+  "news": [
+    {
+      "category": "시장전반",
+      "date": "2026-05-12",
+      "title": "충청권 상장사 시총 한 달 새 26조 증가…반도체·로봇주 강세 견인",
+      "source": "ccdailynews.com",
+      "url": "https://www.ccdailynews.com/news/articleView.html?idxno=2415630",
+      "body": "충북 충주 소재 플라스틱 제품 제조기업 보원케미칼이 지난 4월 코스닥 시장에 신규 상장하면서 충청권... 회복이 증시 상승을 이끌었다고 분석했다. 실제 4월 코스피는 30.61% 급등한 6598.87p로 마감했고, 전체 시장... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-11",
+      "title": "[헬로스톡] 5/11 주목할 종목 : 파마리서치·SK이노베이션·알테오젠·삼...",
+      "source": "hellot.net",
+      "url": "https://www.hellot.net/news/article.html?no=112490",
+      "body": "오늘의 시장 한눈에 5월 11일 코스피는 전일 미·중 무역협상 타결 기대감과 해외 증시 강세 영향으로 5일 연속 상승하며 7,822.24포인트(+4.32%)로 마감했다. 전기·전자 업종이 +6.9%로 강세를 이끈 가운데... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-11",
+      "title": "[박정식의 국내 주식시황] 반도체 랠리 올라탄 증시…실적 기대감에 지...",
+      "source": "newsquest.co.kr",
+      "url": "https://www.newsquest.co.kr/news/articleView.html?idxno=266013",
+      "body": "미 노동부가 발표한 고용동향보고서에 따르면 4월 비농업 부문 고용은 전월 대비 11만5000명 증가했다. 이는... 국내 증시는 소폭 상승 마감했다. 코스피는 7498.00으로 전 거래일보다 0.11% 올랐고, 코스닥은 1207.72로 0.71... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-12",
+      "title": "“상반기 고점론 접어라”…AI·반도체 훈풍에 코스피 12000선 넘본다",
+      "source": "wowtv.co.kr",
+      "url": "http://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202605120385&t=NN",
+      "body": "실적 개선으로 확산되면서 국내 증시 상단이 다시 한번 크게 높아질 것이라는 분석이 나왔다. 반도체... 현재 코스피의 12개월 선행 주가수익비율(P/E)이 7.5배 수준으로 저평가되어 있다는 분석이다. 변준호 IBK투자증권... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-12",
+      "title": "韓 증시, 대만 꺾고 세계 6위…“삼전닉스가 슈퍼사이클 끌었다”",
+      "source": "dt.co.kr",
+      "url": "https://www.dt.co.kr/article/12061982?ref=naver",
+      "body": "‘K-반도체’의 부활이다. 삼성전자와 SK하이닉스라는 글로벌 반도체 수요 폭발의 수혜를 흡수하며 주가... 있다”며 “반도체, 전력기기 등 기존 주도주와 실적 향상이 본격화하는 우량주로 포트폴리오를 구성하는... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-12",
+      "title": "‘사후조정’ 이정표는 시장경제 원칙[포럼]",
+      "source": "munhwa.com",
+      "url": "https://www.munhwa.com/article/11588332?ref=naver",
+      "body": "우리나라 수출과 제조업, 반도체 산업의 핵심축이며 경제의 엔진이다. 삼성전자의 투자와 실적은 협력업체와... 수십조 원을 투자하고도 실패하면 그 손실은 자본과 주주가 떠안는다. 반면, 노동은 계약에 따라 임금과... "
+    },
+    {
+      "category": "거시경제",
+      "date": "2026-05-12",
+      "title": "&quot;대중의 지혜가 군중의 광기로&quot;…'비둘기' 신성환이 남긴 마지막 환시 ...",
+      "source": "news.einfomax.co.kr",
+      "url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4414299",
+      "body": "시장에서는 이를 최근 달러-원 시장의 구조 변화와 외환시장 국제화 확대 속에서 정책당국의 대응 역량 강화... (Fed·연준) 출신으로 환율과 금융안정, 인플레이션 리스크에 상대적으로 경계심이 강한 인물로 평가되면서... "
+    },
+    {
+      "category": "거시경제",
+      "date": "2026-05-12",
+      "title": "[글로벌 마켓 리포트 5월 12일]",
+      "source": "뉴스핌",
+      "url": "https://www.newspim.com/news/view/20260512000342",
+      "body": "국채금리·달러 동반 상승 미국 국채 수익률과 달러화가 상승했다. 트럼프 대통령의 발언에 중동 전쟁 장기화 우려가 커졌고, 국제유가 급등에 따른 인플레이션 재가속 가능성이 시장을 흔들었다. 연준 정책... "
+    },
+    {
+      "category": "거시경제",
+      "date": "2026-05-12",
+      "title": "신현송, 친정 BIS서 글로벌 기류 점검 … 환율·물가·금리 해법 실마리...",
+      "source": "biz.newdaily.co.kr",
+      "url": "https://biz.newdaily.co.kr/site/data/html/2026/05/12/2026051200099.html",
+      "body": "일부 연준 인사들은 추가 긴축 가능성까지 언급하고 있다. 시장에서는 미국의 고금리 장기화가 달러 강세와... 당장 강한 금리 시그널을 내놓기보다는 환율과 기대인플레이션, 글로벌 자금 흐름에 대한 인식을 공유하며... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-11",
+      "title": "[코스피 지수선물 옵션] 삼성전자·SK하이닉스 불기둥… 개별주식선물 ...",
+      "source": "pinpointnews.co.kr",
+      "url": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=451920",
+      "body": "나타내며 2차전지 및 일부 전장부품주 차익실현 흐름이 이어졌다. 조선·방산 관련 종목들의 움직임도... 건설 수주 모멘텀을 안은 대우건설 선물이 종목별 이슈에 따라 반응했다. 전력 인프라 및 바이오 섹터도 시장의 한... "
+    },
+    {
+      "category": "산업·기업",
+      "date": "2026-05-11",
+      "title": "[골든크로스 종목] &quot;지금이 기회&quot;...인바디 동방선기 삼현 모베이스전자...",
+      "source": "pinpointnews.co.kr",
+      "url": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=451881",
+      "body": "한화오션은 조선업 슈퍼사이클 기대감과 수주 확대 전망에 힘입어 상승 흐름을 이어갔다. 방산·우주항공... 케이엔에스와 중앙첨단소재는 2차전지 관련주 조정 흐름 속에 하락 압력을 받았다. 롯데웰푸드는 원가 부담... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-12",
+      "title": "[경제소식] 삼성증권, IBKR과 '외국인통합계좌' 서비스 오픈",
+      "source": "4th.kr",
+      "url": "http://www.4th.kr/news/articleView.html?idxno=2111619",
+      "body": "2026.5.12./사진=삼성증권 삼성증권, IBKR과 '외국인통합계좌' 서비스 오픈 삼성증권은 글로벌 대형 온라인... 주요 편입 종목을 살펴보면, 구글의 차세대 AI 네트워크 시스템 '슈퍼포드'에 필수적인 광회선 스위치(OCS)를... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-12",
+      "title": "7999.67 찍고 돌아선 코스피…외국인 순매도에 1%대 하락",
+      "source": "segye.com",
+      "url": "https://www.segye.com/newsView/20260512507600?OutUrl=naver",
+      "body": "개인과 기관은 각각 3조114억원, 5437억원을 순매수하며 지수 하단을 지탱하고 있으나 외국인의 거센 ‘팔자’가 이어지고 있다. 시가총액 상위 종목들은 대부분 내림세다. 삼성전자는 전 거래일 대비 5000원(1.... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-12",
+      "title": "코스피, 외인 매도 폭탄에 7600선 붕괴…27만전자·185만닉스로 '뚝'[장중...",
+      "source": "newsway.co.kr",
+      "url": "https://www.newsway.co.kr/news/view?ud=2026051211061485962",
+      "body": "같은 시각 코스닥 시장에서 외국인은 4983억원, 기관은 1272억원을 순매수하고 있다. 개인은 6049억원을 순매도하고 있다. 코스닥 시장 주요 종목 중에서는 알테오젠(2.46%), 코오롱티슈진(5.34%), 삼천당제약(0.... "
+    }
+  ]
+}

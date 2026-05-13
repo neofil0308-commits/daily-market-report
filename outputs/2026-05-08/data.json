@@ -1,0 +1,281 @@
+{
+  "date": "2026-05-08",
+  "meta": {
+    "krHoliday": false,
+    "usHoliday": false
+  },
+  "domestic": {
+    "kospi": {
+      "today": 7498,
+      "prev": 7490.05,
+      "diff": 7.95,
+      "pct": 0.11,
+      "direction": "up",
+      "type": "지수"
+    },
+    "kosdaq": {
+      "today": 1207.72,
+      "prev": 1199.18,
+      "diff": 8.54,
+      "pct": 0.71,
+      "direction": "up",
+      "type": "지수"
+    },
+    "volumeBn": null,
+    "marketCap": null,
+    "supply": {
+      "foreign": null,
+      "institution": null,
+      "individual": null
+    },
+    "kospiHistory": [
+      {
+        "date": "04/30",
+        "close": 6598.87,
+        "volumeBn": 6.855e-7
+      },
+      {
+        "date": "05/04",
+        "close": 6936.99,
+        "volumeBn": 8.73e-7
+      },
+      {
+        "date": "05/06",
+        "close": 7384.56,
+        "volumeBn": 9.957e-7
+      },
+      {
+        "date": "05/07",
+        "close": 7490.05,
+        "volumeBn": 7.675e-7
+      },
+      {
+        "date": "05/08",
+        "close": 7498,
+        "volumeBn": 5.1832e-7
+      }
+    ],
+    "vkospi": {
+      "today": null,
+      "prev": null,
+      "diff": null,
+      "pct": null,
+      "direction": null,
+      "type": "지수"
+    },
+    "isHoliday": false
+  },
+  "overseas": {
+    "nasdaq": {
+      "today": 25806.2,
+      "prev": 25838.94,
+      "diff": -32.74,
+      "pct": -0.13,
+      "direction": "down",
+      "type": "지수"
+    },
+    "nikkei": {
+      "today": 62713.65,
+      "prev": 62833.84,
+      "diff": -120.19,
+      "pct": -0.19,
+      "direction": "down",
+      "type": "지수"
+    },
+    "sox": {
+      "today": 11160.99,
+      "prev": 11472.75,
+      "diff": -311.76,
+      "pct": -2.72,
+      "direction": "down",
+      "type": "지수"
+    },
+    "dow": {
+      "today": 49596.97,
+      "prev": 49910.59,
+      "diff": -313.62,
+      "pct": -0.63,
+      "direction": "down",
+      "type": "지수"
+    },
+    "dax": {
+      "today": 24442.81,
+      "prev": 24663.61,
+      "diff": -220.8,
+      "pct": -0.9,
+      "direction": "down",
+      "type": "지수"
+    },
+    "sp500": {
+      "today": 7337.11,
+      "prev": 7365.12,
+      "diff": -28.01,
+      "pct": -0.38,
+      "direction": "down",
+      "type": "지수"
+    },
+    "hsi": {
+      "today": 26411.81,
+      "prev": 26626.28,
+      "diff": -214.47,
+      "pct": -0.81,
+      "direction": "down",
+      "type": "지수"
+    }
+  },
+  "fxRates": {
+    "usdKrw": {
+      "today": 1467.61,
+      "prev": 1444.45,
+      "diff": 23.16,
+      "pct": 1.6,
+      "direction": "up",
+      "type": "환율"
+    },
+    "dxy": {
+      "today": 98.11,
+      "prev": 98.25,
+      "diff": -0.14,
+      "pct": -0.14,
+      "direction": "down",
+      "type": "지수"
+    },
+    "us10y": {
+      "today": 4.39,
+      "prev": 4.36,
+      "diff": 0.03,
+      "pct": 0.69,
+      "direction": "up",
+      "type": "금리"
+    },
+    "us2y": {
+      "today": 3.6,
+      "prev": 3.6,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "금리"
+    },
+    "fomc": {
+      "junHoldPct": 0,
+      "sepCutPct": 100,
+      "currentRate": 4.5
+    }
+  },
+  "commodities": {
+    "goldKrw": {
+      "today": 835029,
+      "prev": 824010,
+      "diff": 11019,
+      "pct": 1.34,
+      "direction": "up",
+      "type": "원화"
+    },
+    "copper": {
+      "today": 6.28,
+      "prev": 6.13,
+      "diff": 0.15,
+      "pct": 2.45,
+      "direction": "up",
+      "type": "달러"
+    },
+    "gold": {
+      "today": 4718.8,
+      "prev": 4699.8,
+      "diff": 19,
+      "pct": 0.4,
+      "direction": "up",
+      "type": "달러"
+    },
+    "zinc": {
+      "today": 2297,
+      "prev": 2297,
+      "diff": 0,
+      "pct": 0,
+      "direction": "flat",
+      "type": "달러"
+    },
+    "aluminum": {
+      "today": 3462.25,
+      "prev": 3480,
+      "diff": -17.75,
+      "pct": -0.51,
+      "direction": "down",
+      "type": "달러"
+    },
+    "platinum": {
+      "today": 2053.1,
+      "prev": 2048.1,
+      "diff": 5,
+      "pct": 0.24,
+      "direction": "up",
+      "type": "달러"
+    },
+    "silver": {
+      "today": 80.39,
+      "prev": 79.7,
+      "diff": 0.69,
+      "pct": 0.87,
+      "direction": "up",
+      "type": "달러"
+    },
+    "wti": {
+      "today": 95.51,
+      "prev": 94.81,
+      "diff": 0.7,
+      "pct": 0.74,
+      "direction": "up",
+      "type": "달러"
+    }
+  },
+  "news": [
+    {
+      "category": "시장",
+      "date": "2026-05-08",
+      "title": "코스피, 장 후반 반등하며 7,500선 턱밑 마감",
+      "source": "fntoday.co.kr",
+      "url": "https://www.fntoday.co.kr/news/articleView.html?idxno=384052",
+      "body": "원, 코스닥은 16조3,460억 원으로 집계됐다. 대체거래소 넥스트레이드의 거래대금은 총 27조6,372억 원이었다. 투자자예탁금은 137조 원 수준으로 늘어나며 증시 대기자금이 풍부한 상황이다. 국내 증시는 최근... "
+    },
+    {
+      "category": "시장",
+      "date": "2026-05-08",
+      "title": "7천피 질주에도 코스닥 지수는 ‘횡보’⋯반도체로 쏠린 수급ㆍ실적 소...",
+      "source": "이투데이",
+      "url": "https://www.etoday.co.kr/news/view/2582830",
+      "body": "코스닥 시장이 잠잠한 건 결국 국내 증시의 '반도체 편중' 때문이라는 진단이다. 허재환 유진투자증권 연구원은 &quot;반도체와 코스피에 대한 쏠림은 더 심해졌고, 반도체 이외 업종들은 대부분 코스피 상승을 쫓아가지... "
+    },
+    {
+      "category": "시장",
+      "date": "2026-05-08",
+      "title": "코스피 4일 연속 상승-코스닥 3일 만에 반등",
+      "source": "thereport.co.kr",
+      "url": "https://www.thereport.co.kr/news/articleView.html?idxno=87642",
+      "body": "약세는 단기 불안 요인으로 작용할 가능성이 있다. 다음 거래일에는 미국-이란 협상 진행 상황과 미국 증시 마감 흐름, 그리고 반도체 업종의 추가 움직임이 시장 방향성을 결정할 주요 변수가 될 전망이다."
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-08",
+      "title": "[박수진의 머니워치] 코스피 사상 최고치 마감…반도체 효과 '톡톡'",
+      "source": "newswatch.kr",
+      "url": "http://www.newswatch.kr/news/articleView.html?idxno=79637",
+      "body": "이상준 NH투자증권 연구원은 &quot;시가총액 1, 2위인 삼성전자와 SK하이닉스 주가 급등에 힘입어 코스피는 7일 7500선에 도달했다. 강한 메모리 수요를 바탕한 실적 상승 기대감이 주가 상승을 견인했다&quot;고 말했다. 또한... "
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-08",
+      "title": "하이닉스 2배, 세계 최대 단일종목 레버리지 됐다",
+      "source": "wowtv.co.kr",
+      "url": "http://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202605080624&t=NN",
+      "body": "주가가 횡보하거나 하락할 때가 많으면 '음의 복리' 위험이 있지만, 강한 추세를 동반한 상승장에서는 레버리지의 강점이 크게 발휘된다. 한편, 이달 말 국내 증시에서도 삼성전자와 SK하이닉스를 기초... "
+    },
+    {
+      "category": "반도체",
+      "date": "2026-05-08",
+      "title": "[오늘의증시] 외국인 12조 투매에도 버틴 코스피…7,500선 문턱서 '전약...",
+      "source": "news.ifm.kr",
+      "url": "https://news.ifm.kr/news/articleView.html?idxno=470566",
+      "body": "미국과 이란의 종전 합의 불확실성이 다시 커진 가운데 미국 반도체주가 약세를 보이면서 국내 반도체 대형주에도 차익 매물이 출회됐다. 삼성전자는 장중 한때 4% 넘게 밀렸고 SK하이닉스도 약세 출발했다. 다만... "
+    }
+  ]
+}
