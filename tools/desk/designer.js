@@ -780,11 +780,19 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
 
   // ── 섹션 헤더 헬퍼 ─────────────────────────────────────────────────────────
   const secHdr = (emoji, title, meta) =>
-    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-      <span style="font-size:13px;font-weight:700;color:#1a1f2e;white-space:nowrap;font-family:${FONT}">${emoji} ${title}</span>
-      <div style="flex:1;height:1px;background:#e8eaed"></div>
-      ${meta ? `<span style="font-size:11px;color:#9aa0ab;white-space:nowrap;font-family:${FONT}">${meta}</span>` : ''}
-    </div>`;
+    `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px">
+      <tr>
+        <td style="white-space:nowrap;vertical-align:middle;padding-right:8px">
+          <span style="font-size:13px;font-weight:700;color:#1a1f2e;font-family:${FONT}">${emoji} ${title}</span>
+        </td>
+        <td width="100%" style="vertical-align:middle">
+          <div style="height:1px;background:#e8eaed"></div>
+        </td>
+        ${meta ? `<td style="white-space:nowrap;vertical-align:middle;padding-left:8px">
+          <span style="font-size:11px;color:#9aa0ab;font-family:${FONT}">${meta}</span>
+        </td>` : ''}
+      </tr>
+    </table>`;
 
   // ── 카드 컴포넌트 헬퍼 ─────────────────────────────────────────────────────
   // direction: 'up' | 'down' | 'neu'
@@ -793,133 +801,125 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     const bg    = direction === 'up'   ? '#fff8f8' : direction === 'down' ? '#f0f5ff' : '#f8f9fb';
     const bdr   = direction === 'up'   ? '#ffd6d6' : direction === 'down' ? '#c7d9ff' : '#e8eaed';
     const color = direction === 'up'   ? '#E24B4A' : direction === 'down' ? '#378ADD' : '#888888';
-    return `<div style="flex:1;min-width:0;background:${bg};border:1px solid ${bdr};border-radius:10px;padding:14px 16px">
+    return `<div style="width:100%;min-height:88px;box-sizing:border-box;background:${bg};border:1px solid ${bdr};border-radius:10px;padding:14px 16px">
       <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:6px;font-family:${FONT}">${label}</div>
       <div style="font-size:${fs};font-weight:700;color:#1a1f2e;margin-bottom:5px;line-height:1.1;font-family:${FONT}">${valueStr}</div>
       <div style="font-size:12px;font-weight:500;color:${color};font-family:${FONT}">${aStr}&nbsp;${pStr}</div>
     </div>`;
   };
 
+  // ── 카드 행 헬퍼 (table 기반, 이메일 클라이언트 호환) ─────────────────────
+  const cardRow2 = (cards, mb = '10px') => {
+    const c0 = cards[0] ?? '';
+    const c1 = cards[1] ?? '';
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0"${mb ? ` style="margin-bottom:${mb}"` : ''}>
+      <tr>
+        <td width="50%" style="vertical-align:top;padding-right:5px">${c0}</td>
+        <td width="50%" style="vertical-align:top;padding-left:5px">${c1}</td>
+      </tr>
+    </table>`;
+  };
+
+  const cardRow3 = (cards, mb = '10px') => {
+    const c0 = cards[0] ?? '';
+    const c1 = cards[1] ?? '';
+    const c2 = cards[2] ?? '';
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0"${mb ? ` style="margin-bottom:${mb}"` : ''}>
+      <tr>
+        <td width="33%" style="vertical-align:top;padding-right:5px">${c0}</td>
+        <td width="34%" style="vertical-align:top;padding-left:5px;padding-right:5px">${c1}</td>
+        <td width="33%" style="vertical-align:top;padding-left:5px">${c2}</td>
+      </tr>
+    </table>`;
+  };
+
   // ── 1. 헤더 ────────────────────────────────────────────────────────────────
   const headerHtml = `<div style="background:#1a1f2e;padding:0 24px">
   <div style="border-top:3px solid #E24B4A;padding:20px 0 18px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="color:#fff;font-size:18px;font-weight:700;font-family:${FONT}">일일 시장 리포트</div>
-        <div style="color:#8892a4;font-size:11px;margin-top:4px;font-family:${FONT}">Korea Market Daily</div>
-      </div>
-      <div style="text-align:right">
-        <div style="color:#e8eaed;font-size:13px;font-weight:600;font-family:${FONT}">${dateLabel}</div>
-        <div style="color:#8892a4;font-size:11px;margin-top:3px;font-family:${FONT}">장 마감 기준</div>
-      </div>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="vertical-align:bottom">
+          <div style="color:#fff;font-size:18px;font-weight:700;font-family:${FONT}">일일 시장 리포트</div>
+          <div style="color:#8892a4;font-size:11px;margin-top:4px;font-family:${FONT}">Korea Market Daily</div>
+        </td>
+        <td style="vertical-align:bottom;text-align:right">
+          <div style="color:#e8eaed;font-size:13px;font-weight:600;font-family:${FONT}">${dateLabel}</div>
+          <div style="color:#8892a4;font-size:11px;margin-top:3px;font-family:${FONT}">장 마감 기준</div>
+        </td>
+      </tr>
+    </table>
   </div>
 </div>`;
 
   // ── 2. 증시 섹션 (2열 2행: KOSPI·KOSDAQ / S&P 500·NASDAQ) ─────────────────
-  const mktCards = [];
   const mktDefs = [
     { label: 'KOSPI',   obj: d.kospi,  valFn: v => fmtI(v) },
     { label: 'KOSDAQ',  obj: d.kosdaq, valFn: v => fmtI(v) },
     { label: 'S&P 500', obj: o.sp500,  valFn: v => fmt2(v) },
     { label: 'NASDAQ',  obj: o.nasdaq, valFn: v => fmt2(v) },
   ];
-  for (const m of mktDefs) {
-    if (m.obj?.today != null) {
-      mktCards.push(indexCard(
-        m.label,
-        m.valFn(m.obj.today),
-        arrowStr(m.obj.diff),
-        pctStr(m.obj.pct),
-        dir(m.obj.diff),
-        '22px'
-      ));
-    }
-  }
+  const mkCard = m => m.obj?.today != null
+    ? indexCard(m.label, m.valFn(m.obj.today), arrowStr(m.obj.diff), pctStr(m.obj.pct), dir(m.obj.diff), '22px')
+    : '';
+  const mktRow1 = [mkCard(mktDefs[0]), mkCard(mktDefs[1])];
+  const mktRow2 = [mkCard(mktDefs[2]), mkCard(mktDefs[3])];
+  const hasMkt  = mktRow1.some(Boolean) || mktRow2.some(Boolean);
+  const hasMktR2 = mktRow2.some(Boolean);
 
-  const mktRowHtml = [];
-  for (let i = 0; i < mktCards.length; i += 2) {
-    const pair = mktCards.slice(i, i + 2);
-    const mb   = i < mktCards.length - 2 ? ';margin-bottom:10px' : '';
-    mktRowHtml.push(`<div style="display:flex;gap:10px${mb}">${pair.join('')}</div>`);
-  }
-
-  const mktSection = mktRowHtml.length ? `<div style="padding:20px 24px 16px">
+  const mktSection = hasMkt ? `<div style="padding:20px 24px 16px">
   ${secHdr('📊', '증시', `${baseMd} 종가`)}
-  ${mktRowHtml.join('')}
+  ${mktRow1.some(Boolean) ? cardRow2(mktRow1, hasMktR2 ? '10px' : '0') : ''}
+  ${hasMktR2 ? cardRow2(mktRow2, '0') : ''}
 </div>` : '';
 
-  // ── 3. 환율·원자재 섹션 (3열 2행) ─────────────────────────────────────────
-  // Row 1: 달러/원, 금, 은
-  // Row 2: 구리, WTI(null이면 생략), DXY(null이면 생략)
+  // ── 3. 환율·원자재 섹션 (3열 2행 고정) ─────────────────────────────────────
+  // Row 1: 달러/원, 금, 은  |  Row 2: 구리, WTI, DXY
+  // 데이터 없는 칸은 빈 문자열 → 빈 <td>로 유지해 열 너비가 흔들리지 않음
   const calcPct = (diff, today) =>
     diff != null && today ? diff / today * 100 : null;
 
-  const fxRow1 = [];
-  if (fx.usdKrw?.today != null) {
-    const diff = fx.usdKrw.diff;
-    fxRow1.push(indexCard('달러/원', fmtI(fx.usdKrw.today)+'원',
-      arrowStr(diff), pctStr(calcPct(diff, fx.usdKrw.today)), dir(diff), '18px'));
-  }
-  if (c.gold?.today != null) {
-    const diff = c.gold.diff;
-    fxRow1.push(indexCard('금 (oz)', '$'+fmt2(c.gold.today),
-      arrowStr(diff), pctStr(calcPct(diff, c.gold.today)), dir(diff), '18px'));
-  }
-  if (c.silver?.today != null) {
-    const diff = c.silver.diff;
-    fxRow1.push(indexCard('은 (oz)', '$'+fmt2(c.silver.today),
-      arrowStr(diff), pctStr(calcPct(diff, c.silver.today)), dir(diff), '18px'));
-  }
+  const fxMk = (label, val, diff, today, fs = '18px') =>
+    val != null
+      ? indexCard(label, val, arrowStr(diff), pctStr(calcPct(diff, today)), dir(diff), fs)
+      : '';
 
-  const fxRow2 = [];
-  if (c.copper?.today != null) {
-    const diff = c.copper.diff;
-    fxRow2.push(indexCard('구리 (lb)', '$'+fmt2(c.copper.today),
-      arrowStr(diff), pctStr(calcPct(diff, c.copper.today)), dir(diff), '18px'));
-  }
-  if (c.wti?.today != null) {
-    const diff = c.wti.diff;
-    fxRow2.push(indexCard('WTI (bbl)', '$'+fmt2(c.wti.today),
-      arrowStr(diff), pctStr(calcPct(diff, c.wti.today)), dir(diff), '18px'));
-  }
-  if (fx.dxy?.today != null) {
-    const diff = fx.dxy.diff;
-    fxRow2.push(indexCard('DXY', fmt2(fx.dxy.today),
-      arrowStr(diff), pctStr(calcPct(diff, fx.dxy.today)), dir(diff), '18px'));
-  }
+  const fxCards1 = [
+    fxMk('달러/원', fx.usdKrw?.today != null ? fmtI(fx.usdKrw.today)+'원' : null, fx.usdKrw?.diff, fx.usdKrw?.today),
+    fxMk('금 (oz)',  c.gold?.today   != null ? '$'+fmt2(c.gold.today)   : null, c.gold?.diff,   c.gold?.today),
+    fxMk('은 (oz)',  c.silver?.today != null ? '$'+fmt2(c.silver.today) : null, c.silver?.diff, c.silver?.today),
+  ];
+  const fxCards2 = [
+    fxMk('구리 (lb)', c.copper?.today != null ? '$'+fmt2(c.copper.today) : null, c.copper?.diff, c.copper?.today),
+    fxMk('WTI (bbl)', c.wti?.today   != null ? '$'+fmt2(c.wti.today)    : null, c.wti?.diff,    c.wti?.today),
+    fxMk('DXY',       fx.dxy?.today  != null ? fmt2(fx.dxy.today)       : null, fx.dxy?.diff,   fx.dxy?.today),
+  ];
+  const hasFxR1 = fxCards1.some(Boolean);
+  const hasFxR2 = fxCards2.some(Boolean);
 
-  const fxSection = (fxRow1.length || fxRow2.length) ? `<div style="padding:16px 24px">
+  const fxSection = (hasFxR1 || hasFxR2) ? `<div style="padding:16px 24px">
   ${secHdr('💱', '환율 · 원자재', `${baseMd} 기준`)}
-  ${fxRow1.length ? `<div style="display:flex;gap:10px;margin-bottom:10px">${fxRow1.join('')}</div>` : ''}
-  ${fxRow2.length ? `<div style="display:flex;gap:10px">${fxRow2.join('')}</div>` : ''}
+  ${hasFxR1 ? cardRow3(fxCards1, hasFxR2 ? '10px' : '0') : ''}
+  ${hasFxR2 ? cardRow3(fxCards2, '0') : ''}
 </div>` : '';
 
-  // ── 4. 코인 섹션 (3열 1행) ─────────────────────────────────────────────────
+  // ── 4. 코인 섹션 (3열 1행 고정) ───────────────────────────────────────────
   const btc   = cr.btc ?? null;
   const eth   = cr.eth ?? null;
   const top10 = (cr.top10 ?? []).filter(x => !['BTC','ETH'].includes(x.symbol?.toUpperCase())).slice(0,1);
 
-  const coinCards = [];
-  if (btc) {
-    const chg    = btc.change24h;
+  const mkCoinCard = (sym, price, chg) => {
     const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
-    coinCards.push(indexCard('BTC', btc.price != null ? '$'+fmtI(btc.price) : 'N/A', chgStr, '', dir(chg), '18px'));
-  }
-  if (eth) {
-    const chg    = eth.change24h;
-    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
-    coinCards.push(indexCard('ETH', eth.price != null ? '$'+fmtI(eth.price) : 'N/A', chgStr, '', dir(chg), '18px'));
-  }
-  for (const x of top10) {
-    const chg    = x.change24h;
-    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
-    coinCards.push(indexCard(x.symbol ?? '―', x.priceUsd != null ? '$'+fmt2(x.priceUsd) : 'N/A', chgStr, '', dir(chg), '18px'));
-  }
+    return indexCard(sym, price != null ? '$'+fmtI(price) : 'N/A', chgStr, '', dir(chg), '18px');
+  };
+  const coinCards3 = [
+    btc      ? mkCoinCard('BTC', btc.price, btc.change24h)                             : '',
+    eth      ? mkCoinCard('ETH', eth.price, eth.change24h)                             : '',
+    top10[0] ? mkCoinCard(top10[0].symbol ?? '―', top10[0].priceUsd, top10[0].change24h) : '',
+  ];
 
-  const coinSection = coinCards.length ? `<div style="padding:16px 24px">
+  const coinSection = coinCards3.some(Boolean) ? `<div style="padding:16px 24px">
   ${secHdr('₿', '코인', '24h 변동')}
-  <div style="display:flex;gap:10px">${coinCards.join('')}</div>
+  ${cardRow3(coinCards3, '0')}
 </div>` : '';
 
   // ── 0. 시장 요약 섹션 (Gemini 결과 있을 때만 표시) ───────────────────────
@@ -934,15 +934,17 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
 
   if (summaryLines.length) {
     const bullets = summaryLines.map(s =>
-      `<div style="display:flex;gap:8px;margin-bottom:9px;align-items:flex-start">
-        <span style="color:#2563eb;font-size:14px;flex-shrink:0;line-height:1.6">•</span>
-        <span style="font-size:13px;color:#2d3748;line-height:1.65;font-family:${FONT}">${String(s).replace(/^[•·\-]\s*/,'')}</span>
-      </div>`
+      `<table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:9px">
+        <tr>
+          <td style="vertical-align:top;padding-right:8px;white-space:nowrap;color:#2563eb;font-size:14px;line-height:1.6;font-family:${FONT}">•</td>
+          <td style="font-size:13px;color:#2d3748;line-height:1.65;font-family:${FONT}">${String(s).replace(/^[•·\-]\s*/,'')}</td>
+        </tr>
+      </table>`
     ).join('');
 
     const themePills = themes.length
-      ? `<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${
-          themes.map(t => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:${FONT}">${t}</span>`).join('')
+      ? `<div style="margin-top:12px">${
+          themes.map(t => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:${FONT};margin:0 3px 3px 0">${t}</span>`).join('')
         }</div>`
       : '';
 
@@ -994,17 +996,25 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     return { bg: '#eff6ff', txt: '#2563eb' };
   };
 
+  // Gmail 호환: CSS line-clamp 미지원 → JS에서 직접 truncate (최대 50자)
+  const truncateTitle = (str, max = 50) => {
+    if (!str) return '제목 없음';
+    return str.length > max ? str.slice(0, max).trimEnd() + '…' : str;
+  };
+
   const newsRows = newsItems.map((n, i) => {
-    const chip   = chipStyle(n.category);
-    const isLast = i === newsItems.length - 1;
+    const chip    = chipStyle(n.category);
+    const isLast  = i === newsItems.length - 1;
+    const title   = truncateTitle(n.title, 50);
+    // impact 없을 때도 최소 높이(18px 빈 공간)를 유지해 카드 간 높이 편차 감소
     const impactHtml = n.impact
       ? `<div style="font-size:11px;color:#6b7280;margin-top:5px;line-height:1.5;font-family:${FONT}">${n.impact}</div>`
-      : '';
-    return `<div style="padding:12px 0;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
+      : `<div style="margin-top:5px;min-height:18px"></div>`;
+    return `<div style="padding:12px 0;min-height:72px;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
       <div style="margin-bottom:5px">
         <span style="display:inline-block;background:${chip.bg};color:${chip.txt};font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-right:7px;font-family:${FONT}">${n.category}</span>
       </div>
-      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.65;font-family:${FONT}">${n.title || '제목 없음'}</div>
+      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.65;font-family:${FONT}">${title}</div>
       ${impactHtml}
     </div>`;
   }).join('');
