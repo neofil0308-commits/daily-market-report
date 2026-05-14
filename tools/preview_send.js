@@ -170,24 +170,52 @@ try {
   console.warn('[report] TF 분석 실패 (무시):', e.message);
 }
 
+// Gemini 503 재시도 — findings 비어 있고 분석 소스가 있으면 3초 후 1회 재시도
+if (tfAnalystResult.findings.length === 0) {
+  const hasAnalystNews = (news ?? []).some(n =>
+    /목표주가|목표가|투자의견|증권사|리포트|매수|매도|Buy|Hold/i.test((n.title ?? '') + ' ' + (n.body ?? ''))
+  );
+  if (hasAnalystNews || data.dart?.reports?.length > 0) {
+    console.log('[report] 애널리스트 분석 재시도 (3초 후)...');
+    await new Promise(r => setTimeout(r, 3000));
+    try {
+      const retry = await runTFAnalyst(data.dart ?? { reports: [] }, news ?? []);
+      if (retry.findings?.length > 0) {
+        tfAnalystResult = retry;
+        console.log(`[report] 애널리스트 재시도 성공: ${tfAnalystResult.findings.length}건`);
+      }
+    } catch {}
+  }
+}
+
 // DART 리포트가 있지만 Gemini가 실패해 findings가 비면 → 원시 DART로 폴백
 if (tfAnalystResult.findings.length === 0 && data.dart?.reports?.length > 0) {
   tfAnalystResult.findings = data.dart.reports.slice(0, 5).map(r => ({
-    company:      r.corp_name ?? r.stock_name ?? '―',
-    firm:         r.flr_nm   ?? '―',
+    company:      r.company ?? '―',
+    firm:         r.flr_nm  ?? '―',
     rating_change: '―',
     target_price: { new: null },
-    key_thesis:   r.report_nm ?? r.title ?? '',
+    key_thesis:   r.reportName ?? '',
+    dart_url:     r.url ?? null,
     importance:   5,
   }));
   console.log(`[report] 애널리스트 DART 폴백: ${tfAnalystResult.findings.length}건`);
+}
+
+// DART URL 매칭 — findings의 company가 DART 리포트와 일치하면 URL 추가
+if (data.dart?.reports?.length > 0 && tfAnalystResult.findings.length > 0) {
+  const dartByCompany = new Map(data.dart.reports.map(r => [r.company, r.url]));
+  tfAnalystResult.findings = tfAnalystResult.findings.map(f => ({
+    ...f,
+    dart_url: f.dart_url ?? dartByCompany.get(f.company) ?? null,
+  }));
 }
 
 // ── HTML 생성 (designer.js 공통 빌더) ────────────────────────────────────────
 const html = await buildHtml(
   { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [], crypto: data.crypto },
   { news: tfNewsResult, analyst: tfAnalystResult, crypto: tfCryptoResult },
-  { headline: null, include_crypto: !!(data.crypto), include_analyst: data.dart?.reports?.length > 0 }
+  { headline: null, include_crypto: !!(data.crypto), include_analyst: tfAnalystResult.findings?.length > 0 }
 );
 
 // ── HTML 파일 저장 ───────────────────────────────────────────────────────────

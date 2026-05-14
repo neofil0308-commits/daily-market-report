@@ -156,8 +156,8 @@ function _buildSupplyHistory(history) {
     `<tr><td style="${TD}">${label}</td>${history.map(h => barCell(h[key], max, h.date === lastDate)).join('')}</tr>`
   ).join('');
 
-  return `<div style="margin-top:4px">
-    <div class="st">KOSPI 수급 추이 — 최근 ${history.length}거래일 <span style="font-size:11px;color:#9ca3af;font-weight:400">(단위: 억원)</span></div>
+  return `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #e8eaed">
+    <div style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:8px">KOSPI 수급 추이 — 최근 ${history.length}거래일 <span style="font-size:11px;color:#9ca3af;font-weight:400">(단위: 억원)</span></div>
     <div style="overflow-x:auto;margin-top:6px">
       <table style="width:100%;border-collapse:collapse;">
         <thead><tr><th style="${TH}"></th>${headers}</tr></thead>
@@ -378,14 +378,19 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
 
 function _buildAnalystSection(tfAnalyst) {
   if (!tfAnalyst?.findings?.length) return '';
-  const rows = tfAnalyst.findings.slice(0, 5).map(f => `
+  const rows = tfAnalyst.findings.slice(0, 5).map(f => {
+    const companyHtml = f.dart_url
+      ? `<a href="${f.dart_url}" target="_blank" style="color:var(--color-text-info);text-decoration:none;font-weight:600;border-bottom:1px dotted var(--color-text-info)">${f.company ?? '―'}</a>`
+      : (f.company ?? '―');
+    return `
     <tr ${f.importance >= 8 ? 'style="background:var(--color-background-warning)"' : ''}>
-      <td style="font-weight:500">${f.company ?? '―'}</td>
+      <td style="font-weight:500">${companyHtml}</td>
       <td>${f.firm ?? '―'}</td>
       <td class="c">${f.rating_change ?? '―'}</td>
       <td class="r">${f.target_price?.new ? NI(f.target_price.new) + '원' : '―'}</td>
       <td class="bi">${f.key_thesis ?? '―'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `
 <div class="sec">
   <div class="sec-title">애널리스트 리포트</div>
@@ -1308,7 +1313,10 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
       return `<div style="padding:10px 0;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
         <table cellpadding="0" cellspacing="0" border="0" style="width:100%">
           <tr>
-            <td style="font-size:13px;font-weight:600;color:#1a1f2e;font-family:${FONT}">${f.company ?? '―'}
+            <td style="font-size:13px;font-weight:600;color:#1a1f2e;font-family:${FONT}">
+              ${f.dart_url
+                ? `<a href="${f.dart_url}" target="_blank" style="color:#2563eb;text-decoration:none;font-weight:600;font-family:${FONT}">${f.company ?? '―'}</a>`
+                : (f.company ?? '―')}
               <span style="font-size:10px;font-weight:400;color:#6b7280;margin-left:6px">${f.sector ?? ''}</span>
             </td>
             <td style="font-size:11px;color:#6b7280;text-align:right;white-space:nowrap;font-family:${FONT}">${f.firm ?? ''} · ${f.rating_change ?? '―'}</td>
