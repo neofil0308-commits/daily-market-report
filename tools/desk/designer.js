@@ -236,6 +236,7 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
       <td style="${TDL}">${coin.symbol}</td>
       <td style="${TD}">$${N(coin.priceUsd)}</td>
       <td style="${TD}">${chgSpan(coin.change24h)}</td>
+      <td style="${TD}"></td>
     </tr>`).join('');
 
   const footerItems = [
@@ -252,25 +253,28 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   <div class="sec-title">블록체인 · 코인</div>
   <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>
-      <th style="${THC};width:8%">순위</th><th style="${THL};width:18%">심볼</th>
-      <th style="${TH};width:40%">시세(USD)</th><th style="${TH};width:34%">24h 변동</th>
+      <th style="${THC};width:6%">순위</th><th style="${THL};width:14%">심볼</th>
+      <th style="${TH};width:24%">시세(USD)</th><th style="${TH};width:18%">24h 변동</th>
+      <th style="${TH};width:38%">시장 동향</th>
     </tr></thead>
     <tbody>
       <tr>
         <td style="${TDC}">—</td><td style="${TDL}">BTC</td>
         <td style="${TD}">$${N(btc?.price)}</td>
         <td style="${TD}">${chgSpan(btc?.change24h)}</td>
+        <td style="${TD}">${tfCrypto?.market_summary ? tfCrypto.market_summary.slice(0,25) : ''}</td>
       </tr>
       ${eth ? `<tr>
         <td style="${TDC}">—</td><td style="${TDL}">ETH</td>
         <td style="${TD}">$${N(eth?.price)}</td>
         <td style="${TD}">${chgSpan(eth?.change24h)}</td>
+        <td style="${TD}"></td>
       </tr>` : ''}
       ${rows}
     </tbody>
   </table></div>
   ${footerHtml}
-  ${tfCrypto?.market_summary ? `<div style="margin-top:6px;font-size:12px;color:#555;background:#f8f8f8;border-left:3px solid #e0e0e0;padding:8px 10px;border-radius:0 4px 4px 0">💡 ${tfCrypto.market_summary}</div>` : ''}
+  ${tfCrypto?.market_summary ? `<div style="margin-top:10px;font-size:13px;color:#374151;background:#f0f4ff;border-left:4px solid #2563eb;padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.6">💡 <strong>코인 시장 요약:</strong> ${tfCrypto.market_summary}</div>` : ''}
 </div>`;
 }
 
@@ -356,7 +360,7 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
     const tvStr = h.tradingValueBn != null
       ? `${N(h.tradingValueBn)}조원`
       : (h.volume && h.volume > 1000 ? `${(h.volume / 1e5).toFixed(1)}억주` : '―');
-    const issueStr = histIssues[h.date] ?? h.note ?? h.issue ?? '―';
+    const issueStr = (histIssues[h.date] || h.note || h.issue) || '―';
     return `<tr>
       <td>${dateLabel}</td>
       <td class="r">${N(h.close)}</td>
@@ -498,12 +502,12 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
               : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
           )
         : ''}
-      ${d.kospi?.marketCap != null
+      ${d.marketCap != null
         ? trow(
             'KOSPI 시가총액',
-            { diff: d.kospi.marketCapDiff, pct: d.kospi.marketCapPct },
-            N(d.kospi.marketCap) + '조원',
-            d.kospi.prevMarketCap != null ? N(d.kospi.prevMarketCap) + '조원' : '―',
+            { diff: d.marketCapDiff, pct: d.marketCapPct },
+            N(d.marketCap) + '조원',
+            d.prevMarketCap != null ? N(d.prevMarketCap) + '조원' : '―',
             rn.marketCap
           )
         : ''}
@@ -523,7 +527,14 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
       style="display:none;width:100%;height:195px"></canvas>
   </div>
   <div class="tbl-wrap"><table class="tbl" style="margin-top:6px">
-    <thead><tr><th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th><th class="l">주요 이슈</th></tr></thead>
+    <colgroup>
+      <col style="width:14%"><col style="width:11%"><col style="width:11%">
+      <col style="width:9%"><col style="width:12%"><col style="width:43%">
+    </colgroup>
+    <thead><tr>
+      <th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th>
+      <th class="l" style="min-width:120px">주요 이슈</th>
+    </tr></thead>
     <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
   </table></div>
 </div>
@@ -664,16 +675,17 @@ async function _buildHistIssues(histDisp, histAll, tfResults) {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
-    const res = await model.generateContent(`다음 KOSPI 5거래일 종가에서 각 날짜의 주요 시장 이슈를 15자 이내 한 줄로 작성하세요.
-- ±1.5% 이상 큰 변동일은 원인을 구체적으로 기재 (예: "미중 협상 기대↑", "외인 대규모 매도")
-- ±0.5% 미만 소폭 변동일은 빈 문자열
+    const res = await model.generateContent(`다음 KOSPI 5거래일 종가에서 각 날짜의 주요 시장 이슈를 한 줄로 작성하세요.
+- 모든 날짜에 간결한 시장 상황을 기재 (15~30자)
+- 큰 변동(±1.5% 이상)은 원인을 구체적으로 (예: "외인 매도·달러 강세 압박")
+- 소폭 변동(±0.5% 미만)은 "보합권 횡보" 또는 당일 가장 이슈가 된 뉴스 한 줄
 - 오늘 시장 테마: ${themes.join(', ')}
 - 최근 핵심 뉴스: ${stories.slice(0, 2).join(' / ')}
 
 KOSPI 데이터:
 ${JSON.stringify(rows, null, 2)}
 
-반드시 JSON만 응답 (키는 MM/DD 형식): {"05/07":"...","05/08":"", ...}`);
+반드시 JSON만 응답 (키는 MM/DD 형식): {"05/07":"외인 순매도 확대","05/08":"FOMC 의사록 대기 보합", ...}`);
     const raw = res.response.text().replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
     return JSON.parse(raw);
   } catch (e) {
@@ -713,18 +725,19 @@ async function _buildRowNotes(pipelineData, tfResults = {}) {
     if (!apiKey) return empty;
 
     const themes  = tfResults?.news?.themes    ?? [];
-    const stories = tfResults?.news?.top_stories ?? [];
+    const stories = (tfResults?.news?.top_stories ?? []).slice(0, 3);
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
 
     const prompt = `다음 시장 데이터를 보고 각 항목의 "비고" 컬럼 설명을 작성하세요.
 오늘 시장 주요 테마: ${themes.join(', ') || '없음'}
-오늘 핵심 뉴스: ${stories.slice(0,2).join(' / ') || '없음'}
+오늘 핵심 뉴스: ${stories.join(' / ') || '없음'}
 
 규칙:
 - 단순 방향(상승/하락)이 아닌 배경·원인을 기재 (예: "반도체 수출↑ 주도", "달러 강세 압박", "FOMC 금리 동결 기대")
-- 각 항목 25자 이내
+- 각 항목 50자 이내 (한국어 기준)
+- 수치(등락폭, 환율 레벨, 금리 bp)와 원인 키워드를 함께 기재 (예: "미 CPI 둔화 → 달러 약세 반영, 1,370원대 지지", "외인 3일 연속 순매수·반도체 주도")
 - 데이터 없는 항목은 빈 문자열("")
 
 데이터:
@@ -1076,10 +1089,11 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
         title: origTitle ?? f.headline ?? f.title ?? '',
         summary: Array.isArray(f.summary) ? f.summary
           : (f.market_impact ? [f.market_impact] : []),
+        url: f.source_url ?? null,
       };
     });
   } else if (rawNews.length) {
-    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', summary: [] }));
+    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', summary: [], url: n.url ?? null }));
   }
 
   // 뉴스 태그 색상
@@ -1118,7 +1132,10 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
       <div style="margin-bottom:5px">
         <span style="display:inline-block;background:${chip.bg};color:${chip.txt};font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-right:7px;font-family:${FONT}">${n.category}</span>
       </div>
-      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</div>
+      ${n.url
+        ? `<a href="${n.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</a>`
+        : `<div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</div>`
+      }
       ${summaryHtml}
     </div>`;
   }).join('');

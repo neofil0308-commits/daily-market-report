@@ -49,7 +49,7 @@ export async function collectDomestic(isHoliday, prevOutputDir = null) {
     try {
       const fs = await import('fs/promises');
       const prev = JSON.parse(await fs.default.readFile(`${prevOutputDir}/data.json`, 'utf-8'));
-      prevMarketCap = prev?.domestic?.kospi?.marketCap ?? null;
+      prevMarketCap = prev?.domestic?.marketCap ?? prev?.domestic?.kospi?.marketCap ?? null;
     } catch {}
   }
   const mcToday = realtimeStats.marketCap;
