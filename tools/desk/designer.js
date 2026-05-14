@@ -82,9 +82,10 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
     if (live?.today != null) d.vkospi = live;
   }
 
-  const [summaryMap, rowNotes] = await Promise.all([
+  const [summaryMap, rowNotes, histIssues] = await Promise.all([
     _buildSummaryMap(news ?? [], pipelineData),
-    _buildRowNotes(pipelineData),
+    _buildRowNotes(pipelineData, tfResults),
+    _buildHistIssues(histDisp, histAll, tfResults),
   ]);
   const chartUrl      = _buildChartUrl(histDisp);     // 이메일 폴백용 quickchart
   const chartScript   = _buildChartScript(histDisp);  // Chart.js 인라인 스크립트
@@ -101,7 +102,7 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
     date, d, o, fx, c, news: orderedNews,
     histDisp, histAll, chartUrl, chartScript,
     summaryHtml, cryptoSection, analystSection,
-    summaryMap, rowNotes,
+    summaryMap, rowNotes, histIssues,
     headline: editorialPlan.headline,
   });
 
@@ -251,8 +252,8 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   <div class="sec-title">블록체인 · 코인</div>
   <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>
-      <th style="${THC}">순위</th><th style="${THL}">심볼</th>
-      <th style="${TH}">시세(USD)</th><th style="${TH}">24h 변동</th>
+      <th style="${THC};width:8%">순위</th><th style="${THL};width:18%">심볼</th>
+      <th style="${TH};width:40%">시세(USD)</th><th style="${TH};width:34%">24h 변동</th>
     </tr></thead>
     <tbody>
       <tr>
@@ -298,7 +299,7 @@ function _buildAnalystSection(tfAnalyst) {
 // ── 최종 HTML 조립 ────────────────────────────────────────────────────────────
 
 function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
-  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, rowNotes, headline }) {
+  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, rowNotes, histIssues = {}, headline }) {
   const rn = rowNotes ?? {};
 
   const supply = d.supply ?? {};
@@ -355,7 +356,7 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
     const tvStr = h.tradingValueBn != null
       ? `${N(h.tradingValueBn)}조원`
       : (h.volume && h.volume > 1000 ? `${(h.volume / 1e5).toFixed(1)}억주` : '―');
-    const issueStr = h.note ?? h.issue ?? '―';
+    const issueStr = histIssues[h.date] ?? h.note ?? h.issue ?? '―';
     return `<tr>
       <td>${dateLabel}</td>
       <td class="r">${N(h.close)}</td>
@@ -641,6 +642,46 @@ function _reorderNewsByTF(rawNews, tfFindings) {
   });
 }
 
+// KOSPI 5거래일 추이 — 날짜별 주요 이슈 한 줄 생성 (±1.5% 이상 변동일 위주)
+async function _buildHistIssues(histDisp, histAll, tfResults) {
+  if (!histDisp?.length) return {};
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) return {};
+
+  const themes  = tfResults?.news?.themes    ?? [];
+  const stories = tfResults?.news?.top_stories ?? [];
+
+  // 직전 종가 계산 (diff/pct 없는 histDisp row 보완)
+  const rows = histDisp.map((h, i) => {
+    const prev = i === 0
+      ? (histAll?.length > histDisp.length ? histAll[histAll.length - histDisp.length - 1] : null)
+      : histDisp[i - 1];
+    const diff = prev?.close != null ? r2(h.close - prev.close) : null;
+    const pct  = diff != null && prev.close ? r2(diff / prev.close * 100) : null;
+    return { date: h.date, close: h.close, diff, pct };
+  });
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
+    const res = await model.generateContent(`다음 KOSPI 5거래일 종가에서 각 날짜의 주요 시장 이슈를 15자 이내 한 줄로 작성하세요.
+- ±1.5% 이상 큰 변동일은 원인을 구체적으로 기재 (예: "미중 협상 기대↑", "외인 대규모 매도")
+- ±0.5% 미만 소폭 변동일은 빈 문자열
+- 오늘 시장 테마: ${themes.join(', ')}
+- 최근 핵심 뉴스: ${stories.slice(0, 2).join(' / ')}
+
+KOSPI 데이터:
+${JSON.stringify(rows, null, 2)}
+
+반드시 JSON만 응답 (키는 MM/DD 형식): {"05/07":"...","05/08":"", ...}`);
+    const raw = res.response.text().replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('[designer] histIssues 생성 실패 (무시):', e.message);
+    return {};
+  }
+}
+
 async function _buildSummaryMap(news, pipelineData) {
   const map = new Map();
   const apiKey = process.env.GOOGLE_API_KEY;
@@ -659,7 +700,7 @@ ${JSON.stringify(news.slice(0, 12).map(n => ({ url: n.url, title: n.title, body:
   return map;
 }
 
-async function _buildRowNotes(pipelineData) {
+async function _buildRowNotes(pipelineData, tfResults = {}) {
   const empty = {
     kospi:'', kosdaq:'', vkospi:'', volume:'', marketCap:'',
     dow:'', sp500:'', nasdaq:'', sox:'', nikkei:'', hsi:'',
@@ -671,13 +712,20 @@ async function _buildRowNotes(pipelineData) {
     const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) return empty;
 
+    const themes  = tfResults?.news?.themes    ?? [];
+    const stories = tfResults?.news?.top_stories ?? [];
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
 
-    const prompt = `다음 시장 데이터를 보고 각 항목의 "비고" 컬럼에 들어갈 짧은 한 줄 설명을 작성하세요.
-- 투자자가 읽기 좋은 맥락 설명 (예: "외국인 순매수 전환 + 반도체 강세 주도")
-- 각 항목 15자 이내, 사실 기반, 추측 금지
-- 데이터가 없는 항목은 빈 문자열("")
+    const prompt = `다음 시장 데이터를 보고 각 항목의 "비고" 컬럼 설명을 작성하세요.
+오늘 시장 주요 테마: ${themes.join(', ') || '없음'}
+오늘 핵심 뉴스: ${stories.slice(0,2).join(' / ') || '없음'}
+
+규칙:
+- 단순 방향(상승/하락)이 아닌 배경·원인을 기재 (예: "반도체 수출↑ 주도", "달러 강세 압박", "FOMC 금리 동결 기대")
+- 각 항목 25자 이내
+- 데이터 없는 항목은 빈 문자열("")
 
 데이터:
 ${JSON.stringify({
