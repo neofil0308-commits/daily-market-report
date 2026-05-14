@@ -578,12 +578,10 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
         : ''}
       ${d.vkospi?.today != null
         ? trow(
-            d.vkospi.source === 'vix_fallback' ? '미국 VIX (참고)' : 'VKOSPI (공포지수)',
+            d.vkospi.source === 'carry_forward' ? 'VKOSPI (전일값)' : 'VKOSPI (공포지수)',
             d.vkospi,
             N(d.vkospi.today), N(d.vkospi.prev),
-            rn.vkospi || (d.vkospi.source === 'vix_fallback'
-              ? 'Yahoo ^VIX — VKOSPI 수집 불가 시 대체'
-              : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
+            rn.vkospi || (d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
           )
         : ''}
       ${d.marketCap != null

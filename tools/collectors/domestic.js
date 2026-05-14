@@ -192,33 +192,50 @@ async function fetchVkospi(prevOutputDir = null) {
     }
   }
 
-  // 3차: 전일 outputs에서 carry-forward
+  // 3차: investing.com 스트리밍 파싱 (189KB, 장 마감 후에도 정확한 종가 제공)
+  try {
+    const stream = await axios.get('https://kr.investing.com/indices/kospi-volatility', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'ko-KR,ko;q=0.9',
+      },
+      responseType: 'stream', timeout: 15000,
+    });
+    let buf = '';
+    for await (const chunk of stream.data) {
+      buf += chunk.toString();
+      if (buf.includes('instrument-price-change-percent') || buf.length > 250000) break;
+    }
+    stream.data.destroy();
+
+    const pn = s => { const v = parseFloat(String(s ?? '').replace(/,/g, '')); return isNaN(v) ? null : v; };
+    const today  = pn(buf.match(/data-test="instrument-price-last">([0-9.,]+)</)?.[1]);
+    const change = pn(buf.match(/data-test="instrument-price-change"[^>]*>\s*([^<]+)</)?.[1]);
+
+    if (today != null) {
+      const prev = change != null ? round2(today - change) : null;
+      console.log('[domestic] VKOSPI investing.com 수집 완료:', today);
+      return { today, prev, source: 'investing_com' };
+    }
+  } catch (e) {
+    console.warn('[domestic] VKOSPI investing.com 실패:', e.message);
+  }
+
+  // 4차: 전일 outputs에서 carry-forward (당일 데이터 없을 때만)
   if (prevOutputDir) {
     try {
       const fs = await import('fs/promises');
       const prevData = JSON.parse(await fs.default.readFile(`${prevOutputDir}/data.json`, 'utf-8'));
       const pv = prevData?.domestic?.vkospi;
-      if (pv?.today != null && pv.source !== 'vix_fallback') {
+      if (pv?.today != null && pv.source !== 'carry_forward') {
         console.warn('[domestic] VKOSPI carry-forward 사용:', pv.today, '(전일 값)');
-        return { today: pv.today, prev: pv.prev ?? null, source: 'carry_forward', label: `VKOSPI (${pv.today} — 전일 값)` };
+        return { today: pv.today, prev: pv.prev ?? null, source: 'carry_forward' };
       }
     } catch {}
   }
 
-  // 4차 최후 폴백: Yahoo Finance ^VIX
-  try {
-    const res = await axios.get(`${YF_BASE}/%5EVIX`, {
-      params: { interval: '1d', range: '5d' },
-      headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 10000,
-    });
-    const closes = res.data.chart.result[0].indicators.quote[0].close.filter(Boolean);
-    const len = closes.length;
-    if (len < 2) throw new Error('데이터 부족');
-    return { today: round2(closes[len - 1]), prev: round2(closes[len - 2]), source: 'vix_fallback', label: '미국 VIX (참고)' };
-  } catch (e) {
-    console.warn('[domestic] VKOSPI 모든 폴백 실패:', e.message);
-    return { today: null, prev: null };
-  }
+  console.warn('[domestic] VKOSPI 모든 소스 실패 — null 반환');
+  return { today: null, prev: null };
 }
 
 // KOSPI 거래대금(조원) + 거래량 — Naver polling realtime
