@@ -43,6 +43,19 @@ export async function collectDomestic(isHoliday, prevOutputDir = null) {
   const qDiff = (kosdaqData.today != null && kosdaqData.prev != null) ? round2(kosdaqData.today - kosdaqData.prev) : null;
   const qPct  = (qDiff != null && kosdaqData.prev) ? round2(qDiff / kosdaqData.prev * 100) : null;
 
+  // 전일 시가총액: prevOutputDir의 data.json에서 로드
+  let prevMarketCap = null;
+  if (prevOutputDir) {
+    try {
+      const fs = await import('fs/promises');
+      const prev = JSON.parse(await fs.default.readFile(`${prevOutputDir}/data.json`, 'utf-8'));
+      prevMarketCap = prev?.domestic?.kospi?.marketCap ?? null;
+    } catch {}
+  }
+  const mcToday = realtimeStats.marketCap;
+  const mcDiff  = (mcToday != null && prevMarketCap != null) ? round2(mcToday - prevMarketCap) : null;
+  const mcPct   = (mcDiff  != null && prevMarketCap)         ? round2(mcDiff / prevMarketCap * 100) : null;
+
   return {
     kospi: {
       today:     kospiData.today,
@@ -52,7 +65,10 @@ export async function collectDomestic(isHoliday, prevOutputDir = null) {
       direction: kDiff == null ? 'flat' : kDiff > 0 ? 'up' : kDiff < 0 ? 'down' : 'flat',
       volumeBn:    realtimeStats.volumeBn,
       volumeShares: realtimeStats.volumeShares,
-      marketCap:   realtimeStats.marketCap,
+      marketCap:     mcToday,
+      prevMarketCap,
+      marketCapDiff: mcDiff,
+      marketCapPct:  mcPct,
     },
     kosdaq: {
       today:     kosdaqData.today,

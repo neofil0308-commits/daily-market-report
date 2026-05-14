@@ -95,8 +95,10 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
   const analystSection = editorialPlan.include_analyst
     ? _buildAnalystSection(tfResults.analyst) : '';
 
+  const orderedNews = _reorderNewsByTF(news ?? [], tfResults?.news?.findings);
+
   const html = _assembleHtml({
-    date, d, o, fx, c, news: news ?? [],
+    date, d, o, fx, c, news: orderedNews,
     histDisp, histAll, chartUrl, chartScript,
     summaryHtml, cryptoSection, analystSection,
     summaryMap, rowNotes,
@@ -211,43 +213,63 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   if (!rawCrypto?.btc) return '';
   const { btc, eth, fearGreed, btcDominance, top10 } = rawCrypto;
   const fgColor = fearGreed?.value >= 60 ? COLOR.up : fearGreed?.value <= 30 ? COLOR.dn : COLOR.neu;
-  // top10에서 BTC·ETH는 상단 고정 행과 중복되므로 제외
   const filteredTop10 = (top10 ?? []).filter(coin =>
     !['BTC', 'ETH'].includes(coin.symbol?.toUpperCase())
   ).slice(0, 5);
+
+  const TH  = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #e0e0e0';
+  const THL = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid #e0e0e0';
+  const THC = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #e0e0e0';
+  const TD  = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:right';
+  const TDL = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;font-weight:600';
+  const TDC = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:center';
+
+  const chgSpan = (v) => {
+    const color = v >= 0 ? COLOR.up : COLOR.dn;
+    return `<span style="color:${color}">${arr(v)} ${sgn(v)}${N(Math.abs(v ?? 0))}%</span>`;
+  };
+
   const rows = filteredTop10.map(coin => `
     <tr>
-      <td class="c">${coin.rank}</td>
-      <td style="font-weight:500">${coin.symbol}</td>
-      <td class="r">$${N(coin.priceUsd)}</td>
-      <td class="r"><div class="chg">
-        <span class="chg-val ${coin.change24h >= 0 ? 'up' : 'dn'}">${arr(coin.change24h)} ${sgn(coin.change24h)}${N(Math.abs(coin.change24h))}%</span>
-      </div></td>
+      <td style="${TDC}">${coin.rank}</td>
+      <td style="${TDL}">${coin.symbol}</td>
+      <td style="${TD}">$${N(coin.priceUsd)}</td>
+      <td style="${TD}">${chgSpan(coin.change24h)}</td>
     </tr>`).join('');
+
+  const footerItems = [
+    fearGreed    ? `😱 Fear &amp; Greed: <b style="color:${fgColor}">${fearGreed.value} (${fearGreed.label})</b>` : null,
+    btcDominance ? `BTC 도미넌스: <b>${btcDominance}%</b>` : null,
+  ].filter(Boolean);
+  const footerHtml = footerItems.length
+    ? `<table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr>
+        ${footerItems.map(t => `<td style="font-size:12px;color:#555;padding-right:16px">${t}</td>`).join('')}
+      </tr></table>` : '';
+
   return `
 <div class="sec">
   <div class="sec-title">블록체인 · 코인</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>순위</th><th class="l">심볼</th><th>시세(USD)</th><th>24h 변동</th></tr></thead>
+  <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>
+      <th style="${THC}">순위</th><th style="${THL}">심볼</th>
+      <th style="${TH}">시세(USD)</th><th style="${TH}">24h 변동</th>
+    </tr></thead>
     <tbody>
       <tr>
-        <td class="c">—</td><td style="font-weight:600">BTC</td>
-        <td class="r">$${N(btc?.price)}</td>
-        <td class="r"><div class="chg"><span class="chg-val ${btc?.change24h >= 0 ? 'up' : 'dn'}">${arr(btc?.change24h)} ${sgn(btc?.change24h)}${N(Math.abs(btc?.change24h ?? 0))}%</span></div></td>
+        <td style="${TDC}">—</td><td style="${TDL}">BTC</td>
+        <td style="${TD}">$${N(btc?.price)}</td>
+        <td style="${TD}">${chgSpan(btc?.change24h)}</td>
       </tr>
       ${eth ? `<tr>
-        <td class="c">—</td><td style="font-weight:600">ETH</td>
-        <td class="r">$${N(eth?.price)}</td>
-        <td class="r"><div class="chg"><span class="chg-val ${eth?.change24h >= 0 ? 'up' : 'dn'}">${arr(eth?.change24h)} ${sgn(eth?.change24h)}${N(Math.abs(eth?.change24h ?? 0))}%</span></div></td>
+        <td style="${TDC}">—</td><td style="${TDL}">ETH</td>
+        <td style="${TD}">$${N(eth?.price)}</td>
+        <td style="${TD}">${chgSpan(eth?.change24h)}</td>
       </tr>` : ''}
       ${rows}
     </tbody>
   </table></div>
-  <div style="margin-top:8px;display:flex;gap:16px;font-size:12px;color:var(--color-text-secondary)">
-    ${fearGreed ? `<span>😱 Fear &amp; Greed: <b style="color:${fgColor}">${fearGreed.value} (${fearGreed.label})</b></span>` : ''}
-    ${btcDominance ? `<span>BTC 도미넌스: <b>${btcDominance}%</b></span>` : ''}
-  </div>
-  ${tfCrypto?.market_summary ? `<div class="note" style="margin-top:6px">💡 ${tfCrypto.market_summary}</div>` : ''}
+  ${footerHtml}
+  ${tfCrypto?.market_summary ? `<div style="margin-top:6px;font-size:12px;color:#555;background:#f8f8f8;border-left:3px solid #e0e0e0;padding:8px 10px;border-radius:0 4px 4px 0">💡 ${tfCrypto.market_summary}</div>` : ''}
 </div>`;
 }
 
@@ -475,8 +497,14 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
               : d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
           )
         : ''}
-      ${d.marketCap != null
-        ? `<tr><td>KOSPI 시가총액</td><td class="r">${N(d.marketCap)}조원</td><td class="r">―</td><td class="r"><span class="neu">―</span></td><td class="bi"></td></tr>`
+      ${d.kospi?.marketCap != null
+        ? trow(
+            'KOSPI 시가총액',
+            { diff: d.kospi.marketCapDiff, pct: d.kospi.marketCapPct },
+            N(d.kospi.marketCap) + '조원',
+            d.kospi.prevMarketCap != null ? N(d.kospi.prevMarketCap) + '조원' : '―',
+            rn.marketCap
+          )
         : ''}
     </tbody>
   </table></div>
@@ -591,6 +619,27 @@ ${chartScript}
 }
 
 // ── 내부 헬퍼 ────────────────────────────────────────────────────────────────
+
+// TF findings의 source_url·중요도를 기준으로 원시 뉴스를 재정렬.
+// findings가 없으면 카테고리 순서(기존 동작)를 유지.
+function _reorderNewsByTF(rawNews, tfFindings) {
+  if (!tfFindings?.length) return rawNews;
+  const importanceMap = new Map();
+  tfFindings.forEach(f => {
+    const url = f.source_url ?? f.url;
+    if (url && !importanceMap.has(url)) importanceMap.set(url, f.importance ?? 0);
+  });
+  if (!importanceMap.size) return rawNews;
+  const NEWS_CAT_ORDER = ['시장전반', '거시경제', '산업·기업'];
+  return [...rawNews].sort((a, b) => {
+    const ia = importanceMap.get(a.url) ?? -1;
+    const ib = importanceMap.get(b.url) ?? -1;
+    if (ib !== ia) return ib - ia;
+    const oa = NEWS_CAT_ORDER.indexOf(a.category);
+    const ob = NEWS_CAT_ORDER.indexOf(b.category);
+    return (oa === -1 ? 99 : oa) - (ob === -1 ? 99 : ob);
+  });
+}
 
 async function _buildSummaryMap(news, pipelineData) {
   const map = new Map();
