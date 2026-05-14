@@ -117,6 +117,37 @@ try {
   console.warn('[report] 뉴스 분석 실패 (무시):', e.message);
 }
 
+// ── 수급 5거래일 이력 수집 ────────────────────────────────────────────────────
+async function fetchSupplyHistory(dateStr) {
+  try {
+    const bizdate = dateStr.replace(/-/g, '');
+    const r = await axios.get(
+      `https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate=${bizdate}&sosok=`,
+      { headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/sise/sise_trans_style.naver' },
+        timeout: 12000, responseType: 'arraybuffer' }
+    );
+    const html = new TextDecoder('euc-kr').decode(r.data);
+    const { load } = await import('cheerio');
+    const $ = load(html);
+    const pn = s => { const v = parseFloat(String(s ?? '').replace(/,/g, '')); return isNaN(v) ? null : v; };
+    const rows = [];
+    $('table tr').each((_, tr) => {
+      if (rows.length >= 5) return;
+      const cells = $(tr).find('td').map((__, td) => $(td).text().trim()).get();
+      if (cells.length >= 4 && /^\d{2}\.\d{2}\.\d{2}$/.test(cells[0])) {
+        rows.push({ date: cells[0], foreign: pn(cells[2]), institution: pn(cells[3]), individual: pn(cells[1]) });
+      }
+    });
+    return rows.length > 0 ? rows.reverse() : null; // 오래된 날짜 먼저
+  } catch { return null; }
+}
+
+const supplyHistory = await fetchSupplyHistory(todayStr).catch(() => null);
+if (supplyHistory) {
+  d.supplyHistory = supplyHistory;
+  console.log(`[report] 수급 추이 ${supplyHistory.length}거래일 수집 완료`);
+}
+
 // ── TF-2 애널리스트 리포트 분석 + TF-3 코인 분석 (병렬) ─────────────────────
 let tfAnalystResult = { findings: [] };
 let tfCryptoResult  = { findings: [] };

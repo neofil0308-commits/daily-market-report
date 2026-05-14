@@ -110,6 +110,63 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
   return html;
 }
 
+// ── 수급 5거래일 추이 테이블 ──────────────────────────────────────────────────
+
+function _buildSupplyHistory(history) {
+  if (!history || history.length === 0) return '';
+
+  const maxF = Math.max(...history.map(h => Math.abs(h.foreign ?? 0)), 1);
+  const maxI = Math.max(...history.map(h => Math.abs(h.institution ?? 0)), 1);
+  const maxP = Math.max(...history.map(h => Math.abs(h.individual ?? 0)), 1);
+
+  const fmt = v => {
+    if (v == null) return '―';
+    const abs = Math.abs(v);
+    const prefix = v >= 0 ? '+' : '';
+    return prefix + abs.toLocaleString('ko-KR');
+  };
+
+  const barCell = (val, maxAbs, isLast) => {
+    if (val == null) return `<td style="padding:3px 4px;"></td>`;
+    const isBuy  = val >= 0;
+    const pct    = Math.max(8, Math.round(Math.abs(val) / maxAbs * 100));
+    const bg     = isBuy ? 'rgba(37,99,235,0.18)' : 'rgba(220,38,38,0.20)';
+    const fg     = isBuy ? '#1d4ed8' : '#b91c1c';
+    const border = isLast ? 'border:1.5px solid ' + (isBuy ? '#93c5fd' : '#fca5a5') + ';' : '';
+    return `<td style="padding:3px 4px;">
+      <div style="position:relative;height:24px;border-radius:4px;overflow:hidden;background:#f4f4f5;${border}">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${bg};"></div>
+        <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;color:${fg};white-space:nowrap;letter-spacing:-0.3px;">${fmt(val)}</span>
+      </div></td>`;
+  };
+
+  const lastDate = history[history.length - 1]?.date ?? '';
+  const TH = 'text-align:center;font-size:11px;color:#888;font-weight:500;padding:4px 4px 6px;';
+  const TD = 'font-size:12px;font-weight:700;color:#374151;padding:4px 8px 4px 0;white-space:nowrap;';
+
+  const headers = history.map(h =>
+    `<th style="${TH}${h.date === lastDate ? 'color:#1d4ed8;font-weight:700;' : ''}">${h.date}</th>`
+  ).join('');
+
+  const rows = [
+    { label: '외국인', key: 'foreign',     max: maxF },
+    { label: '기관',   key: 'institution', max: maxI },
+    { label: '개인',   key: 'individual',  max: maxP },
+  ].map(({ label, key, max }) =>
+    `<tr><td style="${TD}">${label}</td>${history.map(h => barCell(h[key], max, h.date === lastDate)).join('')}</tr>`
+  ).join('');
+
+  return `<div style="margin-top:4px">
+    <div class="st">KOSPI 수급 추이 — 최근 ${history.length}거래일 <span style="font-size:11px;color:#9ca3af;font-weight:400">(단위: 억원)</span></div>
+    <div style="overflow-x:auto;margin-top:6px">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr><th style="${TH}"></th>${headers}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
 // ── 수급 바 + 시장 강도 섹션 ──────────────────────────────────────────────────
 
 function _supplyBar(name, val, maxAbs) {
@@ -132,11 +189,38 @@ function _supplyBar(name, val, maxAbs) {
   </div>`;
 }
 
-function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday) {
+function _buildMarketCards(supply, breadth, date, prevMd, dateMd, supplyToday, supplyHistory) {
+  const hasHistory     = supplyHistory?.length > 0;
   const hasSupply      = supply?.foreign != null || supply?.institution != null || supply?.individual != null;
   const hasSupplyToday = supplyToday?.foreign != null || supplyToday?.institution != null || supplyToday?.individual != null;
   const hasBreadth     = breadth?.advancing != null || breadth?.intraHigh != null;
-  if (!hasSupply && !hasSupplyToday && !hasBreadth) return '';
+  if (!hasHistory && !hasSupply && !hasSupplyToday && !hasBreadth) return '';
+
+  // 5거래일 이력이 있으면 새 차트로 대체
+  if (hasHistory) {
+    const historyHtml = _buildSupplyHistory(supplyHistory);
+    if (!hasBreadth) return `<div class="sup-wrap">${historyHtml}</div>`;
+    // breadth 카드는 별도 유지
+    const { advancing, declining, unchanged, intraHigh, intraLow } = breadth ?? {};
+    const total = (advancing ?? 0) + (declining ?? 0) + (unchanged ?? 0);
+    const advPct = total > 0 ? Math.round((advancing ?? 0) / total * 100) : null;
+    const bars = total > 0 ? `
+      <div class="bar-row">
+        <span class="nm">상승</span>
+        <div class="bwrap"><div class="bfill b-buy" style="width:${advPct}%"></div></div>
+        <span class="val up">${(advancing ?? '—').toLocaleString?.() ?? advancing}</span>
+      </div>
+      <div class="bar-row">
+        <span class="nm">하락</span>
+        <div class="bwrap"><div class="bfill b-sell" style="width:${100 - advPct}%"></div></div>
+        <span class="val dn">${(declining ?? '—').toLocaleString?.() ?? declining}</span>
+      </div>` : '';
+    const hlStr = (intraHigh != null && intraLow != null)
+      ? `<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">장중 ${N(intraHigh)} ↕ ${N(intraLow)}</div>`
+      : '';
+    const breadthCard = `<div class="sup-card"><div class="st">시장 강도 (상승/하락 종목)</div>${bars}${hlStr}</div>`;
+    return `<div class="sup-wrap">${historyHtml}</div><div class="sup-cards">${breadthCard}</div>`;
+  }
 
   // 첫 번째 카드: 전일 수급
   const supplyCard = hasSupply ? (() => {
@@ -513,7 +597,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
         : ''}
     </tbody>
   </table></div>
-  ${_buildMarketCards(supply, d.breadth, date, prevMd, dateMd, d.supplyToday)}
+  ${_buildMarketCards(supply, d.breadth, date, prevMd, dateMd, d.supplyToday, d.supplyHistory)}
 </div>
 
 <!-- ══ 2. KOSPI 5거래일 추이 ══ -->
