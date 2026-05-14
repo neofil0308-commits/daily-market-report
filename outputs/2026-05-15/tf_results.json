@@ -1,0 +1,140 @@
+{
+  "news": {
+    "findings": [
+      {
+        "headline": "[퇴근길머니] '8천피' 고지 눈앞…6개월 만 '1만피' 전망",
+        "theme": "시장심리",
+        "importance": 8,
+        "market_impact": "KOSPI 단기 혼조 (외국인 순매도 vs 8천피 기대감)",
+        "summary": [
+          "• 코스피 7,980선 마감, '8천피' 고지 목전에 도달했습니다.",
+          "• 외국인 투자자 2조원 넘게 순매도, 5월 누적 17조원 매도 지속.",
+          "• 일부 전문가들은 6개월 내 코스피 '1만피' 돌파 가능성 제시."
+        ],
+        "verified": false,
+        "source_url": "http://www.yonhapnewstv.co.kr/news/MYH20260514172546SRL"
+      },
+      {
+        "headline": "코스피, 미 CPI발 금리 인하 기대에 7981선 안착...또 사상 최고치",
+        "theme": "금리",
+        "importance": 9,
+        "market_impact": "KOSPI/코스닥 단기 상승 압력",
+        "summary": [
+          "• 미 CPI발 금리 인하 기대감에 코스피 7981선 마감하며 사상 최고치 경신.",
+          "• 코스닥도 1.20% 상승한 1191.09로 장 마감, 1200선 탈환 임박했습니다.",
+          "• 증시 강세와 금리 인하 기대감이 교차하며 외환시장이 변동성 보였습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.financialpost.co.kr/news/articleView.html?idxno=259153"
+      },
+      {
+        "headline": "[채권/외환] 美 국채금리·달러 동반 강세…\"연준 금리인하 물 건너갔다...",
+        "theme": "금리",
+        "importance": 9,
+        "market_impact": "KOSPI 단기 하락 압력",
+        "summary": [
+          "• 미 국채금리 및 달러화 동반 강세, 연준의 금리 인하 기대감이 약화.",
+          "• CME 페드워치는 12월 25bp 금리 인상 가능성을 36.9%로 반영 (전주 22.5%↑).",
+          "• 달러화 강세가 지속되며 주요 6개 통화 대비 달러 가치 상승했습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.newspim.com/news/view/20260515000026"
+      },
+      {
+        "headline": "[Invest]BBB급인데 조달금리는 3%대…'두산'에 몰려드는 금융사들",
+        "theme": "실적",
+        "importance": 6,
+        "market_impact": "개별 기업 (두산) 단기 상승 압력",
+        "summary": [
+          "• 두산그룹이 수출입은행과 5조원 규모 금융지원 협약을 체결했습니다.",
+          "• 수출입은행은 반도체 소재, SMR 등 핵심 신사업에 2028년까지 지원.",
+          "• BBB급 신용등급에도 불구하고 3%대 낮은 금리로 자금 조달에 성공했습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.investchosun.com/site/data/html_dir/2026/05/14/2026051480184.html"
+      },
+      {
+        "headline": "[증시전략] 인플레 우려 뚫은 AI 반도체 '독자적' 랠리…판단은?",
+        "theme": "반도체",
+        "importance": 9,
+        "market_impact": "KOSPI 단기 상승 압력",
+        "summary": [
+          "• AI 반도체주가 인플레이션 우려를 뚫고 미국 및 국내 증시에서 랠리 지속.",
+          "• 빅테크 기업들의 견고한 실적이 AI 반도체 섹터 강세의 주요 기반.",
+          "• AI 반도체 랠리는 거시 경제 불확실성 속에서도 시장을 견인하는 동력입니다."
+        ],
+        "verified": false,
+        "source_url": "https://biz.sbs.co.kr/article_hub/20000310515?division=NAVER"
+      }
+    ],
+    "top_stories": [
+      "코스피, 미 CPI발 금리 인하 기대에 7981선 안착...또 사상 최고치",
+      "[채권/외환] 美 국채금리·달러 동반 강세…\"연준 금리인하 물 건너갔다...",
+      "[증시전략] 인플레 우려 뚫은 AI 반도체 '독자적' 랠리…판단은?"
+    ],
+    "themes": [
+      "반도체",
+      "금리",
+      "환율",
+      "시장심리"
+    ],
+    "confidence": 0.9,
+    "model_used": "gemini-2.5-flash"
+  },
+  "analyst": {
+    "findings": [],
+    "sector_sentiment": {},
+    "consensus_changes": 0,
+    "alert_items": [],
+    "confidence": 0,
+    "model_used": null
+  },
+  "crypto": {
+    "findings": [
+      {
+        "asset": "BTC",
+        "price_usd": 81412,
+        "key_level": "85,000 달러 저항선 테스트 또는 새로운 고점 형성",
+        "importance": 7
+      },
+      {
+        "asset": "ETH",
+        "price_usd": 2295.66,
+        "key_level": "2,500 달러 저항선 테스트",
+        "importance": 7
+      }
+    ],
+    "signal": "조정 구간",
+    "market_summary": "비트코인과 이더리움은 높은 가격 수준에서 긍정적인 24시간 수익률을 기록했으나, 시장 심리 지수는 '공포'를 나타내어 현 가격대에서 잠재적 변동성 또는 조정을 시사합니다.",
+    "kr_stocks_impact": [
+      {
+        "company": "카카오",
+        "ticker": "035720",
+        "expected_direction": "neutral"
+      },
+      {
+        "company": "카카오게임즈",
+        "ticker": "293490",
+        "expected_direction": "positive"
+      },
+      {
+        "company": "위메이드",
+        "ticker": "112040",
+        "expected_direction": "positive"
+      },
+      {
+        "company": "NHN",
+        "ticker": "181710",
+        "expected_direction": "positive"
+      }
+    ],
+    "regulatory_alert": null,
+    "fear_greed": {
+      "value": 34,
+      "label": "Fear"
+    },
+    "btc_dominance": 58.38,
+    "confidence": 0.8,
+    "model_used": "gemini-2.5-flash"
+  }
+}
