@@ -223,10 +223,14 @@ await fs.writeFile(`./outputs/${todayStr}/report.html`, html, 'utf-8');
 
 // ── 중복 발송 방지 (로컬: sent.flag / GA: Notion DB 조회) ───────────────────
 const sentFlagPath = `./outputs/${todayStr}/sent.flag`;
+const forceResend = process.argv.includes('--force');
 const localSent   = await fs.access(sentFlagPath).then(() => true).catch(() => false);
-if (localSent) {
+if (localSent && !forceResend) {
   console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 (로컬 플래그) — 건너뜀`);
   process.exit(0);
+}
+if (localSent && forceResend) {
+  console.log(`[INFO] --force 플래그 감지 — sent.flag 무시하고 재발송 진행`);
 }
 if (process.env.GITHUB_ACTIONS === 'true') {
   const { checkAlreadySent } = await import('./publishers/notion.js');
