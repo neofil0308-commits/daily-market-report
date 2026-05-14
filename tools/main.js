@@ -62,20 +62,6 @@ async function runWorkflow(opts = {}) {
     // 해외증시·환율 데이터를 Gemini에 넘겨 오늘의 추가 키워드 포함해 뉴스 수집
     const rawNews = await collectNews(reportDate, { overseas, fxRates });
 
-    // STEP 2.5: 전일 수급 스냅샷 병합 (16:40 KST에 수집된 supply.json)
-    const supplyPath = path.join(prevOutputDir, 'supply.json');
-    try {
-      const snap = JSON.parse(await fs.readFile(supplyPath, 'utf-8'));
-      if (snap.supply && (snap.supply.foreign != null || snap.supply.institution != null)) {
-        domestic.supply = snap.supply;
-        logger.info(`전일 수급 스냅샷 병합 완료 (${snap.date}): 외국인 ${snap.supply.foreign}`);
-      }
-      if (snap.vkospi?.today != null && domestic.vkospi?.today == null) {
-        domestic.vkospi = { ...snap.vkospi, source: 'snapshot' };
-        logger.info(`전일 VKOSPI 스냅샷 병합 완료: ${snap.vkospi.today}`);
-      }
-    } catch {}
-
     // STEP 3: 검증 및 변동값 계산
     data = validateData({ date: reportDate, domestic, overseas, fxRates, commodities, news: rawNews,
       meta: { krHoliday, usHoliday } });
