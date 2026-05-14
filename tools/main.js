@@ -12,6 +12,8 @@ import { collectOverseas }   from './collectors/overseas.js';
 import { collectFxRates }    from './collectors/fx_rates.js';
 import { collectCommodities} from './collectors/commodities.js';
 import { collectNews }       from './collectors/news.js';
+import { collectCrypto }     from './pipeline/crypto_feed.js';
+import { collectDart }       from './pipeline/dart_feed.js';
 import { validateData }      from './validators/data_validator.js';
 import { generateReport }    from './generators/report_generator.js';
 import { publishToNotion }   from './publishers/notion.js';
@@ -49,11 +51,13 @@ async function runWorkflow(opts = {}) {
     // 전일 outputs 경로 — VKOSPI carry-forward용
     const prevDate = today.subtract(1, 'day');
     const prevOutputDir = path.join(process.env.OUTPUT_DIR ?? './outputs', prevDate.format('YYYY-MM-DD'));
-    const [domestic, overseas, fxRates, commodities] = await Promise.all([
+    const [domestic, overseas, fxRates, commodities, crypto, dart] = await Promise.all([
       collectDomestic(krHoliday, prevOutputDir),
       collectOverseas(usHoliday),
       collectFxRates(),
       collectCommodities(),
+      collectCrypto().catch(() => null),
+      collectDart().catch(() => ({ reports: [] })),
     ]);
     // 해외증시·환율 데이터를 Gemini에 넘겨 오늘의 추가 키워드 포함해 뉴스 수집
     const rawNews = await collectNews(reportDate, { overseas, fxRates });
@@ -75,6 +79,8 @@ async function runWorkflow(opts = {}) {
     // STEP 3: 검증 및 변동값 계산
     data = validateData({ date: reportDate, domestic, overseas, fxRates, commodities, news: rawNews,
       meta: { krHoliday, usHoliday } });
+    data.crypto = crypto ?? null;
+    data.dart   = dart   ?? { reports: [] };
 
     await fs.writeFile(dataPath, JSON.stringify(data, null, 2), 'utf-8');
     logger.info('수집 데이터 저장 완료');

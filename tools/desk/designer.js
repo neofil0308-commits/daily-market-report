@@ -1068,13 +1068,18 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
       if (newsItems.length >= 6) break;
       if (!newsItems.includes(f)) newsItems.push(f);
     }
-    newsItems = newsItems.map(f => ({
-      category: f.theme ?? f.category ?? '시장전반',
-      title: f.headline ?? f.title ?? '',
-      impact: f.market_impact ?? '',
-    }));
+    const urlToTitle = new Map(rawNews.map(n => [n.url, n.title]));
+    newsItems = newsItems.map(f => {
+      const origTitle = (f.source_url && urlToTitle.get(f.source_url)) ?? null;
+      return {
+        category: f.theme ?? f.category ?? '시장전반',
+        title: origTitle ?? f.headline ?? f.title ?? '',
+        summary: Array.isArray(f.summary) ? f.summary
+          : (f.market_impact ? [f.market_impact] : []),
+      };
+    });
   } else if (rawNews.length) {
-    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', impact: '' }));
+    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', summary: [] }));
   }
 
   // 뉴스 태그 색상
@@ -1093,8 +1098,8 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     return { bg: '#eff6ff', txt: '#2563eb' };
   };
 
-  // Gmail 호환: CSS line-clamp 미지원 → JS에서 직접 truncate (최대 50자)
-  const truncateTitle = (str, max = 50) => {
+  // Gmail 호환: CSS line-clamp 미지원 → JS에서 직접 truncate
+  const truncateTitle = (str, max = 60) => {
     if (!str) return '제목 없음';
     return str.length > max ? str.slice(0, max).trimEnd() + '…' : str;
   };
@@ -1102,17 +1107,19 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   const newsRows = newsItems.map((n, i) => {
     const chip    = chipStyle(n.category);
     const isLast  = i === newsItems.length - 1;
-    const title   = truncateTitle(n.title, 50);
-    // impact 없을 때도 최소 높이(18px 빈 공간)를 유지해 카드 간 높이 편차 감소
-    const impactHtml = n.impact
-      ? `<div style="font-size:11px;color:#6b7280;margin-top:5px;line-height:1.5;font-family:${FONT}">${n.impact}</div>`
-      : `<div style="margin-top:5px;min-height:18px"></div>`;
-    return `<div style="padding:12px 0;min-height:72px;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
+    const title   = truncateTitle(n.title, 60);
+    const bullets = (n.summary ?? []).filter(Boolean);
+    const summaryHtml = bullets.length
+      ? bullets.map(b =>
+          `<div style="font-size:11px;color:#374151;line-height:1.6;font-family:${FONT}">${String(b).startsWith('•') ? b : '• ' + b}</div>`
+        ).join('')
+      : `<div style="min-height:14px"></div>`;
+    return `<div style="padding:12px 0;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
       <div style="margin-bottom:5px">
         <span style="display:inline-block;background:${chip.bg};color:${chip.txt};font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-right:7px;font-family:${FONT}">${n.category}</span>
       </div>
-      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.65;font-family:${FONT}">${title}</div>
-      ${impactHtml}
+      <div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</div>
+      ${summaryHtml}
     </div>`;
   }).join('');
 
@@ -1121,7 +1128,41 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   ${newsRows}
 </div>` : '';
 
-  // ── 6. CTA 섹션 ────────────────────────────────────────────────────────────
+  // ── 6. 애널리스트 섹션 ────────────────────────────────────────────────────
+  const analystFindings = (tfResults?.analyst?.findings ?? []).slice(0, 3);
+  let analystSection = '';
+  if (analystFindings.length) {
+    const analystRows = analystFindings.map((f, i) => {
+      const isLast = i === analystFindings.length - 1;
+      const tpPrev = f.target_price?.prev;
+      const tpNew  = f.target_price?.new;
+      const tpPct  = f.target_price?.change_pct;
+      const tpColor = (tpNew != null && tpPrev != null) ? (tpNew > tpPrev ? '#E24B4A' : '#378ADD') : '#1a1f2e';
+      const tpStr  = (tpPrev != null && tpNew != null)
+        ? `${fmtI(tpPrev)} → <span style="color:${tpColor};font-weight:700">${fmtI(tpNew)}원</span>${tpPct != null ? ` (${tpPct > 0 ? '+' : ''}${fmt2(tpPct)}%)` : ''}`
+        : tpNew != null ? `<span style="font-weight:700">${fmtI(tpNew)}원</span>` : '―';
+      return `<div style="padding:10px 0;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%">
+          <tr>
+            <td style="font-size:13px;font-weight:600;color:#1a1f2e;font-family:${FONT}">${f.company ?? '―'}
+              <span style="font-size:10px;font-weight:400;color:#6b7280;margin-left:6px">${f.sector ?? ''}</span>
+            </td>
+            <td style="font-size:11px;color:#6b7280;text-align:right;white-space:nowrap;font-family:${FONT}">${f.firm ?? ''} · ${f.rating_change ?? '―'}</td>
+          </tr>
+          <tr>
+            <td style="font-size:11px;color:#374151;padding-top:4px;font-family:${FONT}">${f.key_thesis ?? ''}</td>
+            <td style="font-size:11px;color:#374151;text-align:right;padding-top:4px;white-space:nowrap;font-family:${FONT}">목표가 ${tpStr}</td>
+          </tr>
+        </table>
+      </div>`;
+    }).join('');
+    analystSection = `<div style="padding:16px 24px 20px">
+  ${secHdr('📊', '애널리스트 리포트')}
+  ${analystRows}
+</div>`;
+  }
+
+  // ── 7. CTA 섹션 ────────────────────────────────────────────────────────────
   const url = reportUrl || '#';
   const ctaHtml = `<div style="background:#f8f9fb;padding:20px 24px;text-align:center;border-top:1px solid #edeef0">
   <a href="${url}" target="_blank"
@@ -1138,12 +1179,14 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   const sections = [
     summarySection,
     mktSection,
-    mktSection  && (fxSection || coinSection || newsSection) ? DIVIDER : '',
+    mktSection  && (fxSection || coinSection || newsSection || analystSection) ? DIVIDER : '',
     fxSection,
-    fxSection   && (coinSection || newsSection)              ? DIVIDER : '',
+    fxSection   && (coinSection || newsSection || analystSection)              ? DIVIDER : '',
     coinSection,
-    coinSection && newsSection                               ? DIVIDER : '',
+    coinSection && (newsSection || analystSection)                             ? DIVIDER : '',
     newsSection,
+    newsSection && analystSection                                              ? DIVIDER : '',
+    analystSection,
   ].filter(Boolean).join('');
 
   return `<!DOCTYPE html>

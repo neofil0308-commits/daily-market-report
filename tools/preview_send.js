@@ -5,7 +5,8 @@ import axios from 'axios';
 import nodemailer from 'nodemailer';
 import { buildHtml, buildEmailCard } from './desk/designer.js';
 import { runTFAnalyst } from './teams/tf_analyst.js';
-import { runTFNews } from './teams/tf_news.js';
+import { runTFNews }    from './teams/tf_news.js';
+import { runTFCrypto }  from './teams/tf_crypto.js';
 
 // ── 날짜·데이터 로드 ──────────────────────────────────────────────────────────
 const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -116,21 +117,32 @@ try {
   console.warn('[report] 뉴스 분석 실패 (무시):', e.message);
 }
 
-// ── TF-2 애널리스트 리포트 분석 ─────────────────────────────────────────────
+// ── TF-2 애널리스트 리포트 분석 + TF-3 코인 분석 (병렬) ─────────────────────
 let tfAnalystResult = { findings: [] };
+let tfCryptoResult  = { findings: [] };
 try {
-  tfAnalystResult = await runTFAnalyst(data.dart ?? { reports: [] }, news ?? []);
-  if (tfAnalystResult.findings?.length) {
+  [tfAnalystResult, tfCryptoResult] = await Promise.all([
+    runTFAnalyst(data.dart ?? { reports: [] }, news ?? []).catch(e => {
+      console.warn('[report] 애널리스트 분석 실패 (무시):', e.message);
+      return { findings: [] };
+    }),
+    runTFCrypto(data.crypto ?? null, news ?? []).catch(e => {
+      console.warn('[report] 코인 분석 실패 (무시):', e.message);
+      return { findings: [] };
+    }),
+  ]);
+  if (tfAnalystResult.findings?.length)
     console.log(`[report] 애널리스트 리포트 ${tfAnalystResult.findings.length}건 선정 완료`);
-  }
+  if (tfCryptoResult.findings?.length)
+    console.log(`[report] 코인 분석 ${tfCryptoResult.findings.length}건 완료`);
 } catch (e) {
-  console.warn('[report] 애널리스트 분석 실패 (무시):', e.message);
+  console.warn('[report] TF 분석 실패 (무시):', e.message);
 }
 
 // ── HTML 생성 (designer.js 공통 빌더) ────────────────────────────────────────
 const html = await buildHtml(
-  { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [] },
-  { news: tfNewsResult, analyst: tfAnalystResult },
+  { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [], crypto: data.crypto },
+  { news: tfNewsResult, analyst: tfAnalystResult, crypto: tfCryptoResult },
   { headline: null, include_crypto: !!(data.crypto), include_analyst: tfAnalystResult.findings?.length > 0 }
 );
 
@@ -155,10 +167,10 @@ if (process.env.GITHUB_ACTIONS === 'true') {
 // ── Gmail 발송 (뉴스카드 요약 이메일 + GitHub Pages 링크) ─────────────────────
 const reportUrl = `${process.env.PAGES_BASE_URL ?? ''}/outputs/${todayStr}/report.html`;
 
-const pipelineData = { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [] };
+const pipelineData = { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [], crypto: data.crypto };
 const cardHtml = buildEmailCard(
   pipelineData,
-  { news: tfNewsResult },
+  { news: tfNewsResult, analyst: tfAnalystResult, crypto: tfCryptoResult },
   { headline: null },
   reportUrl,
 );

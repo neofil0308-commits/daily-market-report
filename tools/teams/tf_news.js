@@ -68,10 +68,11 @@ function _buildPrompt(news, marketData) {
 {
   "findings": [
     {
-      "headline": "기사 제목",
+      "headline": "기사 제목 (원문 그대로 유지)",
       "theme": "테마명",
       "importance": 7,
       "market_impact": "KOSPI 단기 상승 압력",
+      "summary": ["• 핵심 포인트 1 (15자 이내)", "• 핵심 포인트 2 (15자 이내)", "• 핵심 포인트 3 (15자 이내, 선택)"],
       "verified": false,
       "source_url": "URL"
     }
@@ -80,6 +81,12 @@ function _buildPrompt(news, marketData) {
   "themes": ["반도체", "금리", "환율"],
   "confidence": 0.85
 }
+
+summary 작성 지침:
+- 각 bullet은 "• "로 시작하는 완결된 한국어 문장
+- 기사 핵심 사실 또는 시장 영향을 구체적 숫자/사실 포함해서 기술
+- 2개 필수, 3개 권장
+- headline은 원문 뉴스 제목을 그대로 사용 (재작성 금지)
 
 뉴스 목록 (${news.length}건):
 ${JSON.stringify(news.slice(0, 20).map(n => ({
