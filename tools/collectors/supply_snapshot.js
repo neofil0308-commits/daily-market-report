@@ -6,32 +6,48 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 
-const NAVER_POLL = 'https://polling.finance.naver.com/api/realtime/domestic/index';
 const NAVER_HDRS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  Referer: 'https://finance.naver.com/',
+  Referer: 'https://finance.naver.com/sise/sise_trans_style.naver',
 };
 
-async function collectSupply() {
+// 네이버 "투자자별 매매 동향 > 일자별 순매수" 페이지 스크래핑 (장 마감 후에도 작동)
+// 단위: 억원 (순매수 양수 = 순매수, 음수 = 순매도)
+async function collectSupply(dateStr) {
   try {
-    const res = await axios.get(`${NAVER_POLL}/KOSPI_INVESTOR`, {
-      headers: NAVER_HDRS, timeout: 10000,
+    const bizdate = dateStr.replace(/-/g, '');
+    const res = await axios.get(
+      `https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate=${bizdate}&sosok=`,
+      { headers: NAVER_HDRS, timeout: 12000, responseType: 'arraybuffer' }
+    );
+    const html = new TextDecoder('euc-kr').decode(res.data);
+
+    const { load } = await import('cheerio');
+    const $ = load(html);
+    const pn = s => { const v = parseFloat(String(s ?? '').replace(/,/g, '')); return isNaN(v) ? null : v; };
+
+    let result = null;
+    $('table tr').each((_, tr) => {
+      if (result) return;
+      const cells = $(tr).find('td').map((__, td) => $(td).text().trim()).get();
+      // 날짜 셀 형식: YY.MM.DD
+      if (cells.length >= 4 && /^\d{2}\.\d{2}\.\d{2}$/.test(cells[0])) {
+        // 첫 번째 데이터 행 = 오늘(bizdate) 데이터
+        // 컬럼: 날짜 | 개인 | 외국인 | 기관계 | 금융투자 | 보험 | 투신(사모) | 은행 | 기타금융기관 | 연기금 | 기타법인
+        result = {
+          individual:  pn(cells[1]),
+          foreign:     pn(cells[2]),
+          institution: pn(cells[3]),
+          collectedAt: new Date().toISOString(),
+        };
+      }
     });
-    const list = res.data?.datas ?? [];
-    if (list.length === 0) throw new Error('datas 비어있음 (장 마감 전 또는 API 불가)');
 
-    const find   = t => list.find(d => String(d.investorType ?? d.investorCode ?? d.name ?? '').includes(t));
-    const pn     = s => { const v = parseFloat(String(s ?? '').replace(/,/g, '')); return isNaN(v) ? null : v; };
-    const getNet = x => pn(x?.netBuySellAmountRaw ?? x?.netBuySellQuantityRaw ?? x?.netCount ?? x?.net);
-
-    return {
-      foreign:     getNet(find('외국인') ?? find('FOREIGN') ?? find('8')),
-      institution: getNet(find('기관')   ?? find('INSTITUTION') ?? find('4')),
-      individual:  getNet(find('개인')   ?? find('INDIVIDUAL')  ?? find('1')),
-      collectedAt: new Date().toISOString(),
-    };
+    if (!result) throw new Error('테이블 행 파싱 실패');
+    console.log(`[supply] 수급 수집 완료 (${dateStr}): 외국인 ${result.foreign}억, 기관 ${result.institution}억, 개인 ${result.individual}억`);
+    return result;
   } catch (e) {
-    console.warn('[supply] KOSPI_INVESTOR 수집 실패:', e.message);
+    console.warn('[supply] 수급 수집 실패:', e.message);
     return null;
   }
 }
@@ -73,7 +89,7 @@ const todayStr = dataDate.toISOString().slice(0, 10);
 const outputDir = path.join(process.env.OUTPUT_DIR ?? './outputs', todayStr);
 await fs.mkdir(outputDir, { recursive: true });
 
-const [supply, vkospi] = await Promise.all([collectSupply(), collectVkospi()]);
+const [supply, vkospi] = await Promise.all([collectSupply(todayStr), collectVkospi()]);
 
 const snapshot = { date: todayStr, supply, vkospi, savedAt: new Date().toISOString() };
 await fs.writeFile(path.join(outputDir, 'supply.json'), JSON.stringify(snapshot, null, 2), 'utf-8');
