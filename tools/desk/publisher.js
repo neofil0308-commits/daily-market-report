@@ -16,7 +16,7 @@ import { logger } from '../utils/logger.js';
  * @param {string} outputDir  출력 폴더 경로
  * @param {string} reportUrl  GitHub Pages 전체 리포트 URL
  */
-export async function publish(date, html, data, outputDir, reportUrl = '') {
+export async function publish(date, html, data, outputDir, reportUrl = '', tfResults = {}, editorialPlan = {}) {
   // ── 중복 발송 방지 ─────────────────────────────────────────────────────────
   const sentFlag = path.join(outputDir, 'sent.flag');
   const localSent = await fs.access(sentFlag).then(() => true).catch(() => false);
@@ -45,7 +45,7 @@ export async function publish(date, html, data, outputDir, reportUrl = '') {
     from:    `"시장 리포트" <${process.env.GMAIL_SENDER}>`,
     to:      process.env.GMAIL_RECIPIENT,
     subject: `${date} 시장 리포트`,
-    html: buildEmailCard(data, {}, {}, reportUrl),
+    html: buildEmailCard(data, tfResults, editorialPlan, reportUrl),
   });
   logger.info(`[publisher] Gmail 발송 완료 → ${process.env.GMAIL_RECIPIENT}`);
 

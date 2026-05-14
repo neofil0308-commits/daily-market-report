@@ -131,7 +131,7 @@ try {
 const html = await buildHtml(
   { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [] },
   { news: tfNewsResult, analyst: tfAnalystResult },
-  { headline: null, include_crypto: false, include_analyst: tfAnalystResult.findings?.length > 0 }
+  { headline: null, include_crypto: !!(data.crypto), include_analyst: tfAnalystResult.findings?.length > 0 }
 );
 
 // ── HTML 파일 저장 ───────────────────────────────────────────────────────────

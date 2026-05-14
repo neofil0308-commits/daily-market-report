@@ -2,5 +2,8 @@
 credentials.json
 token.json
 node_modules/
-outputs/
+outputs/**
+!outputs/
+!outputs/*/
+!outputs/*/supply.json
 .tmp/

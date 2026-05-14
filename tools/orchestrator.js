@@ -90,7 +90,8 @@ async function run(opts = {}) {
   logger.info('[desk/designer] report.html 저장 완료');
 
   // 3-C: 발행
-  const pubResult = await publish(reportDate, html, pipelineData, outputDir);
+  const reportUrl = `${process.env.PAGES_BASE_URL ?? ''}/outputs/${reportDate}/report.html`;
+  const pubResult = await publish(reportDate, html, pipelineData, outputDir, reportUrl, tfResults, editorialPlan);
   if (pubResult.skipped) {
     logger.info(`[desk/publisher] 발송 건너뜀 (${pubResult.reason})`);
   } else {
