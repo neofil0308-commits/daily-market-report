@@ -1,10 +1,86 @@
 {
   "news": {
-    "findings": [],
-    "top_stories": [],
-    "themes": [],
-    "confidence": 0,
-    "model_used": null
+    "findings": [
+      {
+        "headline": "코스피, 미 CPI발 금리 인하 기대에 7981선 안착...또 사상 최고치",
+        "theme": "금리",
+        "importance": 9,
+        "market_impact": "KOSPI/코스닥 단기 상승 압력",
+        "summary": [
+          "• 코스피는 전일 대비 1.75% 상승한 7981.41에 마감하며 사상 최고치를 경신했으며 8천선에 임박했습니다.",
+          "• 미국 소비자물가지수(CPI) 발표 이후 연방준비제도(Fed)의 금리 인하 기대감이 높아지며 증시 상승을 견인했습니다.",
+          "• 코스닥 또한 1.20% 오른 1191.09로 동반 강세를 보여 양 시장 모두 긍정적 흐름을 나타냈습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.financialpost.co.kr/news/articleView.html?idxno=259153"
+      },
+      {
+        "headline": "[200만닉스 시대 ①] 최태원 15년 승부··· 집념이 운명을 바꿨다",
+        "theme": "반도체",
+        "importance": 9,
+        "market_impact": "KOSPI/반도체 섹터 단기 상승 압력",
+        "summary": [
+          "• SK하이닉스 주가가 장중 200만원을 돌파하며 역사적 신고가를 경신, AI 메모리 반도체 시장 선두 주자임을 입증했습니다.",
+          "• 최태원 회장의 15년간 하이닉스 인수를 통한 AI 메모리 반도체 집중 투자가 결실을 맺으며 그룹의 핵심 동력으로 부상했습니다.",
+          "• SK하이닉스의 강세는 반도체 섹터 전반에 긍정적인 투자 심리를 제공하며 KOSPI 상승을 견인하는 요인으로 작용했습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.greenpostkorea.co.kr/news/articleView.html?idxno=306678"
+      },
+      {
+        "headline": "달러 강세, AI 랠리가 막았다…환율 1491원 소폭 상승 (종합)",
+        "theme": "환율",
+        "importance": 7,
+        "market_impact": "중립 (환율 상승 부담 있으나 증시 영향 상쇄)",
+        "summary": [
+          "• 원/달러 환율은 미국 소비자물가지수(CPI) 발표 후 달러 강세 압력 속에서도 1491원 수준으로 소폭 상승 마감했습니다.",
+          "• 인플레이션 압력이 지속되고 연방준비제도(Fed)의 금리 인하 기대가 약화되며 달러 강세 요인이 유지, 글로벌 외환시장에 영향을 미치고 있습니다.",
+          "• AI 기술주 랠리가 이어지며 증시에 긍정적 흐름을 제공, 환율 상승에 따른 시장 부담을 일부 상쇄했습니다."
+        ],
+        "verified": false,
+        "source_url": "https://www.news1.kr/finance/market-exr/6166957"
+      },
+      {
+        "headline": "메리츠금융지주, 1Q 순익 6802억…증권·화재 쌍끌이 실적 대박",
+        "theme": "실적",
+        "importance": 6,
+        "market_impact": "개별 기업 및 금융 섹터 단기 상승 압력",
+        "summary": [
+          "• 메리츠금융지주가 1분기 순이익 6802억원을 달성하며 메리츠증권과 메리츠화재 부문의 동반 성장을 통해 호실적을 기록했습니다.",
+          "• 중동발 리스크 등 대내외 불확실성 확대 상황에서도 우호적 증시 환경을 활용한 딜 부문 강화 등이 주효했습니다.",
+          "• 견조한 실적 발표는 해당 기업 및 금융 섹터 전반에 긍정적인 투자 심리를 제공할 것으로 예상됩니다."
+        ],
+        "verified": false,
+        "source_url": "http://www.thevaluenews.co.kr/news/view.php?idx=198753"
+      },
+      {
+        "headline": "7월부터 1천원 미만 '동전주' 상장폐지…대대적 물갈이 예고",
+        "theme": "정책",
+        "importance": 7,
+        "market_impact": "코스닥 일부 종목 단기 하락 압력, 장기적 시장 건전성 개선",
+        "summary": [
+          "• 금융당국이 7월부터 1천원 미만 이른바 '동전주'에 대한 상장폐지를 시행, 부실기업 퇴출을 가속화할 예정입니다.",
+          "• 시장 전반의 건전성을 높이고 투자자 보호를 강화하려는 취지로, 장기적으로는 증시 신뢰도 향상에 기여할 것으로 기대됩니다.",
+          "• 코스닥 시장 내 재무 상태가 취약한 일부 소형주에 단기적인 하방 압력으로 작용할 가능성이 존재합니다."
+        ],
+        "verified": false,
+        "source_url": "https://biz.sbs.co.kr/article_hub/20000310191?division=NAVER"
+      }
+    ],
+    "top_stories": [
+      "코스피, 미 CPI발 금리 인하 기대에 7981선 안착...또 사상 최고치",
+      "[200만닉스 시대 ①] 최태원 15년 승부··· 집념이 운명을 바꿨다",
+      "코스피 1.75% 상승한 7981.41 마감...8000선 임박"
+    ],
+    "themes": [
+      "금리",
+      "반도체",
+      "환율",
+      "실적",
+      "정책"
+    ],
+    "confidence": 0.9,
+    "model_used": "gemini-2.5-flash"
   },
   "analyst": {
     "findings": [],
@@ -18,24 +94,24 @@
     "findings": [
       {
         "asset": "BTC",
-        "price_usd": 79760,
-        "key_level": "$80,000 심리적 저항선 근접 및 조정",
+        "price_usd": 79601,
+        "key_level": "80,000달러 저항선, 75,000달러 지지선",
         "importance": 8
       },
       {
         "asset": "ETH",
-        "price_usd": 2262.27,
-        "key_level": "$2,250 지지선 테스트",
+        "price_usd": 2254.8,
+        "key_level": "2,300달러 저항선, 2,200달러 지지선",
         "importance": 7
       }
     ],
     "signal": "조정 구간",
-    "market_summary": "BTC와 ETH가 24시간 동안 소폭 하락하며 조정 국면에 진입했으며, 공포 심리가 확산되고 있습니다.",
+    "market_summary": "비트코인 및 이더리움이 2%대 하락하며 조정세가 심화되고 있으며, 시장 심리는 '공포(Fear)' 영역에 진입했습니다. 주요 코인 가격은 하방 압력을 받고 있으며, BTC 도미넌스는 58.26%로 견고합니다.",
     "kr_stocks_impact": [
       {
         "company": "카카오",
         "ticker": "035720",
-        "expected_direction": "neutral"
+        "expected_direction": "negative"
       },
       {
         "company": "카카오게임즈",
@@ -50,7 +126,7 @@
       {
         "company": "NHN",
         "ticker": "181710",
-        "expected_direction": "neutral"
+        "expected_direction": "negative"
       }
     ],
     "regulatory_alert": null,
@@ -59,7 +135,7 @@
       "label": "Fear"
     },
     "btc_dominance": 58.26,
-    "confidence": 0.9,
+    "confidence": 0.85,
     "model_used": "gemini-2.5-flash"
   }
 }

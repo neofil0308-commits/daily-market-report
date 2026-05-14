@@ -83,10 +83,10 @@
       }
     ],
     "vkospi": {
-      "today": 17.78,
+      "today": 17.83,
       "prev": 17.87,
-      "diff": -0.09,
-      "pct": -0.5,
+      "diff": -0.04,
+      "pct": -0.22,
       "direction": "down",
       "type": "지수",
       "source": "vix_fallback",
@@ -103,22 +103,6 @@
       "direction": "up",
       "type": "지수"
     },
-    "sp500": {
-      "today": 7444.25,
-      "prev": 7400.96,
-      "diff": 43.29,
-      "pct": 0.58,
-      "direction": "up",
-      "type": "지수"
-    },
-    "dow": {
-      "today": 49693.2,
-      "prev": 49760.56,
-      "diff": -67.36,
-      "pct": -0.14,
-      "direction": "down",
-      "type": "지수"
-    },
     "sox": {
       "today": 12017.98,
       "prev": 11717.26,
@@ -128,10 +112,10 @@
       "type": "지수"
     },
     "dax": {
-      "today": 24424.04,
+      "today": 24443.7,
       "prev": 24136.81,
-      "diff": 287.23,
-      "pct": 1.19,
+      "diff": 306.89,
+      "pct": 1.27,
       "direction": "up",
       "type": "지수"
     },
@@ -143,6 +127,14 @@
       "direction": "up",
       "type": "지수"
     },
+    "sp500": {
+      "today": 7444.25,
+      "prev": 7400.96,
+      "diff": 43.29,
+      "pct": 0.58,
+      "direction": "up",
+      "type": "지수"
+    },
     "nikkei": {
       "today": 62654.05,
       "prev": 63272.11,
@@ -150,22 +142,30 @@
       "pct": -0.98,
       "direction": "down",
       "type": "지수"
+    },
+    "dow": {
+      "today": 49693.2,
+      "prev": 49760.56,
+      "diff": -67.36,
+      "pct": -0.14,
+      "direction": "down",
+      "type": "지수"
     }
   },
   "fxRates": {
     "usdKrw": {
-      "today": 1490.94,
+      "today": 1491.09,
       "prev": 1492.99,
-      "diff": -2.05,
-      "pct": -0.14,
+      "diff": -1.9,
+      "pct": -0.13,
       "direction": "down",
       "type": "환율"
     },
     "dxy": {
-      "today": 98.5,
+      "today": 98.51,
       "prev": 98.48,
-      "diff": 0.02,
-      "pct": 0.02,
+      "diff": 0.03,
+      "pct": 0.03,
       "direction": "up",
       "type": "지수"
     },
@@ -194,60 +194,60 @@
     }
   },
   "commodities": {
-    "copper": {
-      "today": 6.61,
-      "prev": 6.64,
-      "diff": -0.03,
-      "pct": -0.45,
-      "direction": "down",
-      "type": "달러"
-    },
-    "wti": {
-      "today": 101.57,
-      "prev": 101.02,
-      "diff": 0.55,
-      "pct": 0.54,
+    "gold": {
+      "today": 4698.5,
+      "prev": 4697.7,
+      "diff": 0.8,
+      "pct": 0.02,
       "direction": "up",
       "type": "달러"
     },
-    "platinum": {
-      "today": 2132.5,
-      "prev": 2187.1,
-      "diff": -54.6,
-      "pct": -2.5,
+    "copper": {
+      "today": 6.62,
+      "prev": 6.64,
+      "diff": -0.02,
+      "pct": -0.3,
+      "direction": "down",
+      "type": "달러"
+    },
+    "silver": {
+      "today": 87.56,
+      "prev": 88.89,
+      "diff": -1.33,
+      "pct": -1.5,
       "direction": "down",
       "type": "달러"
     },
     "aluminum": {
-      "today": 3632.5,
+      "today": 3632,
       "prev": 3837.75,
-      "diff": -205.25,
-      "pct": -5.35,
+      "diff": -205.75,
+      "pct": -5.36,
       "direction": "down",
       "type": "달러"
     },
-    "gold": {
-      "today": 4701.4,
-      "prev": 4697.7,
-      "diff": 3.7,
-      "pct": 0.08,
+    "wti": {
+      "today": 101.7,
+      "prev": 101.02,
+      "diff": 0.68,
+      "pct": 0.67,
       "direction": "up",
       "type": "달러"
     },
-    "silver": {
-      "today": 87.65,
-      "prev": 88.89,
-      "diff": -1.24,
-      "pct": -1.39,
+    "platinum": {
+      "today": 2137.6,
+      "prev": 2187.1,
+      "diff": -49.5,
+      "pct": -2.26,
       "direction": "down",
       "type": "달러"
     },
     "goldKrw": {
-      "today": 844167,
+      "today": 843571,
       "prev": 843901,
-      "diff": 266,
-      "pct": 0.03,
-      "direction": "up",
+      "diff": -330,
+      "pct": -0.04,
+      "direction": "down",
       "type": "원화"
     }
   },
@@ -255,26 +255,10 @@
     {
       "category": "시장전반",
       "date": "2026-05-14",
-      "title": "[헬로스톡] 5/14 주목할 종목 : SK이노베이션·LG전자·한국전력·카카오",
-      "source": "hellot.net",
-      "url": "https://www.hellot.net/news/article.html?no=112587",
-      "body": "투자자별로는 기관과 개인이 각각 590억원, 910억원 순매수한 반면 외국인은 1,480억원을 순매도했다. 해외 증시 전일 주요 해외 증시는 혼조세로 마감했다. 미국 나스닥은 1.2% 상승한 26,402포인트, 독일 DAX는 1.0... "
-    },
-    {
-      "category": "시장전반",
-      "date": "2026-05-14",
-      "title": "코스피 1.75% 상승한 7981.41 마감...8000선 임박",
-      "source": "g-enews.com",
-      "url": "https://www.g-enews.com/view.php?ud=20260514155956834df2f5bc1bc_1",
-      "body": "업종별로는 IT대표주·전자·백화점·보험·항공 등 주요 테마가 실적개선 등으로 시장을 주도했다.... 유가증권시장에서 외국인은 2조 1445억 순매도를 기록했고 개인투자자는 1조 8378억 순매수 했다. 기관... "
-    },
-    {
-      "category": "시장전반",
-      "date": "2026-05-14",
       "title": "[퇴근길머니] '8천피' 고지 눈앞…6개월 만 '1만피' 전망",
       "source": "yonhapnewstv.co.kr",
       "url": "http://www.yonhapnewstv.co.kr/news/MYH20260514172546SRL",
-      "body": "외국인과 기관 매물이 쏟아지면서 상승폭을 줄인 채 7,980선에서 마감했습니다. 외국인은 오늘 2조 원 넘게 순매도했고, 5월 들어 누적 순매도도 17조 원을 넘어섰습니다. 그런데도 지수가 버틴 건 개인 매수세... "
+      "body": "7,980선에서 마감했습니다. 외국인은 오늘 2조 원 넘게 순매도했고, 5월 들어 누적 순매도도 17조 원을... 김채영 기자와 함께했습니다. #환율 #코스피 #코스닥 #스콧베선트 #통화스와프 #케빈워시 #MLCC #8천피 #삼성전기"
     },
     {
       "category": "시장전반",
@@ -294,11 +278,75 @@
     },
     {
       "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "[헬로스톡] 5/14 주목할 종목 : SK이노베이션·LG전자·한국전력·카카오",
+      "source": "hellot.net",
+      "url": "https://www.hellot.net/news/article.html?no=112587",
+      "body": "투자자별로는 기관과 개인이 각각 590억원, 910억원 순매수한 반면 외국인은 1,480억원을 순매도했다. 해외 증시 전일 주요 해외 증시는 혼조세로 마감했다. 미국 나스닥은 1.2% 상승한 26,402포인트, 독일 DAX는 1.0... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "코스피 1.75% 상승한 7981.41 마감...8000선 임박",
+      "source": "g-enews.com",
+      "url": "https://www.g-enews.com/view.php?ud=20260514155956834df2f5bc1bc_1",
+      "body": "업종별로는 IT대표주·전자·백화점·보험·항공 등 주요 테마가 실적개선 등으로 시장을 주도했다.... 유가증권시장에서 외국인은 2조 1445억 순매도를 기록했고 개인투자자는 1조 8378억 순매수 했다. 기관... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "코스피 사상 첫 7980선 돌파···'8000피' 눈앞",
+      "source": "smartbizn.com",
+      "url": "https://www.smartbizn.com/news/articleView.html?idxno=143900",
+      "body": "다만 시총 상위 종목에선 희비가 엇갈렸다. 주요 종목들을 보면 삼성전자(4.23%), 삼성전자우(2.43... 개인과 기관이 각각 910억원, 590억원을 순매수했고, 외국인이 1350억원을 팔아치웠다. 시가총액 상위 종목... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "메리츠금융지주, 1Q 순익 6802억…증권·화재 쌍끌이 실적 대박",
+      "source": "thevaluenews.co.kr",
+      "url": "http://www.thevaluenews.co.kr/news/view.php?idx=198753",
+      "body": "메리츠증권은 중동발 리스크 등 대내외 불확실성이 확대된 상황에서도 우호적 증시 환경을 활용하고 딜... 감소 영향으로 1638%까지 상승했다. 고정이하여신 비율은 4.2%를 기록했다. 메리츠증권은 고환율·고금리... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "위상 높아진 K뷰티, 코스피에도 반영…ODM·신흥주 재평가",
+      "source": "newsprime.co.kr",
+      "url": "http://www.newsprime.co.kr/news/article.html?no=733447",
+      "body": "그동안 증시의 관심이 반도체와 중후장대 산업에 집중됐다면, 소비재 영역에서는 화장품 업종의 재평가가... 고환율은 수출 기업에 우호적일 수 있지만 원자재와 물류비 부담을 키울 수 있고, 미국 관세와 중동 지역... "
+    },
+    {
+      "category": "시장전반",
       "date": "2026-05-13",
-      "title": "코스피, 아침 '삼성 결렬 타격' 딛고 또 사상 최고 경신…7844선 안착",
-      "source": "financialpost.co.kr",
-      "url": "https://www.financialpost.co.kr/news/articleView.html?idxno=258999",
-      "body": "코스피 지수가 외국인의 집중적인 매도세를 극복하고 사상 최고치를 다시 한번 갈아치웠다. 13일... 이날 코스닥은 전장 대비 0.20%(2.36포인트) 내린 1176.93으로 거래를 마감했다. 외환시장은 증시 상승과 연동되며... "
+      "title": "7월부터 1천원 미만 '동전주' 상장폐지…대대적 물갈이 예고",
+      "source": "biz.sbs.co.kr",
+      "url": "https://biz.sbs.co.kr/article_hub/20000310191?division=NAVER",
+      "body": "부실기업을 신속히 증시에서 퇴출시켜 시장 전반의 건전성을 높인다는 취지인데요. 이 내용은 김성훈... 중동전쟁 여파로 고환율이 이어지고 있는 데다, 다음 달 18일 대미투자특별법 발효 이후 대미투자 논의가... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "[기자의 눈] 코스피 8000 앞에서 시장이 던진 질문",
+      "source": "sedaily.com",
+      "url": "https://www.sedaily.com/article/20044278?ref=naver",
+      "body": "“중국 증시가 장기간 저평가되는 이유 중 하나는 자본주의가 제대로 작동하지 않는다는 의구심입니다. 한국... 코스피는 8000 선 돌파를 눈앞에 두고 하락 마감했다. 시장에서는 발언의 영향을 두고 의견이 엇갈렸고, 국내... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "8천피까지 19p 남았다…사상 첫 7980선 마감",
+      "source": "biz.sbs.co.kr",
+      "url": "https://biz.sbs.co.kr/article_hub/20000310456?division=NAVER",
+      "body": "뜨거운 주식시장의 열기가 오늘(14일)도 이어졌습니다. 코스피가 어제(13일)에 이어 오늘도 사상 최고치를... 삼성전자는 주당 30만 원 턱밑까지 올랐다 4.23% 급등한 29만 6,000원으로 마감해 신고가를 새로 썼습니다.... "
+    },
+    {
+      "category": "시장전반",
+      "date": "2026-05-14",
+      "title": "[오늘의 증시] 코스피 7,981 또 사상최고 경신…'8천피' 초읽기 돌입",
+      "source": "polinews.co.kr",
+      "url": "https://www.polinews.co.kr/news/articleView.html?idxno=731208",
+      "body": "미국 물가 지표 충격에 따른 달러 강세와 옵션 만기일 부담 속에서도 개인 투자자 매수세가 증시를... 이날 코스피는 전 거래일보다 137.40포인트(1.75%) 오른 7,981.41에 마감했다. 코스닥도 14.16포인트(1.20%) 상승한 1... "
     },
     {
       "category": "거시경제",
@@ -355,12 +403,12 @@
   },
   "crypto": {
     "btc": {
-      "price": 79760,
-      "change24h": -1.76
+      "price": 79601,
+      "change24h": -2
     },
     "eth": {
-      "price": 2262.27,
-      "change24h": -2.47
+      "price": 2254.8,
+      "change24h": -2.85
     },
     "btcDominance": 58.26,
     "totalMarketCapUsd": 2743612113868.1064,
@@ -373,15 +421,15 @@
         "rank": 1,
         "symbol": "BTC",
         "name": "Bitcoin",
-        "priceUsd": 79781,
-        "change24h": -1.74
+        "priceUsd": 79576,
+        "change24h": -2.03
       },
       {
         "rank": 2,
         "symbol": "ETH",
         "name": "Ethereum",
-        "priceUsd": 2263.41,
-        "change24h": -2.43
+        "priceUsd": 2253.92,
+        "change24h": -2.89
       },
       {
         "rank": 3,
@@ -394,36 +442,36 @@
         "rank": 4,
         "symbol": "BNB",
         "name": "BNB",
-        "priceUsd": 671.33,
-        "change24h": -1.59
+        "priceUsd": 669.9,
+        "change24h": -2.17
       },
       {
         "rank": 5,
         "symbol": "XRP",
         "name": "XRP",
         "priceUsd": 1.43,
-        "change24h": -2.02
+        "change24h": -2.52
       },
       {
         "rank": 6,
         "symbol": "USDC",
         "name": "USDC",
         "priceUsd": 1,
-        "change24h": 0.01
+        "change24h": -0.05
       },
       {
         "rank": 7,
         "symbol": "SOL",
         "name": "Solana",
-        "priceUsd": 90.94,
-        "change24h": -4.96
+        "priceUsd": 90.61,
+        "change24h": -5.38
       },
       {
         "rank": 8,
         "symbol": "TRX",
         "name": "TRON",
         "priceUsd": 0.35,
-        "change24h": 0.51
+        "change24h": 0.72
       },
       {
         "rank": 9,
@@ -437,9 +485,9 @@
         "symbol": "DOGE",
         "name": "Dogecoin",
         "priceUsd": 0.11,
-        "change24h": 0.5
+        "change24h": -1
       }
     ],
-    "collectedAt": "2026-05-14T09:18:24.010Z"
+    "collectedAt": "2026-05-14T09:43:42.325Z"
   }
 }
