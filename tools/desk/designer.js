@@ -302,25 +302,37 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
     !['BTC', 'ETH'].includes(coin.symbol?.toUpperCase())
   ).slice(0, 5);
 
+  // top10에서 BTC·ETH 실제 순위 조회
+  const btcEntry = top10?.find(c => c.symbol?.toUpperCase() === 'BTC') ?? { rank: 1 };
+  const ethEntry = top10?.find(c => c.symbol?.toUpperCase() === 'ETH') ?? { rank: 2 };
+
+  // tfCrypto.findings에서 코인별 시장동향 추출
+  const findingFor = (sym) =>
+    (tfCrypto?.findings ?? []).find(f => (f.asset ?? '').toUpperCase() === sym.toUpperCase())?.key_level ?? '';
+
   const TH  = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #e0e0e0';
   const THL = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid #e0e0e0';
   const THC = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #e0e0e0';
   const TD  = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:right';
   const TDL = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;font-weight:600';
   const TDC = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:center';
+  const TDNOTE = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#555;font-size:12px;text-align:left';
 
   const chgSpan = (v) => {
     const color = v >= 0 ? COLOR.up : COLOR.dn;
     return `<span style="color:${color}">${arr(v)} ${sgn(v)}${N(Math.abs(v ?? 0))}%</span>`;
   };
 
+  const btcNote = findingFor('BTC') || (tfCrypto?.market_summary ? tfCrypto.market_summary.slice(0, 45) : '');
+  const ethNote = findingFor('ETH');
+
   const rows = filteredTop10.map(coin => `
     <tr>
       <td style="${TDC}">${coin.rank}</td>
-      <td style="${TDL}">${coin.symbol}</td>
+      <td style="${TDL}">${coin.symbol ?? coin.name}</td>
       <td style="${TD}">$${N(coin.priceUsd)}</td>
       <td style="${TD}">${chgSpan(coin.change24h)}</td>
-      <td style="${TD}"></td>
+      <td style="${TDNOTE}">${findingFor(coin.symbol ?? '')}</td>
     </tr>`).join('');
 
   const footerItems = [
@@ -337,22 +349,22 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   <div class="sec-title">블록체인 · 코인</div>
   <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>
-      <th style="${THC};width:6%">순위</th><th style="${THL};width:14%">심볼</th>
-      <th style="${TH};width:24%">시세(USD)</th><th style="${TH};width:18%">24h 변동</th>
-      <th style="${TH};width:38%">시장 동향</th>
+      <th style="${THC};width:5%">순위</th><th style="${THL};width:10%">심볼</th>
+      <th style="${TH};width:22%">시세(USD)</th><th style="${TH};width:15%">24h 변동</th>
+      <th style="${THL};width:48%">시장 동향</th>
     </tr></thead>
     <tbody>
       <tr>
-        <td style="${TDC}">—</td><td style="${TDL}">BTC</td>
+        <td style="${TDC}">${btcEntry.rank}</td><td style="${TDL}">BTC</td>
         <td style="${TD}">$${N(btc?.price)}</td>
         <td style="${TD}">${chgSpan(btc?.change24h)}</td>
-        <td style="${TD}">${tfCrypto?.market_summary ? tfCrypto.market_summary.slice(0,25) : ''}</td>
+        <td style="${TDNOTE}">${btcNote}</td>
       </tr>
       ${eth ? `<tr>
-        <td style="${TDC}">—</td><td style="${TDL}">ETH</td>
+        <td style="${TDC}">${ethEntry.rank}</td><td style="${TDL}">ETH</td>
         <td style="${TD}">$${N(eth?.price)}</td>
         <td style="${TD}">${chgSpan(eth?.change24h)}</td>
-        <td style="${TD}"></td>
+        <td style="${TDNOTE}">${ethNote}</td>
       </tr>` : ''}
       ${rows}
     </tbody>
@@ -754,6 +766,17 @@ async function _buildHistIssues(histDisp, histAll, tfResults) {
     return { date: h.date, close: h.close, diff, pct };
   });
 
+  // 데이터 기반 폴백: 등락률 계산 결과를 그대로 표시
+  const dataFallback = {};
+  rows.forEach(r => {
+    if (r.pct != null) {
+      const absP = Math.abs(r.pct);
+      dataFallback[r.date] = absP < 0.3 ? '보합권 횡보' :
+        absP >= 1.5 ? `${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}% 대폭 ${r.pct >= 0 ? '상승' : '하락'}` :
+        `${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}% ${r.pct >= 0 ? '소폭 상승' : '소폭 하락'}`;
+    }
+  });
+
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash' });
@@ -769,10 +792,10 @@ ${JSON.stringify(rows, null, 2)}
 
 반드시 JSON만 응답 (키는 MM/DD 형식): {"05/07":"외인 순매도 확대","05/08":"FOMC 의사록 대기 보합", ...}`);
     const raw = res.response.text().replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-    return JSON.parse(raw);
+    return { ...dataFallback, ...JSON.parse(raw) };
   } catch (e) {
-    console.warn('[designer] histIssues 생성 실패 (무시):', e.message);
-    return {};
+    console.warn('[designer] histIssues Gemini 실패 — 데이터 기반 폴백 사용:', e.message);
+    return dataFallback;
   }
 }
 
@@ -794,18 +817,60 @@ ${JSON.stringify(news.slice(0, 12).map(n => ({ url: n.url, title: n.title, body:
   return map;
 }
 
-async function _buildRowNotes(pipelineData, tfResults = {}) {
-  const empty = {
-    kospi:'', kosdaq:'', vkospi:'', volume:'', marketCap:'',
-    dow:'', sp500:'', nasdaq:'', sox:'', nikkei:'', hsi:'',
-    usdKrw:'', dxy:'', us10y:'', us2y:'',
-    gold:'', wti:'', copper:'',
-  };
-  try {
-    const { domestic: d, overseas: o, fxRates: fx, commodities: c } = pipelineData ?? {};
-    const apiKey = process.env.GOOGLE_API_KEY;
-    if (!apiKey) return empty;
+// 데이터만으로 비고 열 생성 (AI 없음, 항상 작동)
+function _buildRowNotesFallback(d, o, fx, c) {
+  const p2   = v => v?.pct != null ? `${v.pct >= 0 ? '+' : ''}${Number(v.pct).toFixed(2)}%` : '';
+  const dir  = v => v?.pct != null ? (v.pct > 0.3 ? '↑' : v.pct < -0.3 ? '↓' : '→') : '';
+  const join = (...parts) => parts.filter(Boolean).join(' ');
 
+  // VKOSPI 레벨 해석
+  const vk     = d?.vkospi?.today;
+  const vkLbl  = vk == null ? '' : vk > 30 ? '불안심리 고조' : vk > 25 ? '경계 수준' : vk > 20 ? '관심 필요' : '안정권';
+
+  // 수급 최신 1일 (supplyHistory 마지막 항목)
+  const latestSup  = d?.supplyHistory?.at(-1) ?? null;
+  const supNote    = latestSup ? (() => {
+    const f = latestSup.foreign;
+    if (f == null) return '';
+    const absF = Math.abs(f);
+    const unit = absF >= 1000 ? `${(absF / 1000).toFixed(1)}천억` : `${Math.round(absF)}억`;
+    return `외인 ${f >= 0 ? '+' : '-'}${unit}`;
+  })() : '';
+
+  // 환율 레벨
+  const krwLvl = fx?.usdKrw?.today != null
+    ? `${Math.round(fx.usdKrw.today).toLocaleString('ko-KR')}원` : '';
+
+  return {
+    kospi:    join(dir(d?.kospi), p2(d?.kospi), supNote),
+    kosdaq:   join(dir(d?.kosdaq), p2(d?.kosdaq)),
+    vkospi:   vk != null ? `${vk} — ${vkLbl}` : '',
+    volume:   d?.volumeBn != null ? `${d.volumeBn.toFixed(1)}조원 거래` : '',
+    marketCap: '',
+    dow:      join(dir(o?.dow),    p2(o?.dow)),
+    sp500:    join(dir(o?.sp500),  p2(o?.sp500)),
+    nasdaq:   join(dir(o?.nasdaq), p2(o?.nasdaq)),
+    sox:      join(dir(o?.sox),    p2(o?.sox)),
+    nikkei:   join(dir(o?.nikkei), p2(o?.nikkei)),
+    hsi:      join(dir(o?.hsi),    p2(o?.hsi)),
+    usdKrw:   join(krwLvl, dir(fx?.usdKrw)),
+    dxy:      fx?.dxy?.today != null ? `${fx.dxy.today.toFixed(2)} ${dir(fx.dxy)}`.trim() : '',
+    us10y:    fx?.us10y?.today != null ? `${fx.us10y.today.toFixed(2)}% 수익률` : '',
+    us2y:     fx?.us2y?.today  != null ? `${fx.us2y.today.toFixed(2)}%` : '',
+    gold:     join(c?.gold?.today  != null ? `$${Number(c.gold.today).toFixed(0)}/oz` : '', dir(c?.gold), '안전자산'),
+    wti:      join(c?.wti?.today   != null ? `$${Number(c.wti.today).toFixed(1)}/bbl` : '', dir(c?.wti)),
+    copper:   join(c?.copper?.today != null ? `$${Number(c.copper.today).toFixed(2)}/lb` : '', dir(c?.copper), '경기선행'),
+  };
+}
+
+async function _buildRowNotes(pipelineData, tfResults = {}) {
+  const { domestic: d, overseas: o, fxRates: fx, commodities: c } = pipelineData ?? {};
+  const fallback = _buildRowNotesFallback(d, o, fx, c);
+
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) return fallback;
+
+  try {
     const themes  = tfResults?.news?.themes    ?? [];
     const stories = (tfResults?.news?.top_stories ?? []).slice(0, 3);
 
@@ -847,10 +912,10 @@ ${JSON.stringify({
 
     const res = await model.generateContent(prompt);
     const raw = res.response.text().replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-    return { ...empty, ...JSON.parse(raw) };
+    return { ...fallback, ...JSON.parse(raw) };
   } catch (e) {
-    console.warn('[designer] rowNotes 생성 실패 (무시):', e.message);
-    return empty;
+    console.warn('[designer] rowNotes Gemini 실패 — 데이터 기반 폴백 사용:', e.message);
+    return fallback;
   }
 }
 

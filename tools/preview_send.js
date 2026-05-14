@@ -170,11 +170,24 @@ try {
   console.warn('[report] TF 분석 실패 (무시):', e.message);
 }
 
+// DART 리포트가 있지만 Gemini가 실패해 findings가 비면 → 원시 DART로 폴백
+if (tfAnalystResult.findings.length === 0 && data.dart?.reports?.length > 0) {
+  tfAnalystResult.findings = data.dart.reports.slice(0, 5).map(r => ({
+    company:      r.corp_name ?? r.stock_name ?? '―',
+    firm:         r.flr_nm   ?? '―',
+    rating_change: '―',
+    target_price: { new: null },
+    key_thesis:   r.report_nm ?? r.title ?? '',
+    importance:   5,
+  }));
+  console.log(`[report] 애널리스트 DART 폴백: ${tfAnalystResult.findings.length}건`);
+}
+
 // ── HTML 생성 (designer.js 공통 빌더) ────────────────────────────────────────
 const html = await buildHtml(
   { date: data.date, domestic: d, overseas: o, fxRates: fx, commodities: c, news: news ?? [], crypto: data.crypto },
   { news: tfNewsResult, analyst: tfAnalystResult, crypto: tfCryptoResult },
-  { headline: null, include_crypto: !!(data.crypto), include_analyst: tfAnalystResult.findings?.length > 0 }
+  { headline: null, include_crypto: !!(data.crypto), include_analyst: data.dart?.reports?.length > 0 }
 );
 
 // ── HTML 파일 저장 ───────────────────────────────────────────────────────────
