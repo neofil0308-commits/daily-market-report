@@ -1,25 +1,31 @@
-// tools/teams/tf_news.js — TF-1 뉴스 분석팀
-// 원시 뉴스 + 시장 데이터 → 중요도 분류·테마 군집화·시장 영향 판단
+// tools/layer-2-research/tf-news/index.js — TF-1 뉴스 분석팀
+// 자기 도메인 데이터(Naver News)를 직접 수집해 분석. Layer 1 의존 제거(2026-05-16).
+// 원시 뉴스 + 시장 컨텍스트 → 중요도 분류·테마 군집화·시장 영향 판단
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../shared/utils/logger.js';
 import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
+import { collectNews } from './feeds/news_feed.js';
 
 /**
  * TF-1: 뉴스 분석 실행.
- * @param {object[]} news       Layer 1 뉴스 배열
- * @param {object}   marketData Layer 1 시장 데이터 (컨텍스트용)
+ * @param {object} marketData Layer 1 시장 데이터 (overseas·fxRates 등 — AI 키워드 생성용)
  * @returns {Promise<TFNewsResult>}
  */
-export async function runTFNews(news, marketData = {}) {
+export async function runTFNews(marketData = {}) {
+  // 자기 도메인 데이터를 직접 수집 (Layer 1의 cross-layer 제거)
+  const date = marketData?.date ?? new Date().toISOString().slice(0, 10);
+  const news = await collectNews(date, marketData)
+    .catch(e => { logger.warn('[tf-news] 뉴스 수집 실패:', e.message); return []; });
+
   if (!news?.length) {
     logger.info('[tf-news] 뉴스 없음 — 건너뜀');
-    return _emptyResult();
+    return _emptyResult(news);
   }
 
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     logger.warn('[tf-news] GOOGLE_API_KEY 미설정 — 분석 생략');
-    return _emptyResult();
+    return _emptyResult(news);
   }
 
   const modelName = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
@@ -42,10 +48,11 @@ export async function runTFNews(news, marketData = {}) {
       themes:       parsed.themes       ?? [],
       confidence:   parsed.confidence   ?? 0.7,
       model_used:   modelName,
+      news_raw:     news,   // ⭐ orchestrator가 다른 TF팀·DESK에 합성해 전달
     };
   } catch (e) {
     logger.warn('[tf-news] 분석 실패:', e.message);
-    return _emptyResult();
+    return _emptyResult(news);
   }
 }
 
@@ -103,21 +110,29 @@ ${JSON.stringify(news.slice(0, 20).map(n => ({
   })), null, 2)}`;
 }
 
-function _emptyResult() {
-  return { findings: [], top_stories: [], themes: [], confidence: 0, model_used: null };
+function _emptyResult(news = []) {
+  return {
+    findings: [], top_stories: [], themes: [],
+    confidence: 0, model_used: null,
+    news_raw: news,
+  };
 }
 
-// 단독 실행 (디버깅용): node tools/teams/tf_news.js --date 2026-05-12
+// 단독 실행: node tools/layer-2-research/tf-news/index.js --date 2026-05-12
+// 2026-05-16: news는 자체 수집. 시장 데이터는 data.json에서 컨텍스트로 사용.
 if (process.argv.includes('--date')) {
   import('dotenv/config').then(async () => {
     const fs   = await import('fs/promises');
     const path = await import('path');
     const idx  = process.argv.indexOf('--date');
     const date = process.argv[idx + 1] ?? new Date().toISOString().slice(0, 10);
-    const data = JSON.parse(await fs.default.readFile(
-      path.default.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
-    ));
-    const result = await runTFNews(data.news, data);
+    let marketData = { date };
+    try {
+      marketData = JSON.parse(await fs.default.readFile(
+        path.default.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
+      ));
+    } catch { /* 시장 컨텍스트 없어도 동작 (기본 키워드만 사용) */ }
+    const result = await runTFNews(marketData);
     console.log(JSON.stringify(result, null, 2));
   });
 }

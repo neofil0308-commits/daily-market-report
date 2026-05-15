@@ -55,15 +55,19 @@ async function run(opts = {}) {
   // ──────────────────────────────────────────────────────────────
   logger.info('\n[Layer 2] TF 리서치팀 병렬 분석 시작...');
 
-  // 각 TF팀은 자기 도메인 데이터를 직접 수집 (Layer 1 cross-layer 제거 — 2026-05-16)
-  // tf-analyst: 한경 컨센서스 + DART 자체 호출 / tf-crypto: CoinGecko 자체 호출
-  // 둘 다 결과 객체에 raw data를 노출(dart_reports, crypto_data)해 orchestrator가 폴백·designer 호환에 사용.
-  const [tfNews, tfAnalystInitial, tfCrypto] = await Promise.all([
-    runTFNews(pipelineData.news, pipelineData)
-      .catch(e => { logger.warn('[TF-1] 실패:', e.message); return { findings:[], top_stories:[], themes:[] }; }),
-    runTFAnalyst(pipelineData.news ?? [])
+  // 각 TF팀은 자기 도메인 데이터를 직접 수집 (Layer 1 cross-layer 완전 제거 — 2026-05-16)
+  // tf-news: Naver News 자체 수집 / tf-analyst: 한경 + DART 자체 / tf-crypto: CoinGecko 자체
+  //
+  // 의존 흐름: tf-news가 먼저 (뉴스 raw가 tf-analyst·tf-crypto의 필터 입력) → 나머지 둘 병렬
+  // tf-news 결과의 news_raw를 다른 TF팀과 DESK에 합성해 전달.
+  const tfNews = await runTFNews(pipelineData)
+    .catch(e => { logger.warn('[TF-1] 실패:', e.message); return { findings:[], top_stories:[], themes:[], news_raw: [] }; });
+  const newsRaw = tfNews.news_raw ?? [];
+
+  const [tfAnalystInitial, tfCrypto] = await Promise.all([
+    runTFAnalyst(newsRaw)
       .catch(e => { logger.warn('[TF-2] 실패:', e.message); return { findings:[], consensus_raw:[], dart_reports:[] }; }),
-    runTFCrypto(pipelineData.news ?? [])
+    runTFCrypto(newsRaw)
       .catch(e => { logger.warn('[TF-3] 실패:', e.message); return { findings:[], crypto_data: null }; }),
   ]);
 
@@ -74,7 +78,7 @@ async function run(opts = {}) {
   // (3) 한경도 비면 DART 리포트로 최종 폴백
   let tfAnalyst = tfAnalystInitial;
   if ((tfAnalyst.findings?.length ?? 0) === 0) {
-    const hasAnalystNews = (pipelineData.news ?? []).some(n =>
+    const hasAnalystNews = newsRaw.some(n =>
       /목표주가|목표가|투자의견|증권사|리포트|매수|매도|Buy|Hold/i.test((n.title ?? '') + ' ' + (n.body ?? ''))
     );
     const hasConsensus = (tfAnalyst.consensus_raw?.length ?? 0) > 0;
@@ -83,7 +87,7 @@ async function run(opts = {}) {
       logger.info('[TF-2] 애널리스트 분석 재시도 (3초 후)...');
       await new Promise(r => setTimeout(r, 3000));
       try {
-        const retry = await runTFAnalyst(pipelineData.news ?? []);
+        const retry = await runTFAnalyst(newsRaw);
         if ((retry.findings?.length ?? 0) > 0) {
           tfAnalyst = retry;
           logger.info(`[TF-2] 재시도 성공: ${tfAnalyst.findings.length}건`);
@@ -199,11 +203,12 @@ async function run(opts = {}) {
   // ──────────────────────────────────────────────────────────────
   logger.info('\n[Layer 3] DESK 편집·디자인·발행 시작...');
 
-  // designer 호환 합성: Layer 1이 더 이상 crypto/dart를 갖지 않으므로,
-  // TF팀이 노출한 raw를 designer가 보던 자리(pipelineData.crypto, .dart)에 합성해서 전달.
-  // 이렇게 하면 designer.js 변경 없이 새 데이터 흐름 유지.
+  // designer 호환 합성: Layer 1이 더 이상 news/dart/crypto를 갖지 않으므로,
+  // TF팀이 노출한 raw를 designer가 보던 자리(news, crypto, dart)에 합성해서 전달.
+  // 이렇게 하면 editor/designer/publisher 변경 없이 새 데이터 흐름 유지.
   const desktopData = {
     ...pipelineData,
+    news:   newsRaw,
     crypto: tfCrypto.crypto_data ?? null,
     dart:   { reports: tfAnalyst.dart_reports ?? [] },
   };

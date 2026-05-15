@@ -1,6 +1,6 @@
 ---
 name: desk
-description: Use when working on editorial decisions, content curation, section inclusion logic, news ordering/selection, analyst report selection, headline generation, Notion publishing, or any changes to tools/layer-3-desk/editor/index.js, tools/layer-3-desk/publisher/index.js, or tools/layer-3-desk/publisher/channels/. For HTML visual design and CSS changes, use the design agent instead. Do NOT modify tools/legacy/preview_send.js or tools/legacy/main.js — those are deprecated legacy paths and changes there will not reach GitHub Actions.
+description: Use when working on editorial decisions, content curation, section inclusion logic, news ordering/selection, analyst report selection, headline generation, Notion publishing, or any changes to tools/layer-3-desk/editor/index.js, tools/layer-3-desk/publisher/index.js, or tools/layer-3-desk/publisher/channels/. For HTML visual design and CSS changes, use the design agent instead.
 tools: Bash, Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
@@ -15,8 +15,7 @@ model: sonnet
 - `tools/layer-3-desk/publisher/channels/gmail.js`, `tools/layer-3-desk/publisher/channels/notion.js`
 
 ## ⚠️ 진입점 주의
-**GA는 `tools/orchestrator.js`만 실행한다.** `tools/legacy/preview_send.js`·`tools/legacy/main.js`는 deprecated 레거시 도구로, 여기에 새 기능을 추가하면 GA에 반영되지 않는다.
-신규 발행·재시도·폴백 로직은 반드시 `tools/orchestrator.js` 또는 `tools/layer-3-desk/publisher/index.js`에 추가한다.
+**GA는 `tools/orchestrator.js`만 실행한다.** 신규 발행·재시도·폴백 로직은 반드시 `tools/orchestrator.js` 또는 `tools/layer-3-desk/publisher/index.js`에 추가한다.
 
 ## DESK의 편집 결정 역할
 모든 TF팀 결과를 받아 아래를 수행한다:

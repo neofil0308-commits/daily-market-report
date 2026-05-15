@@ -6,8 +6,7 @@ import { collectDomestic, fetchKospiMarketCap, fetchNaverKospiHistory } from './
 import { collectOverseas }    from './collectors/overseas.js';
 import { collectFxRates }     from './collectors/fx_rates.js';
 import { collectCommodities } from './collectors/commodities.js';
-import { collectNews }        from './collectors/news.js';
-// dart/crypto는 각 TF팀 소속(Layer 2)이 자체 호출 — Layer 1은 시장 데이터만 책임.
+// news는 tf-news 소속, dart/crypto는 tf-analyst·tf-crypto 소속. Layer 1은 시장 데이터(4종)만 책임.
 import { validateData }       from '../shared/validators/data_validator.js';
 import { isHoliday }          from '../shared/utils/holiday.js';
 import { logger }             from '../shared/utils/logger.js';
@@ -50,14 +49,11 @@ export async function runPipeline(reportDate, outputDir) {
       .catch(e => { logger.warn('[pipeline] commodities 실패:', e.message); return {}; }),
   ]);
 
-  // 뉴스 수집 (시장 데이터 컨텍스트 전달 — AI 키워드 생성용)
-  const news = await collectNews(reportDate, { overseas, fxRates })
-    .catch(e => { logger.warn('[pipeline] news 실패:', e.message); return []; });
-
-  // dart/crypto는 Layer 2 각 TF팀이 자체 수집 (cross-layer import 제거됨)
+  // news/dart/crypto는 Layer 2 각 TF팀이 자체 수집 (Layer 1은 시장 데이터 전용)
   const coreData = validateData({
     date: reportDate,
-    domestic, overseas, fxRates, commodities, news,
+    domestic, overseas, fxRates, commodities,
+    news: [],   // 호환을 위해 빈 배열 유지 (validator 통과용). 실제 뉴스는 tf-news가 수집.
     meta: { krHoliday, usHoliday },
   });
 

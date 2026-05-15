@@ -11,7 +11,6 @@ model: sonnet
 - `tools/orchestrator.js` — **GA 단독 진입점**. 3-layer 파이프라인 + 폴백/재시도 + 발행 통합
 - `.github/workflows/daily-report.yml` — GA 스케줄·단계 관리
 - 전체 워크플로우 E2E 디버깅
-- `tools/legacy/main.js`·`tools/legacy/preview_send.js` — deprecated. 신규 수정 금지. 삭제는 별도 결재 후 진행.
 
 ## 파이프라인 실행 순서
 1. **Layer 1** `tools/layer-1-pipeline/` — 병렬 데이터 수집 (AI 없음)
@@ -40,7 +39,7 @@ model: sonnet
 | Daily Market Report | `daily-report.yml` | 08:00 (주) / 10:00 (백업) | `node tools/orchestrator.js --now` |
 
 > GA Free Plan cron은 수 시간 지연될 수 있다. 백업 스케줄(10:00 KST)이 누락 방지.
-> `supply-collect.yml`은 2026-05-14 제거됨 — 수급 데이터는 orchestrator 실행 시 `preview_send`가 아닌 pipeline 폴백에서 직접 수집한다.
+> `supply-collect.yml`은 2026-05-14 제거됨 — 수급 데이터는 orchestrator 실행 시 pipeline 폴백에서 직접 수집한다.
 
 ## 진단 체크리스트
 문제가 생기면 이 순서로 확인한다:
