@@ -1,6 +1,6 @@
 // tools/publishers/notion.js — 일별 리포트 아카이빙 (데이터베이스)
 import { Client } from '@notionhq/client';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../../shared/utils/logger.js';
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 

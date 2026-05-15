@@ -8,10 +8,10 @@ import 'dotenv/config';
 import fs from 'fs/promises';
 import axios from 'axios';
 import nodemailer from 'nodemailer';
-import { buildHtml, buildEmailCard } from './desk/designer.js';
-import { runTFAnalyst } from './teams/tf_analyst.js';
-import { runTFNews }    from './teams/tf_news.js';
-import { runTFCrypto }  from './teams/tf_crypto.js';
+import { buildHtml, buildEmailCard } from '../layer-3-desk/design/index.js';
+import { runTFAnalyst } from '../layer-2-research/tf-analyst/index.js';
+import { runTFNews }    from '../layer-2-research/tf-news/index.js';
+import { runTFCrypto }  from '../layer-2-research/tf-crypto/index.js';
 
 // ── 날짜·데이터 로드 ──────────────────────────────────────────────────────────
 const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -238,7 +238,7 @@ if (localSent && forceResend) {
   console.log(`[INFO] --force 플래그 감지 — sent.flag 무시하고 재발송 진행`);
 }
 if (process.env.GITHUB_ACTIONS === 'true') {
-  const { checkAlreadySent } = await import('./publishers/notion.js');
+  const { checkAlreadySent } = await import('../layer-3-desk/publisher/channels/notion.js');
   if (await checkAlreadySent(todayStr)) {
     console.log(`⏭  ${todayStr} 리포트는 이미 발송됨 (Notion 확인) — 건너뜀`);
     process.exit(0);
@@ -273,7 +273,7 @@ console.log(`✅ 리포트 발송 완료 → ${process.env.GMAIL_RECIPIENT}`);
 
 // ── Notion 아카이빙 ───────────────────────────────────────────────────────────
 try {
-  const { publishToNotion } = await import('./publishers/notion.js');
+  const { publishToNotion } = await import('../layer-3-desk/publisher/channels/notion.js');
   await publishToNotion(todayStr, '', html, data);
 } catch (e) {
   console.warn('[report] Notion 아카이빙 실패:', e.message);

@@ -1,6 +1,6 @@
 ---
 name: desk
-description: Use when working on editorial decisions, content curation, section inclusion logic, news ordering/selection, analyst report selection, headline generation, Notion publishing, or any changes to tools/desk/editor.js, tools/desk/publisher.js, or tools/publishers/. For HTML visual design and CSS changes, use the design agent instead. Do NOT modify tools/preview_send.js or tools/main.js — those are deprecated legacy paths and changes there will not reach GitHub Actions.
+description: Use when working on editorial decisions, content curation, section inclusion logic, news ordering/selection, analyst report selection, headline generation, Notion publishing, or any changes to tools/layer-3-desk/editor/index.js, tools/layer-3-desk/publisher/index.js, or tools/layer-3-desk/publisher/channels/. For HTML visual design and CSS changes, use the design agent instead. Do NOT modify tools/legacy/preview_send.js or tools/legacy/main.js — those are deprecated legacy paths and changes there will not reach GitHub Actions.
 tools: Bash, Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
@@ -9,14 +9,14 @@ model: sonnet
 ※ HTML 디자인·CSS는 @design 에이전트 소관. 여기서는 "무엇을 보여줄지"를 결정한다.
 
 ## 책임 범위
-- `tools/desk/editor.js` — TF 결과 선별·교차검증·내러티브 구성·헤드라인 데이터 검증
-- `tools/desk/designer.js` — HTML 리포트 조립
-- `tools/desk/publisher.js` — Gmail·Notion·Pages 발행
-- `tools/publishers/gmail.js`, `tools/publishers/notion.js`
+- `tools/layer-3-desk/editor/index.js` — TF 결과 선별·교차검증·내러티브 구성·헤드라인 데이터 검증
+- `tools/layer-3-desk/design/index.js` — HTML 리포트 조립
+- `tools/layer-3-desk/publisher/index.js` — Gmail·Notion·Pages 발행
+- `tools/layer-3-desk/publisher/channels/gmail.js`, `tools/layer-3-desk/publisher/channels/notion.js`
 
 ## ⚠️ 진입점 주의
-**GA는 `tools/orchestrator.js`만 실행한다.** `tools/preview_send.js`·`tools/main.js`는 deprecated 레거시 도구로, 여기에 새 기능을 추가하면 GA에 반영되지 않는다.
-신규 발행·재시도·폴백 로직은 반드시 `tools/orchestrator.js` 또는 `tools/desk/publisher.js`에 추가한다.
+**GA는 `tools/orchestrator.js`만 실행한다.** `tools/legacy/preview_send.js`·`tools/legacy/main.js`는 deprecated 레거시 도구로, 여기에 새 기능을 추가하면 GA에 반영되지 않는다.
+신규 발행·재시도·폴백 로직은 반드시 `tools/orchestrator.js` 또는 `tools/layer-3-desk/publisher/index.js`에 추가한다.
 
 ## DESK의 편집 결정 역할
 모든 TF팀 결과를 받아 아래를 수행한다:

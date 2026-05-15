@@ -1,8 +1,8 @@
 // tools/teams/tf_news.js — TF-1 뉴스 분석팀
 // 원시 뉴스 + 시장 데이터 → 중요도 분류·테마 군집화·시장 영향 판단
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../utils/logger.js';
-import { geminiWithRetry } from '../utils/gemini_retry.js';
+import { logger } from '../../shared/utils/logger.js';
+import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
 
 /**
  * TF-1: 뉴스 분석 실행.

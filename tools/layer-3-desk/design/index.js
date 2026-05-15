@@ -2,7 +2,7 @@
 // 레퍼런스: templates/market_report_reference 기반 완전 재설계
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../shared/utils/logger.js';
 
 const r2  = v => Math.round(v * 100) / 100;
 const N   = (v, dec = 2) => v == null ? 'N/A' : Number(v).toLocaleString('ko-KR', { minimumFractionDigits: dec, maximumFractionDigits: dec });

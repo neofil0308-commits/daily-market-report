@@ -1,7 +1,7 @@
 // tools/pipeline/crypto_feed.js — 코인 시세 + 심리 지표 수집
 // CoinGecko 무료 API + Alternative.me Fear & Greed
 import axios from 'axios';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../../shared/utils/logger.js';
 
 const GECKO_BASE = 'https://api.coingecko.com/api/v3';
 const FNG_URL    = 'https://api.alternative.me/fng/?limit=1';

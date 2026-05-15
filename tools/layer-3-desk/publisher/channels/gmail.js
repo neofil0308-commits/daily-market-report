@@ -1,6 +1,6 @@
 // tools/publishers/gmail.js
 import nodemailer from 'nodemailer';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../../shared/utils/logger.js';
 
 export async function publishToGmail(date, summaryMd, reportHtml, data) {
   const transporter = nodemailer.createTransport({

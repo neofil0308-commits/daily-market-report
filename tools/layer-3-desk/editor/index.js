@@ -8,7 +8,7 @@
 //   헤드라인·요약 둘 다 한꺼번에 손실. 어제(2026-05-14) 사고로 "코스피 7981선" 잘못 인용도 발생.
 //   → 헤드라인은 실제 데이터를 보고 만드는 결정론적 빌더로 분리.
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../shared/utils/logger.js';
 
 const fmt = {
   num:  v => v == null ? null : v.toLocaleString('ko-KR', { maximumFractionDigits: 2 }),

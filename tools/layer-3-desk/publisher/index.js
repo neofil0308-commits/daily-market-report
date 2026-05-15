@@ -4,9 +4,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import nodemailer from 'nodemailer';
-import { publishToNotion, checkAlreadySent } from '../publishers/notion.js';
-import { buildEmailCard } from './designer.js';
-import { logger } from '../utils/logger.js';
+import { publishToNotion, checkAlreadySent } from './channels/notion.js';
+import { buildEmailCard } from '../design/index.js';
+import { logger } from '../../shared/utils/logger.js';
 
 /**
  * HTML 리포트 발행 (Gmail + Notion 아카이브).

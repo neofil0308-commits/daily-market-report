@@ -1,17 +1,18 @@
-// tools/pipeline/index.js — Layer 1 집약 진입점
+// tools/layer-1-pipeline/index.js — Layer 1 집약 진입점
 // 모든 피드를 병렬 수집해 PipelineData 객체 반환.
 // 수집 실패는 null/[] 반환, 전체 파이프라인 중단 금지.
 import axios from 'axios';
-import { collectDomestic, fetchKospiMarketCap, fetchNaverKospiHistory } from '../collectors/domestic.js';
-import { collectOverseas }    from '../collectors/overseas.js';
-import { collectFxRates }     from '../collectors/fx_rates.js';
-import { collectCommodities } from '../collectors/commodities.js';
-import { collectNews }        from '../collectors/news.js';
-import { collectDart }        from './dart_feed.js';
-import { collectCrypto }      from './crypto_feed.js';
-import { validateData }       from '../validators/data_validator.js';
-import { isHoliday }          from '../utils/holiday.js';
-import { logger }             from '../utils/logger.js';
+import { collectDomestic, fetchKospiMarketCap, fetchNaverKospiHistory } from './collectors/domestic.js';
+import { collectOverseas }    from './collectors/overseas.js';
+import { collectFxRates }     from './collectors/fx_rates.js';
+import { collectCommodities } from './collectors/commodities.js';
+import { collectNews }        from './collectors/news.js';
+// dart_feed·crypto_feed는 각 TF팀 소속(Layer 2). pipeline이 임시로 cross-layer import 유지 — 데이터 흐름 정상화는 별도 세션.
+import { collectDart }        from '../layer-2-research/tf-analyst/feeds/dart_feed.js';
+import { collectCrypto }      from '../layer-2-research/tf-crypto/feeds/crypto_feed.js';
+import { validateData }       from '../shared/validators/data_validator.js';
+import { isHoliday }          from '../shared/utils/holiday.js';
+import { logger }             from '../shared/utils/logger.js';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';

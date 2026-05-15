@@ -11,12 +11,12 @@ model: sonnet
 - `tools/orchestrator.js` — **GA 단독 진입점**. 3-layer 파이프라인 + 폴백/재시도 + 발행 통합
 - `.github/workflows/daily-report.yml` — GA 스케줄·단계 관리
 - 전체 워크플로우 E2E 디버깅
-- `tools/main.js`·`tools/preview_send.js` — deprecated. 신규 수정 금지. 삭제는 별도 결재 후 진행.
+- `tools/legacy/main.js`·`tools/legacy/preview_send.js` — deprecated. 신규 수정 금지. 삭제는 별도 결재 후 진행.
 
 ## 파이프라인 실행 순서
-1. **Layer 1** `tools/pipeline/` — 병렬 데이터 수집 (AI 없음)
-2. **Layer 2** `tools/teams/` — TF팀 병렬 분석 (Gemini)
-3. **Layer 3** `tools/desk/` — 편집·HTML·발행 (순차)
+1. **Layer 1** `tools/layer-1-pipeline/` — 병렬 데이터 수집 (AI 없음)
+2. **Layer 2** `tools/layer-2-research/` — TF팀 병렬 분석 (Gemini)
+3. **Layer 3** `tools/layer-3-desk/` — 편집·HTML·발행 (순차)
 
 ## 핵심 규칙
 - Layer 1 수집 실패는 `null`/`[]`로 처리, 전체 중단 금지

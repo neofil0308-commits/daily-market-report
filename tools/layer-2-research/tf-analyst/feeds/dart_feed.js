@@ -1,7 +1,7 @@
 // tools/pipeline/dart_feed.js — OpenDART 증권사 공시 수집
 // DART_API_KEY 환경변수 미설정 시 빈 결과 반환 (파이프라인 중단 없음).
 import axios from 'axios';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../../shared/utils/logger.js';
 
 const DART_BASE = 'https://opendart.fss.or.kr/api';
 

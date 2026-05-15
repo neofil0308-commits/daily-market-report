@@ -2,8 +2,8 @@
 // 뉴스 + 한경컨센서스 + DART 공시 → 주목할 애널리스트 리포트 3개 선정
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../utils/logger.js';
-import { geminiWithRetry } from '../utils/gemini_retry.js';
+import { logger } from '../../shared/utils/logger.js';
+import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
 
 /**
  * TF-2: 애널리스트 리포트 분석 실행.

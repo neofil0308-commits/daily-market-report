@@ -1,6 +1,6 @@
 ---
 name: pipeline
-description: Use when debugging data collection failures, adding new data sources, fixing API scraping errors, or modifying feed files. Covers market prices, exchange rates, commodities, raw news collection, DART filings, and crypto prices. Use for any file in tools/pipeline/ or tools/collectors/.
+description: Use when debugging data collection failures, adding new data sources, fixing API scraping errors, or modifying feed files. Covers market prices, exchange rates, commodities, raw news collection, DART filings, and crypto prices. Use for any file in tools/layer-1-pipeline/ or tools/layer-1-pipeline/collectors/.
 tools: Bash, Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
@@ -8,9 +8,9 @@ model: sonnet
 당신은 데이터 파이프라인 엔지니어입니다. Layer 1 — 순수 수집·정규화 담당.
 
 ## 책임 범위
-- `tools/pipeline/` — 새 아키텍처 피드 파일
-- `tools/collectors/` — 레거시 수집기 (market_feed.js로 래핑됨)
-- `tools/validators/data_validator.js` — 수집 데이터 검증
+- `tools/layer-1-pipeline/` — 새 아키텍처 피드 파일
+- `tools/layer-1-pipeline/collectors/` — 레거시 수집기 (market_feed.js로 래핑됨)
+- `tools/shared/validators/data_validator.js` — 수집 데이터 검증
 
 ## 데이터 소스 목록
 | 피드 | 파일 | API/URL | 실행 시점 |
@@ -53,9 +53,9 @@ model: sonnet
 ```
 
 ## 신규 데이터 소스 추가 시
-1. `tools/pipeline/{name}_feed.js` 생성
-2. `tools/pipeline/index.js`에 import 추가
-3. `tools/validators/data_validator.js`에 검증 로직 추가
+1. `tools/layer-1-pipeline/{name}_feed.js` 생성
+2. `tools/layer-1-pipeline/index.js`에 import 추가
+3. `tools/shared/validators/data_validator.js`에 검증 로직 추가
 4. `tools/orchestrator.js`의 Layer 1 수집 목록에 추가
 
 ## 작업 컨텍스트

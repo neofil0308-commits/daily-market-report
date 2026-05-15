@@ -8,14 +8,14 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
 
-import { runPipeline }   from './pipeline/index.js';
-import { runTFNews }     from './teams/tf_news.js';
-import { runTFAnalyst }  from './teams/tf_analyst.js';
-import { runTFCrypto }   from './teams/tf_crypto.js';
-import { runEditor }     from './desk/editor.js';
-import { buildHtml }     from './desk/designer.js';
-import { publish }       from './desk/publisher.js';
-import { logger }        from './utils/logger.js';
+import { runPipeline }   from './layer-1-pipeline/index.js';
+import { runTFNews }     from './layer-2-research/tf-news/index.js';
+import { runTFAnalyst }  from './layer-2-research/tf-analyst/index.js';
+import { runTFCrypto }   from './layer-2-research/tf-crypto/index.js';
+import { runEditor }     from './layer-3-desk/editor/index.js';
+import { buildHtml }     from './layer-3-desk/design/index.js';
+import { publish }       from './layer-3-desk/publisher/index.js';
+import { logger }        from './shared/utils/logger.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

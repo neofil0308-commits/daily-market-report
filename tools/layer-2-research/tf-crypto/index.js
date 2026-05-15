@@ -1,8 +1,8 @@
 // tools/teams/tf_crypto.js — TF-3 블록체인·코인 분석팀
 // 코인 시세 + 심리 지표 + 뉴스 → 온체인 해석·관련 기업 영향·규제 리스크
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../utils/logger.js';
-import { geminiWithRetry } from '../utils/gemini_retry.js';
+import { logger } from '../../shared/utils/logger.js';
+import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
 
 // 국내 코인 관련 상장 기업 추적 목록
 const KR_CRYPTO_STOCKS = [
