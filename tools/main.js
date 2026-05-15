@@ -20,9 +20,6 @@ import { collectNews }       from './collectors/news.js';
 import { collectCrypto }     from './pipeline/crypto_feed.js';
 import { collectDart }       from './pipeline/dart_feed.js';
 import { validateData }      from './validators/data_validator.js';
-import { generateReport }    from './generators/report_generator.js';
-import { publishToNotion }   from './publishers/notion.js';
-import { publishToGmail }    from './publishers/gmail.js';
 import { isHoliday }         from './utils/holiday.js';
 import { logger }            from './utils/logger.js';
 
@@ -82,21 +79,15 @@ async function runWorkflow(opts = {}) {
     return;
   }
 
-  // STEP 4+5: 뉴스 요약 + HTML 리포트 생성 (Gemini 1회 호출)
-  logger.info('리포트 생성 중 (뉴스 요약 + HTML 통합)...');
-  const { newsSummaryMd, reportHtml } = await generateReport(data, reportDate);
-  await fs.writeFile(path.join(outputDir, 'summary.md'),  newsSummaryMd, 'utf-8');
-  await fs.writeFile(path.join(outputDir, 'report.html'), reportHtml,    'utf-8');
-  logger.info('리포트 생성 완료');
-
-  // STEP 6: 발행
-  logger.info('Notion 업로드 중...');
-  await publishToNotion(reportDate, newsSummaryMd, reportHtml, data);
-
-  logger.info('Gmail 발송 중...');
-  await publishToGmail(reportDate, newsSummaryMd, reportHtml, data);
-
-  logger.info(`=== 완료: ${reportDate} ===`);
+  // ⚠️ DEPRECATED 경로 — generators/ 폴더가 2026-05-15에 제거되어 발송 경로가 끊겼다.
+  // 발송이 필요하면 GA와 동일한 진입점을 쓰라:
+  logger.warn('=================================================================');
+  logger.warn('  이 경로는 더 이상 지원되지 않습니다 (generators/ 제거됨, 2026-05-15).');
+  logger.warn('  발송까지 실행하려면 아래 명령을 쓰세요:');
+  logger.warn('      node tools/orchestrator.js --now');
+  logger.warn('  데이터 수집만 검증하려면 --dry-run을 추가하세요.');
+  logger.warn('=================================================================');
+  process.exitCode = 1;
 }
 
 // ── CLI 즉시 실행 (--now 플래그) ─────────────────────────────────────────────

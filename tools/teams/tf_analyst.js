@@ -3,6 +3,7 @@
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../utils/logger.js';
+import { geminiWithRetry } from '../utils/gemini_retry.js';
 
 /**
  * TF-2: 애널리스트 리포트 분석 실행.
@@ -43,7 +44,7 @@ export async function runTFAnalyst(dartData, newsData = []) {
     const model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = _buildPrompt(dartData?.reports ?? [], analystNews, consensusItems);
-    const result = await model.generateContent(prompt);
+    const result = await geminiWithRetry(() => model.generateContent(prompt), { label: 'tf-analyst' });
     const raw    = result.response.text()
       .replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
 

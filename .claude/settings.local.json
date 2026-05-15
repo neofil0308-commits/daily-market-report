@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(ssh -T git@github.com)",
-      "Bash(node tools/orchestrator.js --now --dry-run)"
+      "Bash(node tools/orchestrator.js --now --dry-run)",
+      "Bash(xargs wc -l)",
+      "Bash(cd /c/Users/neofi && find . -name \"index.js\" -o -name \"crypto_feed.js\" -o -name \"dart_feed.js\" -o -name \"domestic.js\" -o -name \"overseas.js\" -o -name \"fx_rates.js\" -o -name \"commodities.js\" -o -name \"news.js\" -o -name \"supply_snapshot.js\" -o -name \"data_validator.js\" | head -20)",
+      "Bash(rm tools/collectors/supply_snapshot.js tools/publishers/slack.js tools/generators/news_summarizer.js tools/generators/report_generator.js)",
+      "Bash(rmdir tools/generators)",
+      "Bash(node -e \"import\\('./tools/desk/editor.js'\\).then\\(async m => { const data = JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-15/data.json','utf8'\\)\\); const plan = await m.runEditor\\(data, { news:{themes:['금리','반도체']}, analyst:{findings:[]}, crypto:{findings:[]} }\\); console.log\\('헤드라인:', plan.headline\\); console.log\\('include_crypto:', plan.include_crypto\\); console.log\\('include_analyst:', plan.include_analyst\\); }\\);\")",
+      "Bash(node -e \"Promise.all\\([import\\('./tools/teams/tf_news.js'\\),import\\('./tools/teams/tf_analyst.js'\\),import\\('./tools/teams/tf_crypto.js'\\),import\\('./tools/desk/editor.js'\\),import\\('./tools/desk/designer.js'\\),import\\('./tools/desk/publisher.js'\\),import\\('./tools/utils/gemini_retry.js'\\),import\\('./tools/validators/data_validator.js'\\),import\\('./tools/orchestrator.js'\\),import\\('./tools/main.js'\\)]\\).then\\(\\(\\)=>console.log\\('✅ 모든 모듈 로드 성공'\\)\\).catch\\(e=>{console.error\\('❌',e.message\\);process.exit\\(1\\)}\\)\")",
+      "Bash(node -e \"Promise.all\\([import\\('./tools/teams/tf_news.js'\\),import\\('./tools/teams/tf_analyst.js'\\),import\\('./tools/teams/tf_crypto.js'\\),import\\('./tools/desk/editor.js'\\),import\\('./tools/desk/designer.js'\\),import\\('./tools/desk/publisher.js'\\),import\\('./tools/utils/gemini_retry.js'\\),import\\('./tools/validators/data_validator.js'\\),import\\('./tools/orchestrator.js'\\)]\\).then\\(\\(\\)=>{console.log\\('✅ 모든 모듈 로드 성공'\\);process.exit\\(0\\)}\\).catch\\(e=>{console.error\\('❌',e.message\\);process.exit\\(1\\)}\\)\")"
     ]
   }
 }

@@ -1,70 +1,88 @@
 // tools/validators/data_validator.js
+// 수집기에서 받은 raw 데이터를 표시용 구조로 변환.
+// 절대 throw 하지 않는다 — 한 필드가 비어도 나머지 섹션은 살아남아야 한다.
 import { logger } from '../utils/logger.js';
+
+const round2 = v => Math.round(v * 100) / 100;
 
 export function validateData(raw) {
   return {
     date: raw.date,
     meta: raw.meta,
-
-    domestic: raw.domestic.isHoliday ? { isHoliday: true } : {
-      kospi:        enrich(raw.domestic.kospi.today,  raw.domestic.kospi.prev,  '지수'),
-      kosdaq:       enrich(raw.domestic.kosdaq.today, raw.domestic.kosdaq.prev, '지수'),
-      volumeBn:     raw.domestic.kospi.volumeBn,
-      marketCap:     raw.domestic.kospi.marketCap      ?? null,
-    prevMarketCap: raw.domestic.kospi.prevMarketCap  ?? null,
-    marketCapDiff: raw.domestic.kospi.marketCapDiff  ?? null,
-    marketCapPct:  raw.domestic.kospi.marketCapPct   ?? null,
-      supply:       raw.domestic.supply,
-      breadth:      raw.domestic.breadth ?? null,
-      kospiHistory: raw.domestic.kospiHistory ?? [],
-      vkospi:       {
-        ...enrich(raw.domestic.vkospi?.today, raw.domestic.vkospi?.prev, '지수'),
-        source: raw.domestic.vkospi?.source ?? null,
-        label:  raw.domestic.vkospi?.label  ?? null,
-      },
-      isHoliday:    false,
-    },
-
-    overseas: Object.fromEntries(
-      Object.entries(raw.overseas)
-        .filter(([k]) => k !== 'usHoliday')
-        .map(([k, v]) => [k, enrich(v.close, v.prevClose, '지수')])
-    ),
-
-    fxRates: {
-      usdKrw: enrich(raw.fxRates.usdKrw.today, raw.fxRates.usdKrw.prev, '환율'),
-      dxy:    enrich(raw.fxRates.dxy.today,    raw.fxRates.dxy.prev,    '지수'),
-      us10y:  enrich(raw.fxRates.us10y.today,  raw.fxRates.us10y.prev,  '금리'),
-      us2y:   enrich(raw.fxRates.us2y.today,   raw.fxRates.us2y.prev,   '금리'),
-      fomc:   raw.fxRates.fomc,
-    },
-
-    commodities: Object.fromEntries(
-      Object.entries(raw.commodities).map(([k, v]) => {
-        const type = k === 'goldKrw' ? '원화' : '달러';
-        return [k, enrich(v.today, v.prev, type)];
-      })
-    ),
-
-    news: raw.news,
+    domestic:    _validateDomestic(raw.domestic    ?? {}),
+    overseas:    _validateOverseas(raw.overseas    ?? {}),
+    fxRates:     _validateFxRates(raw.fxRates      ?? {}),
+    commodities: _validateCommodities(raw.commodities ?? {}),
+    news:        raw.news ?? [],
   };
 }
 
+function _validateDomestic(d) {
+  if (d.isHoliday) return { isHoliday: true };
+  const k = d.kospi  ?? {};
+  const q = d.kosdaq ?? {};
+  const v = d.vkospi ?? {};
+  return {
+    kospi:        enrich(k.today, k.prev, '지수'),
+    kosdaq:       enrich(q.today, q.prev, '지수'),
+    volumeBn:     k.volumeBn      ?? null,
+    marketCap:    k.marketCap     ?? null,
+    prevMarketCap: k.prevMarketCap ?? null,
+    marketCapDiff: k.marketCapDiff ?? null,
+    marketCapPct:  k.marketCapPct  ?? null,
+    supply:       d.supply        ?? null,
+    breadth:      d.breadth       ?? null,
+    kospiHistory: d.kospiHistory  ?? [],
+    vkospi: {
+      ...enrich(v.today, v.prev, '지수'),
+      source: v.source ?? null,
+      label:  v.label  ?? null,
+    },
+    isHoliday: false,
+  };
+}
+
+function _validateOverseas(o) {
+  return Object.fromEntries(
+    Object.entries(o)
+      .filter(([k]) => k !== 'usHoliday')
+      .map(([k, v]) => [k, enrich(v?.close, v?.prevClose, '지수')])
+  );
+}
+
+function _validateFxRates(f) {
+  return {
+    usdKrw: enrich(f.usdKrw?.today, f.usdKrw?.prev, '환율'),
+    dxy:    enrich(f.dxy?.today,    f.dxy?.prev,    '지수'),
+    us10y:  enrich(f.us10y?.today,  f.us10y?.prev,  '금리'),
+    us2y:   enrich(f.us2y?.today,   f.us2y?.prev,   '금리'),
+    fomc:   f.fomc ?? null,
+  };
+}
+
+function _validateCommodities(c) {
+  return Object.fromEntries(
+    Object.entries(c).map(([k, v]) => {
+      const type = k === 'goldKrw' ? '원화' : '달러';
+      return [k, enrich(v?.today, v?.prev, type)];
+    })
+  );
+}
+
+// 값 두 개 받아 diff·pct·direction 계산. null 안전.
 function enrich(today, prev, type) {
   if (today == null || prev == null || prev === 0) {
-    return { today, prev, diff: null, pct: null, direction: null, type };
+    return { today: today ?? null, prev: prev ?? null, diff: null, pct: null, direction: null, type };
   }
 
   const diff = round2(today - prev);
   const pct  = round2((diff / prev) * 100);
   const direction = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
 
-  // 이상치 경고 (±20% 이상)
+  // 이상치 경고 (±20% 이상) — 데이터 오염 의심 시 로그만 남기고 통과시킨다.
   if (Math.abs(pct) >= 20) {
     logger.warn(`[validator] 이상치 감지 — ${type}: today=${today}, prev=${prev}, pct=${pct}%`);
   }
 
   return { today, prev, diff, pct, direction, type };
 }
-
-const round2 = v => Math.round(v * 100) / 100;

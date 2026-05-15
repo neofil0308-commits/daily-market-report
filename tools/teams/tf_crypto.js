@@ -2,6 +2,7 @@
 // 코인 시세 + 심리 지표 + 뉴스 → 온체인 해석·관련 기업 영향·규제 리스크
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../utils/logger.js';
+import { geminiWithRetry } from '../utils/gemini_retry.js';
 
 // 국내 코인 관련 상장 기업 추적 목록
 const KR_CRYPTO_STOCKS = [
@@ -39,7 +40,7 @@ export async function runTFCrypto(cryptoData, news = []) {
     const model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = _buildPrompt(cryptoData, cryptoNews);
-    const result = await model.generateContent(prompt);
+    const result = await geminiWithRetry(() => model.generateContent(prompt), { label: 'tf-crypto' });
     const raw    = result.response.text()
       .replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
 
