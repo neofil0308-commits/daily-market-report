@@ -25,13 +25,25 @@
 
 ---
 
-## 아키텍처 (3-Layer Newsroom Model)
+## 아키텍처 (콘텐츠 미디어 플랫폼)
+
+사주의 비전: **시장 리포트 + 개별 기업분석 + 카드뉴스 + 투자 의향도** — 다중 콘텐츠 플랫폼.
 
 ```
-Layer 1 — DATA PIPELINE    순수 수집·정규화 (AI 없음, 빠르고 저렴)
-Layer 2 — TF RESEARCH TEAMS  도메인별 AI 분석 (병렬 실행)
-Layer 3 — THE DESK         선별·교차검증·편집·발행 (최종 결정권)
+사주
+ └─ 편집장 (orchestrator) — "오늘 어떤 콘텐츠를 만들지" 결정
+     └─ tools/contents/{name}.js — 콘텐츠 정의 (defineContent로 등록)
+         ├─ Layer 1 (Pipeline)  순수 시장 데이터 수집 (AI 없음)
+         ├─ Layer 2 (Research)  TF팀이 자기 도메인 데이터 수집·분석 (병렬)
+         └─ Layer 3 (Desk)      편집 → 디자인 → 발행 (Gmail·Notion·Pages)
 ```
+
+**시스템 헌법** (`tools/kernel/`):
+- `Agent.js` — 에이전트 표준 인터페이스 (defineAgent, register/getAgent)
+- `ContentPipeline.js` — 콘텐츠 정의·스케줄·자동 발견 (defineContent, getDueContents)
+- `Result.js` — 표준 결과 객체 (ok·data·raw·meta·errors)
+- `cache.js` — 데이터 소스 호출 캐싱 (메모리 + 디스크 옵션)
+- `metrics.js` — 시스템 자기 모니터링 (콘텐츠별 발행 통계)
 
 ### Layer 1: Data Pipeline (`tools/layer-1-pipeline/`)
 | 파일 | 수집 대상 | 의존 API |
@@ -148,7 +160,20 @@ OUTPUT_DIR             기본값: ./outputs
 
 ```
 tools/
-├── orchestrator.js                   ⭐ GA 단독 진입점 — Layer 1·2·3 순차 실행
+├── orchestrator.js                   ⭐ GA 단독 진입점 — 콘텐츠 등록부 라우터
+│
+├── kernel/                            ⭐ 시스템 헌법 (모든 에이전트·콘텐츠가 따를 표준)
+│   ├── Agent.js                      에이전트 인터페이스
+│   ├── ContentPipeline.js            콘텐츠 정의·스케줄·자동 발견
+│   ├── Result.js                     표준 결과 객체 (ok·data·raw·meta·errors)
+│   ├── cache.js                      데이터 소스 호출 캐싱 (메모리+디스크)
+│   └── metrics.js                    시스템 자기 모니터링
+│
+├── contents/                          ⭐ 콘텐츠 정의 (defineContent로 등록)
+│   └── daily-market-report.js        매일 08:00 시장 리포트 (현재 유일)
+│   #  equity-deep-dive.js            (Phase 3 예정 — 개별 기업 심층 분석)
+│   #  card-news.js                   (Phase 3 예정 — 카드뉴스)
+│   #  investment-tracking.js         (Phase 3 예정 — 투자 의향 추적)
 │
 ├── layer-1-pipeline/                  ★ Layer 1: 시장 데이터 (AI 없음, 4종)
 │   ├── README.md
@@ -186,6 +211,7 @@ tools/
 │       └── channels/{gmail,notion}.js
 │
 └── shared/                            (모든 Layer가 import)
+    ├── feeds/                         재사용 데이터 소스 (Phase 2부터 실제 이동)
     ├── validators/data_validator.js
     └── utils/{logger,formatter,holiday,gemini_retry}.js
 
