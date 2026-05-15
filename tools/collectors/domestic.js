@@ -269,7 +269,8 @@ async function fetchKospiRealtimeStats() {
 
 // KOSPI 전체 시가총액(조원) — Naver sise_market_sum 전 종목 합산
 // sosok=0: KOSPI, 페이지당 50개 종목, 시가총액 컬럼 단위: 억원
-async function fetchKospiMarketCap() {
+// pipeline 폴백에서도 호출하므로 export.
+export async function fetchKospiMarketCap() {
   try {
     // 1페이지에서 총 페이지 수 확인 후 전체 병렬 수집
     const firstRes = await axios.get(

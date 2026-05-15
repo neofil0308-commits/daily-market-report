@@ -18,27 +18,31 @@ export function validateData(raw) {
 }
 
 function _validateDomestic(d) {
-  if (d.isHoliday) return { isHoliday: true };
+  // ⚠️ 휴장일에도 모든 필드를 그대로 통과시킨다.
+  // 예전엔 isHoliday=true면 { isHoliday: true } 만 반환해서 marketCap/vkospi/supply/supplyHistory가
+  // 모두 사라지는 사고가 있었다 (2026-05-15 발견). pipeline 폴백이 채우면 표시되도록.
   const k = d.kospi  ?? {};
   const q = d.kosdaq ?? {};
   const v = d.vkospi ?? {};
   return {
     kospi:        enrich(k.today, k.prev, '지수'),
     kosdaq:       enrich(q.today, q.prev, '지수'),
-    volumeBn:     k.volumeBn      ?? null,
-    marketCap:    k.marketCap     ?? null,
+    volumeBn:      k.volumeBn      ?? null,
+    marketCap:     k.marketCap     ?? null,
     prevMarketCap: k.prevMarketCap ?? null,
     marketCapDiff: k.marketCapDiff ?? null,
     marketCapPct:  k.marketCapPct  ?? null,
-    supply:       d.supply        ?? null,
-    breadth:      d.breadth       ?? null,
-    kospiHistory: d.kospiHistory  ?? [],
+    supply:        d.supply        ?? null,
+    supplyToday:   d.supplyToday   ?? null,
+    supplyHistory: d.supplyHistory ?? [],
+    breadth:       d.breadth       ?? null,
+    kospiHistory:  d.kospiHistory  ?? [],
     vkospi: {
       ...enrich(v.today, v.prev, '지수'),
       source: v.source ?? null,
       label:  v.label  ?? null,
     },
-    isHoliday: false,
+    isHoliday: !!d.isHoliday,
   };
 }
 
