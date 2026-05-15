@@ -70,78 +70,96 @@ export async function runTFAnalyst(dartData, newsData = []) {
 // 한경 컨센서스 최근 리포트 스크래핑
 // 2026-05-16 한경이 엔드포인트를 리디자인. /apps.analysis/analysis.list(404) → /analysis/list,
 // 날짜는 YYYYMMDD → YYYY-MM-DD, category=CO → report_type=CO, pagenum은 페이지번호→페이지당건수로 의미가 바뀜.
+// 5xx/네트워크 오류는 간헐적이므로 1.5초 간격 2회 재시도 (총 3회 시도). 4xx는 영구 오류로 즉시 포기.
 async function fetchHankyungConsensus() {
-  try {
-    const today = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    const sdate = new Date(today);
-    sdate.setDate(sdate.getDate() - 3);
-    const fmt = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
+  const today = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const sdate = new Date(today);
+  sdate.setDate(sdate.getDate() - 3);
+  const fmt = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
 
-    const res = await axios.get(
-      'https://consensus.hankyung.com/analysis/list',
-      {
-        params: {
-          sdate: fmt(sdate),
-          edate: fmt(today),
-          report_type: 'CO', // 기업분석
-          pagenum: 50,       // 페이지당 건수 (최대치 80, 안정적으로 50)
-          now_page: 1,
-        },
-        headers: {
-          // 한경은 짧은 UA를 봇으로 보고 500을 던진다(2026-05-16 확인). 풀 브라우저 UA + Accept 헤더 필수.
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
-          'Referer': 'https://consensus.hankyung.com/',
-        },
-        timeout: 12000,
-      }
-    );
+  const reqConfig = {
+    params: {
+      sdate: fmt(sdate),
+      edate: fmt(today),
+      report_type: 'CO', // 기업분석
+      pagenum: 50,       // 페이지당 건수 (최대치 80, 안정적으로 50)
+      now_page: 1,
+    },
+    headers: {
+      // 한경은 짧은 UA를 봇으로 보고 500을 던진다(2026-05-16 확인). 풀 브라우저 UA + Accept 헤더 필수.
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+      'Referer': 'https://consensus.hankyung.com/',
+    },
+    timeout: 12000,
+  };
 
-    const { load } = await import('cheerio');
-    const $ = load(res.data);
-    const items = [];
+  const MAX_ATTEMPTS = 3;
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await axios.get('https://consensus.hankyung.com/analysis/list', reqConfig);
+      const { load } = await import('cheerio');
+      const $ = load(res.data);
+      const items = [];
 
-    // 새 구조: <tbody> 안의 <tr>들. 컬럼 순서 = 작성일·제목·적정가격·투자의견·작성자·증권사·...
-    // 제목 셀(td.text_l > a) 텍스트가 "회사명(종목코드) 리포트제목" 형태로 합쳐져 있다.
-    $('tbody tr').each((_, el) => {
-      const tds = $(el).find('td');
-      if (tds.length < 6) return;
+      // 새 구조: <tbody> 안의 <tr>들. 컬럼 순서 = 작성일·제목·적정가격·투자의견·작성자·증권사·...
+      // 제목 셀(td.text_l > a) 텍스트가 "회사명(종목코드) 리포트제목" 형태로 합쳐져 있다.
+      $('tbody tr').each((_, el) => {
+        const tds = $(el).find('td');
+        if (tds.length < 6) return;
 
-      const date     = $(tds[0]).text().trim();
-      const titleA   = $(tds[1]).find('a').first();
-      const rawTitle = titleA.text().replace(/\s+/g, ' ').trim();
-      const href     = titleA.attr('href') ?? '';
-      const target   = $(tds[2]).text().trim();   // 적정가격
-      const rating   = $(tds[3]).text().trim();   // 투자의견
-      const firm     = $(tds[5]).text().trim();   // 제공출처(증권사)
+        const date     = $(tds[0]).text().trim();
+        const titleA   = $(tds[1]).find('a').first();
+        const rawTitle = titleA.text().replace(/\s+/g, ' ').trim();
+        const href     = titleA.attr('href') ?? '';
+        const target   = $(tds[2]).text().trim();   // 적정가격
+        const rating   = $(tds[3]).text().trim();   // 투자의견
+        const firm     = $(tds[5]).text().trim();   // 제공출처(증권사)
 
-      if (!rawTitle || rawTitle.length < 4) return;
+        if (!rawTitle || rawTitle.length < 4) return;
 
-      // "회사명(종목코드) 나머지" 분리. 매칭 실패해도 원제목 그대로 사용.
-      const m = rawTitle.match(/^(.+?)\s*\((\d{6})\)\s*(.*)$/);
-      const company = m ? m[1].trim() : '';
-      const ticker  = m ? m[2]        : '';
-      const title   = m ? m[3].trim() || rawTitle : rawTitle;
+        // "회사명(종목코드) 나머지" 분리. 매칭 실패해도 원제목 그대로 사용.
+        const m = rawTitle.match(/^(.+?)\s*\((\d{6})\)\s*(.*)$/);
+        const company = m ? m[1].trim() : '';
+        const ticker  = m ? m[2]        : '';
+        const title   = m ? m[3].trim() || rawTitle : rawTitle;
 
-      items.push({
-        title,
-        firm,
-        company,
-        ticker,
-        target_price: target,
-        rating,
-        date,
-        url: href.startsWith('http') ? href : `https://consensus.hankyung.com${href}`,
+        items.push({
+          title,
+          firm,
+          company,
+          ticker,
+          target_price: target,
+          rating,
+          date,
+          url: href.startsWith('http') ? href : `https://consensus.hankyung.com${href}`,
+        });
       });
-    });
 
-    if (items.length > 0) logger.info(`[tf-analyst] 한경 컨센서스 ${items.length}건 수집`);
-    return items.slice(0, 20);
-  } catch (e) {
-    logger.warn('[tf-analyst] 한경 컨센서스 수집 실패:', e.message);
-    return [];
+      if (items.length > 0) {
+        const retryNote = attempt > 1 ? ` (재시도 ${attempt - 1}회 후 성공)` : '';
+        logger.info(`[tf-analyst] 한경 컨센서스 ${items.length}건 수집${retryNote}`);
+      }
+      return items.slice(0, 20);
+    } catch (e) {
+      lastErr = e;
+      const status = e.response?.status;
+      // 4xx는 영구 오류(404 URL 변경, 401·403 차단 등) — 재시도 의미 없음
+      if (status && status >= 400 && status < 500) {
+        logger.warn(`[tf-analyst] 한경 컨센서스 수집 실패 (HTTP ${status}) — 영구 오류, 재시도 안 함`);
+        return [];
+      }
+      // 5xx 또는 네트워크 오류는 일시적일 가능성 → 1.5초 후 재시도
+      if (attempt < MAX_ATTEMPTS) {
+        logger.warn(`[tf-analyst] 한경 컨센서스 일시 오류 (${status ?? e.code ?? 'NETWORK'}) — ${attempt}회차 실패, 1.5초 후 재시도`);
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    }
   }
+  logger.warn(`[tf-analyst] 한경 컨센서스 수집 실패 (${MAX_ATTEMPTS}회 모두 실패):`, lastErr?.message);
+  return [];
 }
 
 function _buildPrompt(dartReports, analystNews, consensusItems) {

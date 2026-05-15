@@ -34,7 +34,11 @@
       "Bash(git checkout *)",
       "Bash(curl -sS -o NUL -w 'report_idx=__TRACKED_VAR__ → %{http_code}\\\\n' -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36' 'https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=__TRACKED_VAR__')",
       "Bash(curl -sS -o NUL -w 'downpdf?report_idx=__TRACKED_VAR__ → %{http_code}\\\\n' -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36' 'https://consensus.hankyung.com/analysis/downpdf?report_idx=__TRACKED_VAR__')",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(node --env-file=\"/c/Users/neofi/content report/.env\" tools/orchestrator.js --now)",
+      "Bash(date -Iseconds)",
+      "Bash(echo \"$\\(date -Iseconds\\) \\(재발송 차단용 임시 플래그\\)\")",
+      "Bash(rm -f sent.flag)"
     ]
   }
 }
