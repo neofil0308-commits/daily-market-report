@@ -100,23 +100,39 @@ async function run(opts = {}) {
     };
     logger.info(`[TF-2] DART 폴백: ${tfAnalyst.findings.length}건`);
   }
-  if ((pipelineData.dart?.reports?.length ?? 0) > 0 && (tfAnalyst.findings?.length ?? 0) > 0) {
-    // 회사명 정규화 — Gemini 출력과 DART 응답이 "(주)" 접두/공백/우선주 표기 등으로 어긋날 수 있다.
-    //   "삼성전자" ↔ "(주)삼성전자" ↔ "삼성전자우"  모두 같은 회사로 매칭.
+  // ── 애널리스트 종목 링크 폴백 체인 ──────────────────────────────────────────
+  // 사주 의도: Gemini가 뽑은 회사라면 무조건 링크가 활성화되어야 한다.
+  // 1순위 — DART URL: Gemini가 직접 채운 값 (가장 정확한 공시 페이지)
+  // 2순위 — DART 정규화 매칭: 같은 날 DART 응답에 그 회사 공시가 있으면 매칭
+  // 3순위 — 한경 컨센서스 검색 URL: 회사명만 있어도 작동하는 최종 안전망
+  if ((tfAnalyst.findings?.length ?? 0) > 0) {
     const normalize = s => String(s ?? '')
       .replace(/\(주\)|㈜/g, '')
       .replace(/\s+/g, '')
       .replace(/우[^가-힣]*$/, '')   // 우선주 접미사 제거
       .toLowerCase();
-    const dartByNorm = new Map(pipelineData.dart.reports.map(r => [normalize(r.company), r.url]));
-    let matched = 0;
+    const dartByNorm = new Map(
+      (pipelineData.dart?.reports ?? []).map(r => [normalize(r.company), r.url])
+    );
+    let dartHits = 0, searchHits = 0;
     tfAnalyst.findings = tfAnalyst.findings.map(f => {
       if (f.dart_url) return f;
-      const found = dartByNorm.get(normalize(f.company));
-      if (found) matched++;
-      return { ...f, dart_url: found ?? null };
+      // 2순위: DART 정규화 매칭
+      const dartMatch = dartByNorm.get(normalize(f.company));
+      if (dartMatch) { dartHits++; return { ...f, dart_url: dartMatch }; }
+      // 3순위: 한경 컨센서스 검색 URL — 회사명 인코딩
+      const company = String(f.company ?? '').trim();
+      if (company && company !== '―') {
+        searchHits++;
+        const q = encodeURIComponent(company);
+        return {
+          ...f,
+          dart_url: `https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=${q}&report_type=&search_type=2`,
+        };
+      }
+      return { ...f, dart_url: null };
     });
-    logger.info(`[TF-2] DART URL 매칭: ${matched}/${tfAnalyst.findings.length}건 (정규화 비교)`);
+    logger.info(`[TF-2] 애널리스트 링크 — DART 매칭 ${dartHits}건, 한경 검색 폴백 ${searchHits}건`);
   }
 
   const tfResults = { news: tfNews, analyst: tfAnalyst, crypto: tfCrypto };

@@ -278,6 +278,25 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
     }
   }
 
+  // KOSDAQ 종가 폴백 — Yahoo ^KQ11 5거래일 히스토리에서 마지막/마지막-1 추출
+  // KOSPI와 달리 KOSDAQ은 별도 히스토리 객체가 없어 m.stock OPEN 거부 후 빈 채로 떨어지던 사고를 방지.
+  if (d.kosdaq?.today == null) {
+    const kqHist = await _fetchYahooKosdaqHistory();
+    if (kqHist?.length >= 2) {
+      const last = kqHist[kqHist.length - 1];
+      const prev = kqHist[kqHist.length - 2];
+      const diff = r2(last - prev);
+      const pct  = prev ? r2(diff / prev * 100) : 0;
+      d.kosdaq = {
+        ...(d.kosdaq ?? {}),
+        today: last, prev, diff, pct,
+        direction: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat',
+        source: 'history-fallback',
+      };
+      logger.info(`[pipeline] KOSDAQ 기준 거래일 폴백: ${last} (전일 ${prev})`);
+    }
+  }
+
   // ── 시가총액·거래대금 전일比 폴백 (kospiHistory·KOSPI 종가 채워진 후 실행) ────
   // 시가총액 합산 폴백 — Naver polling에 marketCapRaw 없으면 sise_market_sum 전 종목 합산
   if (d.marketCap == null && d.kospi?.today != null) {
@@ -316,6 +335,21 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
       d.prevVolumeBn = prevRow.tradingValueBn;
       logger.info(`[pipeline] 거래대금 전일比 (히스토리 폴백): ${d.volumeBn}조 vs ${prevRow.tradingValueBn}조`);
     }
+  }
+}
+
+// Yahoo Finance ^KQ11 — KOSDAQ 5거래일 종가 배열 (오래된 → 최근). KOSDAQ history 폴백용.
+async function _fetchYahooKosdaqHistory() {
+  try {
+    const yf = await axios.get(
+      'https://query1.finance.yahoo.com/v8/finance/chart/%5EKQ11',
+      { params: { interval: '1d', range: '10d' }, headers: NAV_H, timeout: 12000 }
+    );
+    const closes = yf.data.chart.result[0].indicators.quote[0].close;
+    return closes.filter(v => v != null).slice(-5).map(r2);
+  } catch (e) {
+    logger.warn('[pipeline] KOSDAQ Yahoo 폴백 실패:', e.message);
+    return null;
   }
 }
 
