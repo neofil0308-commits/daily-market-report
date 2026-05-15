@@ -1,25 +1,29 @@
-// tools/teams/tf_analyst.js — TF-2 애널리스트 리포트 분석팀
-// 뉴스 + 한경컨센서스 + DART 공시 → 주목할 애널리스트 리포트 3개 선정
+// tools/layer-2-research/tf-analyst/index.js — TF-2 애널리스트 리포트 분석팀
+// 자기 도메인 데이터(dart + 한경 컨센서스)를 직접 수집해 분석. Layer 1 의존 제거(2026-05-16).
+// 뉴스 + 한경 컨센서스 + DART 공시 → 주목할 애널리스트 리포트 3개 선정
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../shared/utils/logger.js';
 import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
+import { collectDart } from './feeds/dart_feed.js';
 
 /**
  * TF-2: 애널리스트 리포트 분석 실행.
- * @param {object} dartData  Layer 1 dart_feed 결과
- * @param {Array}  newsData  수집된 뉴스 목록 (선택)
+ * @param {Array}  newsData  수집된 뉴스 목록 (orchestrator가 Layer 1에서 전달)
  * @returns {Promise<TFAnalystResult>}
  */
-export async function runTFAnalyst(dartData, newsData = []) {
-  // ⭐ 한경 컨센서스를 가장 먼저 수집 — Gemini가 실패해도 orchestrator가 raw로 폴백할 수 있도록.
-  //   (DART는 사실상 빈 응답이므로 한경이 1차 소스다.)
-  const consensusItems = await fetchHankyungConsensus();
+export async function runTFAnalyst(newsData = []) {
+  // 자기 도메인 데이터를 직접 수집 (Layer 1의 cross-layer 제거)
+  // 한경 컨센서스 + DART 병렬 — 한쪽 실패해도 다른 쪽 분석 가능
+  const [consensusItems, dartData] = await Promise.all([
+    fetchHankyungConsensus(),
+    collectDart().catch(e => { logger.warn('[tf-analyst] dart 실패:', e.message); return { reports: [] }; }),
+  ]);
 
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     logger.warn('[tf-analyst] GOOGLE_API_KEY 미설정 — 분석 생략');
-    return _emptyResult(consensusItems);
+    return _emptyResult(consensusItems, dartData);
   }
 
   // 뉴스에서 애널리스트 관련 기사 필터
@@ -29,13 +33,13 @@ export async function runTFAnalyst(dartData, newsData = []) {
     )
   );
 
-  const hasDart     = dartData?.reports?.length > 0;
-  const hasNews     = analystNews.length > 0;
+  const hasDart      = dartData?.reports?.length > 0;
+  const hasNews      = analystNews.length > 0;
   const hasConsensus = consensusItems.length > 0;
 
   if (!hasDart && !hasNews && !hasConsensus) {
     logger.info('[tf-analyst] 분석 소스 없음 — 건너뜀');
-    return _emptyResult(consensusItems);
+    return _emptyResult(consensusItems, dartData);
   }
 
   const modelName = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
@@ -60,10 +64,11 @@ export async function runTFAnalyst(dartData, newsData = []) {
       confidence:        parsed.confidence        ?? 0.8,
       model_used:        modelName,
       consensus_raw:     consensusItems,
+      dart_reports:      dartData?.reports ?? [],   // ⭐ orchestrator가 폴백·링크 매핑에 사용
     };
   } catch (e) {
     logger.warn('[tf-analyst] 분석 실패:', e.message);
-    return _emptyResult(consensusItems);
+    return _emptyResult(consensusItems, dartData);
   }
 }
 
@@ -211,25 +216,31 @@ target_price가 불명확하면 null로 표기. findings는 정확히 3개.
 ${sections.join('\n\n')}`;
 }
 
-function _emptyResult(consensusItems = []) {
+function _emptyResult(consensusItems = [], dartData = { reports: [] }) {
   return {
     findings: [], sector_sentiment: {}, consensus_changes: 0,
     alert_items: [], confidence: 0, model_used: null,
     consensus_raw: consensusItems,
+    dart_reports: dartData?.reports ?? [],
   };
 }
 
-// 단독 실행 (디버깅용): node tools/teams/tf_analyst.js --date 2026-05-12
+// 단독 실행 (디버깅용): node tools/layer-2-research/tf-analyst/index.js --date 2026-05-12
+// 2026-05-16: dart는 자체 수집하므로 data.json 불필요. news만 있으면 됨.
 if (process.argv.includes('--date')) {
   import('dotenv/config').then(async () => {
     const fs   = await import('fs/promises');
     const path = await import('path');
     const idx  = process.argv.indexOf('--date');
     const date = process.argv[idx + 1] ?? new Date().toISOString().slice(0, 10);
-    const data = JSON.parse(await fs.default.readFile(
-      path.default.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
-    ));
-    const result = await runTFAnalyst(data.dart ?? { reports: [] });
+    let news = [];
+    try {
+      const data = JSON.parse(await fs.default.readFile(
+        path.default.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
+      ));
+      news = data.news ?? [];
+    } catch { /* news 없어도 동작 */ }
+    const result = await runTFAnalyst(news);
     console.log(JSON.stringify(result, null, 2));
   });
 }

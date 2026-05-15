@@ -7,9 +7,7 @@ import { collectOverseas }    from './collectors/overseas.js';
 import { collectFxRates }     from './collectors/fx_rates.js';
 import { collectCommodities } from './collectors/commodities.js';
 import { collectNews }        from './collectors/news.js';
-// dart_feed·crypto_feed는 각 TF팀 소속(Layer 2). pipeline이 임시로 cross-layer import 유지 — 데이터 흐름 정상화는 별도 세션.
-import { collectDart }        from '../layer-2-research/tf-analyst/feeds/dart_feed.js';
-import { collectCrypto }      from '../layer-2-research/tf-crypto/feeds/crypto_feed.js';
+// dart/crypto는 각 TF팀 소속(Layer 2)이 자체 호출 — Layer 1은 시장 데이터만 책임.
 import { validateData }       from '../shared/validators/data_validator.js';
 import { isHoliday }          from '../shared/utils/holiday.js';
 import { logger }             from '../shared/utils/logger.js';
@@ -56,21 +54,14 @@ export async function runPipeline(reportDate, outputDir) {
   const news = await collectNews(reportDate, { overseas, fxRates })
     .catch(e => { logger.warn('[pipeline] news 실패:', e.message); return []; });
 
-  // 확장 피드 (선택 — API 키 없으면 빈 값 반환)
-  const [dart, crypto] = await Promise.all([
-    collectDart()
-      .catch(e  => { logger.warn('[pipeline] dart 실패:', e.message);   return { reports: [] }; }),
-    collectCrypto()
-      .catch(e  => { logger.warn('[pipeline] crypto 실패:', e.message); return null; }),
-  ]);
-
+  // dart/crypto는 Layer 2 각 TF팀이 자체 수집 (cross-layer import 제거됨)
   const coreData = validateData({
     date: reportDate,
     domestic, overseas, fxRates, commodities, news,
     meta: { krHoliday, usHoliday },
   });
 
-  const pipelineData = { ...coreData, dart, crypto };
+  const pipelineData = { ...coreData };
 
   // ── 전일 수급 스냅샷 병합 (supply-collect.yml이 16:40 KST에 저장한 supply.json) ──
   await _mergeSupplySnapshot(pipelineData, prevOutputDir);

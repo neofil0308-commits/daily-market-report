@@ -55,13 +55,16 @@ async function run(opts = {}) {
   // ──────────────────────────────────────────────────────────────
   logger.info('\n[Layer 2] TF 리서치팀 병렬 분석 시작...');
 
+  // 각 TF팀은 자기 도메인 데이터를 직접 수집 (Layer 1 cross-layer 제거 — 2026-05-16)
+  // tf-analyst: 한경 컨센서스 + DART 자체 호출 / tf-crypto: CoinGecko 자체 호출
+  // 둘 다 결과 객체에 raw data를 노출(dart_reports, crypto_data)해 orchestrator가 폴백·designer 호환에 사용.
   const [tfNews, tfAnalystInitial, tfCrypto] = await Promise.all([
     runTFNews(pipelineData.news, pipelineData)
       .catch(e => { logger.warn('[TF-1] 실패:', e.message); return { findings:[], top_stories:[], themes:[] }; }),
-    runTFAnalyst(pipelineData.dart, pipelineData.news ?? [])
-      .catch(e => { logger.warn('[TF-2] 실패:', e.message); return { findings:[] }; }),
-    runTFCrypto(pipelineData.crypto, pipelineData.news)
-      .catch(e => { logger.warn('[TF-3] 실패:', e.message); return { findings:[] }; }),
+    runTFAnalyst(pipelineData.news ?? [])
+      .catch(e => { logger.warn('[TF-2] 실패:', e.message); return { findings:[], consensus_raw:[], dart_reports:[] }; }),
+    runTFCrypto(pipelineData.news ?? [])
+      .catch(e => { logger.warn('[TF-3] 실패:', e.message); return { findings:[], crypto_data: null }; }),
   ]);
 
   // ── TF-Analyst Gemini 503 폴백 체인 ──────────────────────────────────────────
@@ -75,17 +78,18 @@ async function run(opts = {}) {
       /목표주가|목표가|투자의견|증권사|리포트|매수|매도|Buy|Hold/i.test((n.title ?? '') + ' ' + (n.body ?? ''))
     );
     const hasConsensus = (tfAnalyst.consensus_raw?.length ?? 0) > 0;
-    if (hasAnalystNews || hasConsensus || (pipelineData.dart?.reports?.length ?? 0) > 0) {
+    const hasDart      = (tfAnalyst.dart_reports?.length ?? 0) > 0;
+    if (hasAnalystNews || hasConsensus || hasDart) {
       logger.info('[TF-2] 애널리스트 분석 재시도 (3초 후)...');
       await new Promise(r => setTimeout(r, 3000));
       try {
-        const retry = await runTFAnalyst(pipelineData.dart, pipelineData.news ?? []);
+        const retry = await runTFAnalyst(pipelineData.news ?? []);
         if ((retry.findings?.length ?? 0) > 0) {
           tfAnalyst = retry;
           logger.info(`[TF-2] 재시도 성공: ${tfAnalyst.findings.length}건`);
         } else if ((retry.consensus_raw?.length ?? 0) > (tfAnalyst.consensus_raw?.length ?? 0)) {
           // findings는 비었지만 consensus_raw가 추가로 수집됐다면 그것만이라도 반영
-          tfAnalyst = { ...tfAnalyst, consensus_raw: retry.consensus_raw };
+          tfAnalyst = { ...tfAnalyst, consensus_raw: retry.consensus_raw, dart_reports: retry.dart_reports };
         }
       } catch (e) { logger.warn('[TF-2] 재시도 실패:', e.message); }
     }
@@ -107,10 +111,10 @@ async function run(opts = {}) {
     logger.info(`[TF-2] 한경 컨센서스 폴백: ${tfAnalyst.findings.length}건`);
   }
   // (3) DART 최종 폴백 — 한경도 비어있는 극단 케이스만 적용
-  if ((tfAnalyst.findings?.length ?? 0) === 0 && (pipelineData.dart?.reports?.length ?? 0) > 0) {
+  if ((tfAnalyst.findings?.length ?? 0) === 0 && (tfAnalyst.dart_reports?.length ?? 0) > 0) {
     tfAnalyst = {
       ...tfAnalyst,
-      findings: pipelineData.dart.reports.slice(0, 5).map(r => ({
+      findings: tfAnalyst.dart_reports.slice(0, 5).map(r => ({
         company:       r.company ?? '―',
         firm:          r.flr_nm  ?? '―',
         rating_change: '―',
@@ -136,7 +140,7 @@ async function run(opts = {}) {
       .replace(/우[^가-힣]*$/, '')   // 우선주 접미사 제거
       .toLowerCase();
     const dartByNorm = new Map(
-      (pipelineData.dart?.reports ?? []).map(r => [normalize(r.company), r.url])
+      (tfAnalyst.dart_reports ?? []).map(r => [normalize(r.company), r.url])
     );
     // 안전망: Gemini가 학습 시점의 옛 한경 경로(/apps.analysis/analysis.view·analysis.list 등)를
     // URL로 합성하면 메일에서 클릭 시 한경 404로 떨어진다. 모든 한경 도메인 URL을 신규 경로로 강제 변환.
@@ -195,19 +199,28 @@ async function run(opts = {}) {
   // ──────────────────────────────────────────────────────────────
   logger.info('\n[Layer 3] DESK 편집·디자인·발행 시작...');
 
+  // designer 호환 합성: Layer 1이 더 이상 crypto/dart를 갖지 않으므로,
+  // TF팀이 노출한 raw를 designer가 보던 자리(pipelineData.crypto, .dart)에 합성해서 전달.
+  // 이렇게 하면 designer.js 변경 없이 새 데이터 흐름 유지.
+  const desktopData = {
+    ...pipelineData,
+    crypto: tfCrypto.crypto_data ?? null,
+    dart:   { reports: tfAnalyst.dart_reports ?? [] },
+  };
+
   // 3-A: 편집장 — 선별·교차검증·내러티브
-  const editorialPlan = await runEditor(pipelineData, tfResults)
+  const editorialPlan = await runEditor(desktopData, tfResults)
     .catch(e => { logger.warn('[desk/editor] 실패, 기본 플랜 사용:', e.message); return {}; });
   logger.info(`[desk/editor] 헤드라인: "${editorialPlan.headline ?? '(없음)'}"`);
 
   // 3-B: 디자이너 — HTML 조립
-  const html = await buildHtml(pipelineData, tfResults, editorialPlan);
+  const html = await buildHtml(desktopData, tfResults, editorialPlan);
   await fs.writeFile(path.join(outputDir, 'report.html'), html, 'utf-8');
   logger.info('[desk/designer] report.html 저장 완료');
 
   // 3-C: 발행
   const reportUrl = `${process.env.PAGES_BASE_URL ?? ''}/outputs/${reportDate}/report.html`;
-  const pubResult = await publish(reportDate, html, pipelineData, outputDir, reportUrl, tfResults, editorialPlan);
+  const pubResult = await publish(reportDate, html, desktopData, outputDir, reportUrl, tfResults, editorialPlan);
   if (pubResult.skipped) {
     logger.info(`[desk/publisher] 발송 건너뜀 (${pubResult.reason})`);
   } else {

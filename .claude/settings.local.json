@@ -41,7 +41,9 @@
       "Bash(rm -f sent.flag)",
       "Bash(set -e)",
       "Bash(git mv *)",
-      "Bash(node --env-file=\"/c/Users/neofi/content report/.env\" tools/orchestrator.js --now --dry-run)"
+      "Bash(node --env-file=\"/c/Users/neofi/content report/.env\" tools/orchestrator.js --now --dry-run)",
+      "Bash(node --env-file=\"/c/Users/neofi/content report/.env\" tools/layer-2-research/tf-analyst/index.js --date 2026-05-15)",
+      "Bash(node --env-file=\"/c/Users/neofi/content report/.env\" tools/layer-2-research/tf-crypto/index.js --date 2026-05-15)"
     ]
   }
 }
