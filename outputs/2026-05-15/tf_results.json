@@ -2,115 +2,95 @@
   "news": {
     "findings": [
       {
-        "headline": "8000선 코앞에서 무너진 코스피",
+        "headline": "코스피 8000 축포 하루도 못 갔다…외국인 투매에 6% 급락",
         "theme": "지정학",
         "importance": 10,
-        "market_impact": "KOSPI/코스닥 단기 하락 압력",
+        "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• KOSPI는 장중 8000선 돌파 후 중동발 지정학적 불안, 반도체 업종 악재, 외국인·기관의 동반 매도세로 7493.18(-6.12%)에 마감했습니다.",
-          "• 외국인과 기관은 코스피 시장에서 각각 5.65조원, 1.73조원을 순매도하며 지수 하락을 주도했습니다.",
-          "• 원화 약세가 수출 기업의 실적 개선에 긍정적 변수로 작용할 가능성도 언급되었습니다."
+          "• KOSPI는 장중 8000선을 돌파했으나, 외국인 순매도 5조 6607억원에 6.12% 급락했다.",
+          "• 기관도 1조 7347억원 순매도했고, 개인이 7조 2297억원 매수했으나 지수는 7493.18로 마감했다.",
+          "• 중동 불안 등 지정학적 리스크가 외국인 투자심리 위축을 야기하며 국내 증시를 끌어내렸다."
         ],
         "verified": false,
-        "source_url": "https://www.thereport.co.kr/news/articleView.html?idxno=87890"
+        "source_url": "https://www.joongang.co.kr/article/25428726"
       },
       {
         "headline": "삼성전자·SK하이닉스, 외국인 매도세에 주가 급락",
         "theme": "반도체",
         "importance": 9,
-        "market_impact": "KOSPI 단기 하락 압력 (특히 반도체 섹터)",
+        "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• 외국인은 삼성전자와 SK하이닉스 등 반도체 대형주를 중심으로 대규모 순매도를 기록하며 KOSPI 하락을 견인했습니다.",
-          "• 외국인 순매도는 코스피 전체 5.8조원, 기관은 2.1조원 규모에 달했고, 필라델피아 반도체 지수는 0.46% 상승했으나 국내 증시는 역행했습니다.",
-          "• 개인 투자자는 7.8조원을 순매수하며 낙폭 방어에 나섰지만 역부족이었습니다."
+          "• 삼성전자와 SK하이닉스 등 국내 반도체 대형주들이 외국인 매도세에 힘입어 주가가 급락했다.",
+          "• 외국인은 코스피 시장에서 5조 8746억원을 순매도, 이는 지수 하락의 주된 요인으로 작용했다.",
+          "• 해외 필라델피아 반도체 지수 상승에도 불구하고 국내 반도체주는 외국인 매도로 차별화된 하락을 보였다."
         ],
         "verified": false,
         "source_url": "https://www.tokenpost.kr/news/market/360090"
       },
       {
-        "headline": "김진일 금통위원 \"금융위기 막으려면 금리 다소 높아야\"",
+        "headline": "'매파' 김진일 금통위원 &quot;금융안정 위해 이자율 반클릭 높은 게 좋아&quot;",
         "theme": "금리",
-        "importance": 8,
-        "market_impact": "KOSPI/코스닥 단기 하락 압력 (긴축 우려)",
+        "importance": 9,
+        "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• 김진일 한국은행 금융통화위원은 금융위기를 막기 위해 기준금리가 다소 높게 유지되는 것이 바람직하다는 매파적 입장을 밝혔습니다.",
-          "• 최근 원/달러 환율이 1500원대로 올라선 것에 대해서는 적정 수준을 단정하기 어렵다는 입장을 표명했습니다."
+          "• 김진일 한은 금통위원은 취임사에서 금융 안정을 위해 기준금리가 중앙값보다 0.1~0.2%p 높게 유지되어야 한다고 밝혔다.",
+          "• 이 발언은 중동 고유가로 인한 인플레이션 우려와 달러-원 환율의 1500원대 상승에 대한 대응으로 풀이된다.",
+          "• 금통위원의 매파적 입장은 금리 인상 가능성을 시사, 투자 심리를 위축시켜 증시에 부정적 영향을 줄 수 있다."
         ],
         "verified": false,
-        "source_url": "https://www.ebn.co.kr/news/articleView.html?idxno=1709025"
+        "source_url": "https://biz.sbs.co.kr/article_hub/20000310753?division=NAVER"
       },
       {
-        "headline": "전장 대비 500p 날아가...장중 8000 돌파, 마감은 7493",
-        "theme": "환율",
+        "headline": "[오늘의 ABC 뉴스룸] &quot;상호금융에서 15조가 사라졌다?&quot; 예금 깨서 주식으...",
+        "theme": "실적",
         "importance": 7,
-        "market_impact": "KOSPI 단기 하락 압력 (환율 불안정)",
+        "market_impact": "KOSPI/코스닥 단기 중립",
         "summary": [
-          "• 증시 급락과 외국인 자금 이탈 우려로 원/달러 환율이 한 달여 만에 1500원대로 올라서는 오름세를 보였습니다.",
-          "• 코스닥 역시 외국인과 기관 매도세에 5.14% 하락한 1129.82로 마감하며 KOSPI와 동반 약세를 보였습니다."
+          "• AI 핵심인 HBM 시장을 주도하는 국내 반도체 기업 주가가 미국 경쟁사 대비 저평가될 가능성이 제기됐다.",
+          "• 시장은 증시 성장을 위해 반도체 외 바이오, 로봇, 방산 등 신성장 동력의 실적 기여가 필수적이라고 진단했다.",
+          "• 이는 국내 증시 산업 포트폴리오 다각화의 필요성을 강조하며 장기적인 투자 방향에 영향을 미친다."
         ],
         "verified": false,
-        "source_url": "https://www.financialpost.co.kr/news/articleView.html?idxno=259300"
+        "source_url": "https://www.ajunews.com/view/20260515142110272"
       },
       {
         "headline": "[거래소 기관] SK하이닉스 삼성전자 LS ELECTRIC HD현대중공업 폭풍 매도",
-        "theme": "방산",
-        "importance": 7,
-        "market_impact": "KOSPI/코스닥 단기 하락 압력 (특정 섹터)",
+        "theme": "반도체",
+        "importance": 8,
+        "market_impact": "KOSPI/코스닥 단기 하락 압력",
         "summary": [
-          "• 기관은 반도체 대형주 외에 LS ELECTRIC, 효성중공업, HD현대일렉트릭, HD현대중공업 등 전력 인프라 및 방산 관련 종목에서 대규모 순매도를 기록했습니다.",
-          "• 이는 최근 전력 설비주 급등에 따른 차익 실현 부담이 영향을 미친 것으로 분석됩니다."
+          "• 기관 투자자들이 SK하이닉스, 삼성전자 등 반도체주 외 전력 인프라 및 방산 관련주를 대규모 순매도했다.",
+          "• LS ELECTRIC, 효성중공업 등 전력 설비주의 급등에 따른 차익실현 부담이 매도세에 영향을 미쳤다.",
+          "• 기관 매도세는 특정 성장 섹터에 대한 단기 조정 압력을 높여 전반적인 시장 하락에 기여했다."
         ],
         "verified": false,
         "source_url": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=453057"
       },
       {
-        "headline": "반도체에 밀리고 악재에 흔들리고…강세장 속 힘 못 쓰는 바이오주",
-        "theme": "바이오",
+        "headline": "[올댓차이나] 홍콩 증시, 대중 규제 완화 불투명에 하락 마감…H주 1.89%...",
+        "theme": "지정학",
         "importance": 6,
-        "market_impact": "코스닥 단기 하락 압력 (바이오 섹터)",
+        "market_impact": "KOSPI/코스닥 단기 하락 압력",
         "summary": [
-          "• 바이오주는 반도체 섹터의 강세에 밀리고 개별 악재에 흔들리며 전반적인 시장 강세 속에서도 힘을 쓰지 못하고 있습니다.",
-          "• 기술 수출 및 임상 데이터 발표 등 개별 모멘텀이 종목별 반등 계기가 될 수 있다는 관측도 존재합니다."
+          "• 홍콩 증시는 대중(對中) 규제 완화 불확실성 및 자원 가격 하락으로 하락 마감하며 H주가 1.89% 내렸다.",
+          "• 화훙반도체 등 반도체 관련주와 금광주, 비철금속주 등 소재주가 약세를 면치 못했다.",
+          "• 인접국 증시의 하락은 국내 투자자들의 아시아 시장 전반에 대한 투자 심리에 부정적 영향을 미칠 수 있다."
         ],
         "verified": false,
-        "source_url": "https://ilyo.co.kr/?ac=article_view&entry_id=510901"
-      },
-      {
-        "headline": "[이슈] '셀 코리아' 진정 조짐…외국인 채권자금 순유입 전환",
-        "theme": "국제금융",
-        "importance": 7,
-        "market_impact": "KOSPI/코스닥 중립 (단기 주식 매도와 상쇄되는 채권 매수)",
-        "summary": [
-          "• 한국은행 발표에 따르면, 외국인 투자자들은 국내 채권 시장에서 4월 중 15억 5천만 달러 순유입으로 전환되며 '셀 코리아' 기조 진정 조짐을 보였습니다.",
-          "• 이는 주식 시장의 대규모 매도세와 대비되는 움직임으로, 국제금융 시장의 복합적인 흐름을 시사합니다."
-        ],
-        "verified": false,
-        "source_url": "https://www.startuptoday.co.kr/news/articleView.html?idxno=801085"
-      },
-      {
-        "headline": "[오늘의 ABC 뉴스룸] \"상호금융에서 15조가 사라졌다?\" 예금 깨서 주식으...",
-        "theme": "국내경제",
-        "importance": 6,
-        "market_impact": "KOSPI/코스닥 단기 중립 (내부 자금 이동)",
-        "summary": [
-          "• 상호금융 예금 잔액이 15조원 가량 감소한 것으로 나타나, 이 자금이 주식 시장으로 이동했을 가능성이 제기됩니다.",
-          "• AI 산업의 핵심인 HBM 외에 바이오, 로봇, 방산 등 신성장 동력이 함께 실적을 내줘야 시장이 성장할 수 있다는 진단이 나왔습니다."
-        ],
-        "verified": false,
-        "source_url": "https://www.ajunews.com/view/20260515142110272"
+        "source_url": "https://www.newsis.com/view/NISX20260515_0003631937"
       }
     ],
     "top_stories": [
-      "8000선 코앞에서 무너진 코스피",
+      "코스피 8000 축포 하루도 못 갔다…외국인 투매에 6% 급락",
       "삼성전자·SK하이닉스, 외국인 매도세에 주가 급락",
-      "김진일 금통위원 \"금융위기 막으려면 금리 다소 높아야\""
+      "'매파' 김진일 금통위원 &quot;금융안정 위해 이자율 반클릭 높은 게 좋아&quot;"
     ],
     "themes": [
       "반도체",
       "금리",
       "환율",
       "지정학",
-      "방산"
+      "실적"
     ],
     "confidence": 0.95,
     "model_used": "gemini-2.5-flash"
@@ -118,85 +98,83 @@
   "analyst": {
     "findings": [
       {
-        "company": "삼성전자",
-        "sector": "반도체",
-        "firm": "미래에셋증권",
+        "company": "HD현대일렉트릭",
+        "sector": "전력 인프라",
+        "firm": "키움증권",
         "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 85000,
-          "new": 95000,
-          "change_pct": 11.8
+          "prev": 180000,
+          "new": 260000,
+          "change_pct": 44.4
         },
-        "key_thesis": "외국인 매도세로 인한 단기 조정에도 불구하고 AI 반도체 수요 증가와 HBM 시장 선점으로 견조한 실적 성장이 기대되어 목표주가 상향.",
-        "report_url": null,
+        "key_thesis": "사상 최대 수주잔고와 높은 수익성으로 호실적 지속 기대",
+        "report_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708274",
         "importance": 9,
-        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90&report_type=&search_type=2"
+        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708274"
       },
       {
-        "company": "LS ELECTRIC",
-        "sector": "전력 인프라",
-        "firm": "한국투자증권",
-        "rating_change": "Buy→Hold",
+        "company": "롯데에너지머티리얼즈",
+        "sector": "2차전지",
+        "firm": "삼성증권",
+        "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 200000,
-          "new": 180000,
-          "change_pct": -10
+          "prev": 63000,
+          "new": 55000,
+          "change_pct": -12.7
         },
-        "key_thesis": "급등에 따른 차익 실현 매물 출회 및 밸류에이션 부담으로 투자의견을 하향 조정하며, 단기적인 숨고르기 구간 진입 예상.",
-        "report_url": null,
+        "key_thesis": "일진머티리얼즈와 합병 후 시너지 효과가 예상되나 목표주가 하향",
+        "report_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708276",
         "importance": 8,
-        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=LS%20ELECTRIC&report_type=&search_type=2"
+        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708276"
       },
       {
-        "company": "한화에어로스페이스",
-        "sector": "방산",
+        "company": "고영",
+        "sector": "반도체",
         "firm": "신한투자증권",
-        "rating_change": "신규 Buy",
+        "rating_change": "Hold 유지",
         "target_price": {
           "prev": null,
-          "new": 250000,
+          "new": 15000,
           "change_pct": null
         },
-        "key_thesis": "글로벌 지정학적 리스크 심화와 수출 계약 확대로 견조한 성장세를 유지하며, 타 섹터 대비 차별화된 실적을 기대하며 신규 커버리지 개시.",
-        "report_url": null,
+        "key_thesis": "반도체 검사 장비 사업의 성장 잠재력을 주목하며 신규 목표주가 제시",
+        "report_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708273",
         "importance": 7,
-        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=%ED%95%9C%ED%99%94%EC%97%90%EC%96%B4%EB%A1%9C%EC%8A%A4%ED%8E%98%EC%9D%B4%EC%8A%A4&report_type=&search_type=2"
+        "dart_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708273"
       }
     ],
     "sector_sentiment": {
       "반도체": "중립",
-      "전력 인프라": "중립",
-      "방산": "긍정",
-      "2차전지": "부정"
+      "바이오": "부정적"
     },
     "consensus_changes": 3,
     "alert_items": [
       {
-        "company": "삼성전자",
-        "sector": "반도체",
-        "firm": "미래에셋증권",
+        "company": "HD현대일렉트릭",
+        "sector": "전력 인프라",
+        "firm": "키움증권",
         "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 85000,
-          "new": 95000,
-          "change_pct": 11.8
+          "prev": 180000,
+          "new": 260000,
+          "change_pct": 44.4
         },
-        "key_thesis": "외국인 매도세로 인한 단기 조정에도 불구하고 AI 반도체 수요 증가와 HBM 시장 선점으로 견조한 실적 성장이 기대되어 목표주가 상향.",
-        "report_url": null,
+        "key_thesis": "사상 최대 수주잔고와 높은 수익성으로 호실적 지속 기대",
+        "report_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708274",
         "importance": 9
       },
       {
-        "company": "LS ELECTRIC",
-        "sector": "전력 인프라",
-        "firm": "한국투자증권",
-        "rating_change": "Buy→Hold",
+        "company": "롯데에너지머티리얼즈",
+        "sector": "2차전지",
+        "firm": "삼성증권",
+        "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 200000,
-          "new": 180000,
-          "change_pct": -10
+          "prev": 63000,
+          "new": 55000,
+          "change_pct": -12.7
         },
-        "key_thesis": "급등에 따른 차익 실현 매물 출회 및 밸류에이션 부담으로 투자의견을 하향 조정하며, 단기적인 숨고르기 구간 진입 예상.",
-        "report_url": null,
+        "key_thesis": "일진머티리얼즈와 합병 후 시너지 효과가 예상되나 목표주가 하향",
+        "report_url": "https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=708276",
         "importance": 8
       }
     ],
@@ -208,30 +186,24 @@
     "findings": [
       {
         "asset": "BTC",
-        "price_usd": 80600,
-        "key_level": "80,000 달러 돌파 후 85,000 - 90,000 달러 구간 저항선 주시",
-        "importance": 7
+        "price_usd": 80460,
+        "key_level": "85,000 달러 저항선 테스트 및 80,000 달러 지지선 형성 여부 주목",
+        "importance": 8
       },
       {
         "asset": "ETH",
-        "price_usd": 2257.97,
-        "key_level": "2,300 달러 저항선 근접 및 2,500 달러 목표",
-        "importance": 6
-      },
-      {
-        "asset": "BTC Dominance",
-        "price_usd": null,
-        "key_level": "58.37% 유지, 시장의 비트코인 중심 현상 지속",
+        "price_usd": 2252.84,
+        "key_level": "2,300 달러 저항선 및 2,200 달러 지지선 확인",
         "importance": 6
       }
     ],
-    "signal": "축적 구간",
-    "market_summary": "비트코인과 이더리움은 소폭 상승하며 강세를 보이고 있으나, 시장 심리 지수는 '공포(Fear)' 상태를 유지하며 관망세가 짙습니다. 비트코인 도미넌스는 견고하게 유지됩니다.",
+    "signal": "조정 구간",
+    "market_summary": "비트코인이 사상 최고가 부근에서 상승세를 이어가고 있으나 투자 심리는 '공포' 상태로 전환되어 단기 조정 가능성이 대두되며 이더리움은 보합세를 보입니다.",
     "kr_stocks_impact": [
       {
         "company": "카카오",
         "ticker": "035720",
-        "expected_direction": "neutral"
+        "expected_direction": "positive"
       },
       {
         "company": "카카오게임즈",
@@ -254,8 +226,8 @@
       "value": 43,
       "label": "Fear"
     },
-    "btc_dominance": 58.37,
-    "confidence": 0.85,
+    "btc_dominance": 58.38,
+    "confidence": 0.8,
     "model_used": "gemini-2.5-flash"
   }
 }
