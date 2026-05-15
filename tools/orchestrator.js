@@ -101,11 +101,22 @@ async function run(opts = {}) {
     logger.info(`[TF-2] DART 폴백: ${tfAnalyst.findings.length}건`);
   }
   if ((pipelineData.dart?.reports?.length ?? 0) > 0 && (tfAnalyst.findings?.length ?? 0) > 0) {
-    const dartByCompany = new Map(pipelineData.dart.reports.map(r => [r.company, r.url]));
-    tfAnalyst.findings = tfAnalyst.findings.map(f => ({
-      ...f,
-      dart_url: f.dart_url ?? dartByCompany.get(f.company) ?? null,
-    }));
+    // 회사명 정규화 — Gemini 출력과 DART 응답이 "(주)" 접두/공백/우선주 표기 등으로 어긋날 수 있다.
+    //   "삼성전자" ↔ "(주)삼성전자" ↔ "삼성전자우"  모두 같은 회사로 매칭.
+    const normalize = s => String(s ?? '')
+      .replace(/\(주\)|㈜/g, '')
+      .replace(/\s+/g, '')
+      .replace(/우[^가-힣]*$/, '')   // 우선주 접미사 제거
+      .toLowerCase();
+    const dartByNorm = new Map(pipelineData.dart.reports.map(r => [normalize(r.company), r.url]));
+    let matched = 0;
+    tfAnalyst.findings = tfAnalyst.findings.map(f => {
+      if (f.dart_url) return f;
+      const found = dartByNorm.get(normalize(f.company));
+      if (found) matched++;
+      return { ...f, dart_url: found ?? null };
+    });
+    logger.info(`[TF-2] DART URL 매칭: ${matched}/${tfAnalyst.findings.length}건 (정규화 비교)`);
   }
 
   const tfResults = { news: tfNews, analyst: tfAnalyst, crypto: tfCrypto };

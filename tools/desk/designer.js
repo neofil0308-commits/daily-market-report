@@ -412,8 +412,9 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
   // 날짜 변수: dateMd = 마지막 거래일(5/11), prevMd = 그 전일(5/10)
   const { full: dateFull, md: dateMd, prevMd } = _dataDateInfo(date, histDisp);
 
-  // 전일 거래대금: histDisp 마지막 항목 (= 어제 거래일)
-  const prevDayTvBn = histDisp[histDisp.length - 1]?.tradingValueBn ?? null;
+  // 전일 거래대금 — pipeline이 채운 d.prevVolumeBn 우선, 없으면 histDisp[마지막-1] 폴백
+  // (histDisp 마지막은 "기준 거래일"이라 d.volumeBn과 같아 비교에 사용 불가 — 마지막에서 두 번째가 전일)
+  const prevDayTvBn = d.prevVolumeBn ?? histDisp[histDisp.length - 2]?.tradingValueBn ?? null;
   const volDiff = (d.volumeBn != null && prevDayTvBn != null) ? r2(d.volumeBn - prevDayTvBn) : null;
   const volPct  = (volDiff != null && prevDayTvBn) ? r2(volDiff / prevDayTvBn * 100) : null;
 

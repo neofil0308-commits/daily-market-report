@@ -395,7 +395,8 @@ async function fetchMarketBreadth() {
 }
 
 // 네이버 KOSPI 일별 시세 (거래대금 포함) — 역사 테이블용
-async function fetchNaverKospiHistory() {
+// pipeline 폴백에서도 직접 호출하므로 export
+export async function fetchNaverKospiHistory() {
   try {
     const res = await axios.get(
       'https://finance.naver.com/sise/sise_index_day.nhn?code=KOSPI&page=1',

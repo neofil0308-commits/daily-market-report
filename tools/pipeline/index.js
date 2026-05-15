@@ -2,7 +2,7 @@
 // 모든 피드를 병렬 수집해 PipelineData 객체 반환.
 // 수집 실패는 null/[] 반환, 전체 파이프라인 중단 금지.
 import axios from 'axios';
-import { collectDomestic, fetchKospiMarketCap } from '../collectors/domestic.js';
+import { collectDomestic, fetchKospiMarketCap, fetchNaverKospiHistory } from '../collectors/domestic.js';
 import { collectOverseas }    from '../collectors/overseas.js';
 import { collectFxRates }     from '../collectors/fx_rates.js';
 import { collectCommodities } from '../collectors/commodities.js';
@@ -109,18 +109,22 @@ async function _mergeSupplySnapshot(data, prevOutputDir) {
 async function _applyLiveFallbacks(data, prevOutputDir = null) {
   const d = data.domestic ?? {};
 
-  // KOSPI 종가 실시간 폴백 (Yahoo ^KS11 실패 → Naver m.stock 사용)
-  // Yahoo가 일시 차단되거나 응답 지연 시 today/prev null로 떨어지는 사고를 방지.
+  // KOSPI/KOSDAQ 종가 실시간 폴백
+  // ⚠️ 핵심 규칙: 사주는 매일 08:00 KST에 메일 수신 → 그때 "기준 거래일"은 직전 거래일(=어제) 종가.
+  //   m.stock의 closePrice는 marketStatus=CLOSE면 어제 종가, OPEN이면 장중 현재가다.
+  //   장중에 실수로 트리거된 경우(수동 검증 등)에는 그 값을 절대 신뢰하면 안 된다 → kospiHistory 마지막 사용.
   if (d.kospi?.today == null) {
     const live = await _fetchNaverIdxLive('KOSPI');
-    if (live?.today != null) {
+    if (live?.today != null && live.marketStatus !== 'OPEN') {
       d.kospi = { ...(d.kospi ?? {}), ...live, source: 'naver-fallback' };
       logger.info(`[pipeline] KOSPI 종가 실시간 폴백: ${live.today} (${live.diff >= 0 ? '+' : ''}${live.diff})`);
+    } else if (live?.marketStatus === 'OPEN') {
+      logger.info(`[pipeline] KOSPI 시장 OPEN — 라이브값 ${live.today} 무시, kospiHistory 폴백으로 위임`);
     }
   }
   if (d.kosdaq?.today == null) {
     const live = await _fetchNaverIdxLive('KOSDAQ');
-    if (live?.today != null) {
+    if (live?.today != null && live.marketStatus !== 'OPEN') {
       d.kosdaq = { ...(d.kosdaq ?? {}), ...live, source: 'naver-fallback' };
       logger.info(`[pipeline] KOSDAQ 종가 실시간 폴백: ${live.today} (${live.diff >= 0 ? '+' : ''}${live.diff})`);
     }
@@ -169,29 +173,6 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
         logger.info(`[pipeline] KOSPI 시가총액 실시간 폴백: ${d.marketCap}조`);
       }
     } catch (e) { logger.warn('[pipeline] KOSPI 거래대금·시총 폴백 실패:', e.message); }
-  }
-
-  // 시가총액 폴백 — Naver polling 응답에 없으면 sise_market_sum 전 종목 합산 (휴장일에도 동작)
-  // collectDomestic이 휴장일 분기로 일찍 종료해 marketCap이 비는 케이스 대응.
-  if (d.marketCap == null && d.kospi?.today != null) {
-    const mc = await fetchKospiMarketCap();
-    if (mc != null) {
-      d.marketCap = mc;
-      logger.info(`[pipeline] KOSPI 시가총액 합산 폴백: ${mc}조`);
-    }
-  }
-
-  // 시가총액 전일比 계산 — prevOutputDir의 data.json에서 전일 marketCap 로드
-  if (d.marketCap != null && d.prevMarketCap == null && prevOutputDir) {
-    try {
-      const prev = JSON.parse(await fs.readFile(path.join(prevOutputDir, 'data.json'), 'utf-8'));
-      const prevMc = prev?.domestic?.marketCap ?? null;
-      if (prevMc != null) {
-        d.prevMarketCap = prevMc;
-        d.marketCapDiff = r2(d.marketCap - prevMc);
-        d.marketCapPct  = prevMc ? r2(d.marketCapDiff / prevMc * 100) : null;
-      }
-    } catch { /* 전일 데이터 없으면 무시 */ }
   }
 
   // VKOSPI 폴백 — m.stock 실패(409) 또는 휴장일 → investing.com 시도
@@ -243,7 +224,18 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
     }
   }
 
-  // KOSPI 히스토리 폴백 (6거래일 미만이면 Yahoo Finance 직접 수집)
+  // KOSPI 히스토리 폴백 1단계: Naver (거래대금 포함, 사주 핵심 요구)
+  if ((d.kospiHistory ?? []).length < 6) {
+    try {
+      const naver = await fetchNaverKospiHistory();
+      if (naver?.length >= 2) {
+        d.kospiHistory = naver.slice(-6);
+        logger.info(`[pipeline] KOSPI 히스토리 Naver 폴백: ${naver.length}거래일 (거래대금 포함)`);
+      }
+    } catch (e) { logger.warn('[pipeline] Naver KOSPI 히스토리 폴백 실패:', e.message); }
+  }
+
+  // KOSPI 히스토리 폴백 2단계: Yahoo (Naver도 실패한 경우 — 거래대금 없음)
   if ((d.kospiHistory ?? []).length < 6) {
     try {
       const yf     = await axios.get(
@@ -263,13 +255,103 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
         .map(x => ({ date: toMD(x.ts), close: r2(x.close), tradingValueBn: null }));
       if (rows.length >= 2) {
         d.kospiHistory = rows;
-        logger.info(`[pipeline] KOSPI 히스토리 폴백: ${rows.length}거래일`);
+        logger.info(`[pipeline] KOSPI 히스토리 Yahoo 폴백: ${rows.length}거래일 (거래대금 없음)`);
       }
-    } catch (e) { logger.warn('[pipeline] KOSPI 히스토리 폴백 실패:', e.message); }
+    } catch (e) { logger.warn('[pipeline] KOSPI 히스토리 Yahoo 폴백 실패:', e.message); }
+  }
+
+  // KOSPI 종가가 m.stock OPEN 으로 못 가져왔을 때 — kospiHistory 마지막을 기준 거래일로 사용
+  if (d.kospi?.today == null && (d.kospiHistory ?? []).length >= 2) {
+    const hist = d.kospiHistory;
+    const last = hist[hist.length - 1];
+    const prev = hist[hist.length - 2];
+    if (last?.close != null && prev?.close != null) {
+      const diff = r2(last.close - prev.close);
+      const pct  = prev.close ? r2(diff / prev.close * 100) : 0;
+      d.kospi = {
+        ...(d.kospi ?? {}),
+        today: last.close, prev: prev.close, diff, pct,
+        direction: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat',
+        source: 'history-fallback',
+      };
+      logger.info(`[pipeline] KOSPI 기준 거래일 폴백: ${last.close} (전일 ${prev.close})`);
+    }
+  }
+
+  // ── 시가총액·거래대금 전일比 폴백 (kospiHistory·KOSPI 종가 채워진 후 실행) ────
+  // 시가총액 합산 폴백 — Naver polling에 marketCapRaw 없으면 sise_market_sum 전 종목 합산
+  if (d.marketCap == null && d.kospi?.today != null) {
+    const mc = await fetchKospiMarketCap();
+    if (mc != null) {
+      d.marketCap = mc;
+      logger.info(`[pipeline] KOSPI 시가총액 합산 폴백: ${mc}조`);
+    }
+  }
+
+  // 시가총액·거래대금 전일比 — prevOutputDir → PAGES_BASE_URL 순으로 시도
+  // GA 워크스페이스는 매번 새것이라 prevOutputDir 로컬 파일이 없을 가능성 높음 → gh-pages에 deploy된 어제 data.json 직접 fetch.
+  if ((d.marketCap != null && d.prevMarketCap == null) || (d.volumeBn != null && d.prevVolumeBn == null)) {
+    const prevData = await _loadPrevDayData(prevOutputDir, data.date);
+    if (prevData) {
+      const prevMc = prevData?.domestic?.marketCap ?? null;
+      const prevVb = prevData?.domestic?.volumeBn  ?? null;
+      if (d.marketCap != null && d.prevMarketCap == null && prevMc != null) {
+        d.prevMarketCap = prevMc;
+        d.marketCapDiff = r2(d.marketCap - prevMc);
+        d.marketCapPct  = prevMc ? r2(d.marketCapDiff / prevMc * 100) : null;
+        logger.info(`[pipeline] 시가총액 전일比: ${d.marketCap}조 vs ${prevMc}조 (${d.marketCapPct}%)`);
+      }
+      if (d.volumeBn != null && d.prevVolumeBn == null && prevVb != null) {
+        d.prevVolumeBn = prevVb;
+        logger.info(`[pipeline] 거래대금 전일比: ${d.volumeBn}조 vs ${prevVb}조`);
+      }
+    }
+  }
+
+  // 거래대금 prev 폴백 2단계: kospiHistory 마지막에서 두 번째 행 (= 전 거래일 거래대금)
+  if (d.volumeBn != null && d.prevVolumeBn == null && (d.kospiHistory?.length ?? 0) >= 2) {
+    const hist = d.kospiHistory;
+    const prevRow = hist[hist.length - 2];
+    if (prevRow?.tradingValueBn != null) {
+      d.prevVolumeBn = prevRow.tradingValueBn;
+      logger.info(`[pipeline] 거래대금 전일比 (히스토리 폴백): ${d.volumeBn}조 vs ${prevRow.tradingValueBn}조`);
+    }
   }
 }
 
+// 전일 data.json 로드 — 로컬 prevOutputDir 우선, 없으면 gh-pages에 deploy된 파일을 axios로 fetch
+// GA 워크스페이스는 매 실행마다 새것이라 로컬엔 파일이 없음 → PAGES_BASE_URL 경로로 직접 받아옴.
+async function _loadPrevDayData(prevOutputDir, currentDate) {
+  // 1차: 로컬 파일
+  if (prevOutputDir) {
+    try {
+      const content = await fs.readFile(path.join(prevOutputDir, 'data.json'), 'utf-8');
+      return JSON.parse(content);
+    } catch { /* 다음 시도 */ }
+  }
+  // 2차: PAGES_BASE_URL/outputs/{prevDate}/data.json
+  const pagesBase = process.env.PAGES_BASE_URL?.replace(/\/$/, '');
+  if (pagesBase && currentDate) {
+    try {
+      // 직전 거래일을 영업일 단위로 거꾸로 탐색 (최대 7일까지)
+      for (let i = 1; i <= 7; i++) {
+        const dt = new Date(new Date(currentDate).getTime() - i * 86400000);
+        const dstr = dt.toISOString().slice(0, 10);
+        try {
+          const r = await axios.get(`${pagesBase}/outputs/${dstr}/data.json`, { timeout: 10000 });
+          if (r.data && r.data.domestic) {
+            logger.info(`[pipeline] 전일 데이터 fetch 성공: ${pagesBase}/outputs/${dstr}/data.json`);
+            return r.data;
+          }
+        } catch { /* 다음 날짜 */ }
+      }
+    } catch { /* 무시 */ }
+  }
+  return null;
+}
+
 // Naver m.stock 인덱스 라이브 시세 — KOSPI/KOSDAQ 종가 폴백용
+// marketStatus 함께 반환해 호출부에서 OPEN/CLOSE 분기 가능.
 async function _fetchNaverIdxLive(symbol) {
   try {
     const res = await axios.get(
@@ -279,12 +361,14 @@ async function _fetchNaverIdxLive(symbol) {
     const p     = s => parseFloat(String(s ?? '').replace(/,/g, '')) || null;
     const today = p(res.data.closePrice);
     const delta = p(res.data.compareToPreviousClosePrice);
+    const marketStatus = res.data.marketStatus ?? null;
     if (today == null) return null;
     const prev = delta != null ? r2(today - delta) : null;
     const pct  = (prev != null && prev !== 0) ? r2((today - prev) / prev * 100) : 0;
     return {
       today, prev, diff: delta, pct,
       direction: delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat',
+      marketStatus,
     };
   } catch { return null; }
 }
