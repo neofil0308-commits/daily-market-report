@@ -1,4 +1,9 @@
-// tools/preview_send.js — 일일 시장 리포트 Gmail 발송
+// tools/preview_send.js — ⚠️ DEPRECATED ⚠️
+// 2026-05-13 이후 GitHub Actions는 이 파일을 호출하지 않는다.
+// GA 진입점: tools/orchestrator.js (`.github/workflows/daily-report.yml` 참조).
+// 이 파일은 로컬에서 기존 data.json 으로 Gmail 재발송을 검증할 때 쓰는 보조 도구다.
+// 새 기능을 여기에 추가하면 GA에 절대 반영되지 않는다 — orchestrator.js / desk/publisher.js 쪽에 추가하라.
+// (참조: 오답노트 #033)
 import 'dotenv/config';
 import fs from 'fs/promises';
 import axios from 'axios';

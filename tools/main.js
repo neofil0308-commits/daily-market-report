@@ -1,4 +1,9 @@
-// tools/main.js — 오케스트레이터
+// tools/main.js — ⚠️ DEPRECATED ⚠️
+// 2026-05-13 이후 GitHub Actions는 이 파일을 호출하지 않는다.
+// GA 진입점: tools/orchestrator.js (`.github/workflows/daily-report.yml` 참조).
+// 이 파일은 로컬에서 수동으로 데이터 수집만 검증할 때 쓰는 보조 도구다.
+// 새 기능을 여기에 추가하면 GA에 절대 반영되지 않는다 — orchestrator.js / pipeline / desk 쪽에 추가하라.
+// (참조: 오답노트 #033)
 import 'dotenv/config';
 import cron from 'node-cron';
 import dayjs from 'dayjs';

@@ -109,6 +109,23 @@ async function _mergeSupplySnapshot(data, prevOutputDir) {
 async function _applyLiveFallbacks(data) {
   const d = data.domestic ?? {};
 
+  // KOSPI 종가 실시간 폴백 (Yahoo ^KS11 실패 → Naver m.stock 사용)
+  // Yahoo가 일시 차단되거나 응답 지연 시 today/prev null로 떨어지는 사고를 방지.
+  if (d.kospi?.today == null) {
+    const live = await _fetchNaverIdxLive('KOSPI');
+    if (live?.today != null) {
+      d.kospi = { ...(d.kospi ?? {}), ...live, source: 'naver-fallback' };
+      logger.info(`[pipeline] KOSPI 종가 실시간 폴백: ${live.today} (${live.diff >= 0 ? '+' : ''}${live.diff})`);
+    }
+  }
+  if (d.kosdaq?.today == null) {
+    const live = await _fetchNaverIdxLive('KOSDAQ');
+    if (live?.today != null) {
+      d.kosdaq = { ...(d.kosdaq ?? {}), ...live, source: 'naver-fallback' };
+      logger.info(`[pipeline] KOSDAQ 종가 실시간 폴백: ${live.today} (${live.diff >= 0 ? '+' : ''}${live.diff})`);
+    }
+  }
+
   // VKOSPI 실시간 폴백
   if (d.vkospi?.today == null) {
     try {
@@ -147,6 +164,25 @@ async function _applyLiveFallbacks(data) {
     } catch (e) { logger.warn('[pipeline] KOSPI 거래대금 폴백 실패:', e.message); }
   }
 
+  // KOSPI 종가/거래대금 폴백을 받지 못했지만 kospiHistory가 있으면 마지막 종가로 보완
+  // (Naver·Yahoo가 모두 실패해도 사용자에게는 N/A 대신 직전 거래일 종가가 표시되도록.)
+  if (d.kospi?.today == null && (d.kospiHistory ?? []).length >= 2) {
+    const hist = d.kospiHistory;
+    const last = hist[hist.length - 1];
+    const prev = hist[hist.length - 2];
+    if (last?.close != null && prev?.close != null) {
+      const diff = r2(last.close - prev.close);
+      const pct  = prev.close ? r2(diff / prev.close * 100) : 0;
+      d.kospi = {
+        ...(d.kospi ?? {}),
+        today: last.close, prev: prev.close, diff, pct,
+        direction: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat',
+        source: 'history-fallback',
+      };
+      logger.info(`[pipeline] KOSPI 히스토리 기반 폴백: ${last.close} (전일 ${prev.close})`);
+    }
+  }
+
   // KOSPI 히스토리 폴백 (6거래일 미만이면 Yahoo Finance 직접 수집)
   if ((d.kospiHistory ?? []).length < 6) {
     try {
@@ -171,4 +207,24 @@ async function _applyLiveFallbacks(data) {
       }
     } catch (e) { logger.warn('[pipeline] KOSPI 히스토리 폴백 실패:', e.message); }
   }
+}
+
+// Naver m.stock 인덱스 라이브 시세 — KOSPI/KOSDAQ 종가 폴백용
+async function _fetchNaverIdxLive(symbol) {
+  try {
+    const res = await axios.get(
+      `https://m.stock.naver.com/api/index/${symbol}/basic`,
+      { headers: NAV_H, timeout: 8000 }
+    );
+    const p     = s => parseFloat(String(s ?? '').replace(/,/g, '')) || null;
+    const today = p(res.data.closePrice);
+    const delta = p(res.data.compareToPreviousClosePrice);
+    if (today == null) return null;
+    const prev = delta != null ? r2(today - delta) : null;
+    const pct  = (prev != null && prev !== 0) ? r2((today - prev) / prev * 100) : 0;
+    return {
+      today, prev, diff: delta, pct,
+      direction: delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat',
+    };
+  } catch { return null; }
 }

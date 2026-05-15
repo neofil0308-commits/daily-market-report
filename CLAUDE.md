@@ -44,7 +44,7 @@ Layer 3 — THE DESK         선별·교차검증·편집·발행 (최종 결정
 | `supply_snapshot.js` | KOSPI 수급(외국인·기관·개인)·VKOSPI | Naver (16:40 KST 전용) |
 
 수집 실패 시 항상 `null` 또는 `[]`를 반환하고 파이프라인을 중단하지 않는다.
-`tools/pipeline/`은 향후 orchestrator.js 전용 신규 피드 디렉토리 (현재 GA 미사용).
+`tools/pipeline/`는 orchestrator의 Layer 1 진입점이며, 위 `collectors/`를 호출하고 실시간 폴백(KOSPI 종가·VKOSPI·거래대금·히스토리)을 적용한다.
 
 ### Layer 2: TF Research Teams (`tools/teams/`)
 | 파일 | 역할 | 모델 | 입력 |
@@ -66,34 +66,50 @@ TF팀은 항상 `{ findings[], confidence, model_used }` 형태로 반환한다.
 DESK는 모든 TF 결과를 받아 오늘의 핵심 의제와 스토리를 결정한다.
 상충 정보(뉴스 악재 ↔ 리포트 낙관론)는 DESK에서 명시적으로 조율한다.
 
+## ⚠️ 진입점 (Single Entry Point — 반드시 숙지)
+
+**GitHub Actions는 매일 08:00 KST에 `node tools/orchestrator.js --now` 단 한 줄만 실행한다.**
+
+- `tools/orchestrator.js` — **GA 단독 진입점**. Layer 1·2·3을 순차 실행하고 Gmail·Notion 발행까지 한 번에 처리한다.
+- `tools/main.js` / `tools/preview_send.js` — **2026-05-13 이후 GA에서 호출되지 않는 레거시 도구.** 로컬 수동 검증용으로만 유지된다.
+  새 기능을 여기에만 추가하면 **GA에 절대 반영되지 않는다.** (오답노트 `#033` 참조)
+- 어떤 코드 변경이든 "이게 `orchestrator.js`의 호출 경로에 들어가는가?"를 먼저 확인하라.
+  - ✅ orchestrator 경로: `tools/pipeline/*`, `tools/collectors/*`, `tools/teams/*`, `tools/desk/*`
+  - ❌ orchestrator 미경유: `tools/main.js`, `tools/preview_send.js`
+
 ## 에이전트 라우팅 (Sub-Agent Routing)
 
 Claude Code에서 작업할 때 아래 에이전트를 `@agent-<name>` 또는 자동 라우팅으로 사용한다.
 
 | 에이전트 | 언제 사용 | 파일 소유권 |
 |---------|-----------|------------|
-| `@agent-orchestrator` | 전체 워크플로우 실행·디버깅, 일일 리포트 생성 | `tools/orchestrator.js`, `.github/workflows/` |
-| `@agent-pipeline` | 데이터 수집 오류, API 추가, 스크래핑 수정 | `tools/pipeline/`, `tools/collectors/` |
+| `@agent-orchestrator` | 전체 워크플로우 실행·디버깅, 일일 리포트 생성, **모든 Gmail·Notion 발행 로직** | `tools/orchestrator.js`, `.github/workflows/` |
+| `@agent-pipeline` | 데이터 수집 오류, API 추가, 스크래핑 수정, **실시간 폴백 추가** | `tools/pipeline/`, `tools/collectors/` |
 | `@agent-tf-news` | 뉴스 분류 로직, Gemini 프롬프트 튜닝 | `tools/teams/tf_news.js`, `tools/generators/` |
 | `@agent-tf-analyst` | 애널리스트 리포트 파싱, DART 연동 | `tools/teams/tf_analyst.js`, `tools/pipeline/dart_feed.js` |
 | `@agent-tf-crypto` | 코인 분석, CoinGecko 연동, 온체인 지표 | `tools/teams/tf_crypto.js`, `tools/pipeline/crypto_feed.js` |
-| `@agent-desk` | 편집 결정·섹션 선별·발행 로직·Notion 스키마 | `tools/desk/editor.js`, `tools/desk/publisher.js`, `tools/preview_send.js`, `tools/publishers/` |
+| `@agent-desk` | 편집 결정·섹션 선별·발행 로직·Notion 스키마 | `tools/desk/editor.js`, `tools/desk/publisher.js`, `tools/publishers/` |
 | `@agent-design` | HTML 디자인·CSS·차트 시각화·레이아웃 | `tools/desk/designer.js`, `templates/` |
+
+> ⚠️ `tools/preview_send.js`와 `tools/main.js`는 **어느 에이전트의 소유 파일도 아니다.** 레거시 검증 도구이므로 수정해도 GA에 반영되지 않는다.
 
 ## 주요 명령어
 
 ```bash
-# GA 워크플로우 로컬 재현 (수집 → HTML 생성 → Gmail → Notion)
+# GA가 실제로 실행하는 명령 — 로컬에서도 동일하게 동작
+node tools/orchestrator.js --now
+
+# 데이터 수집만 (TF 분석·HTML·발행 생략)
+node tools/orchestrator.js --now --dry-run
+
+# 기존 data.json 재사용 (TF부터 다시 실행)
+node tools/orchestrator.js --now --skip-collect
+
+# 특정 날짜로 재실행
+node tools/orchestrator.js --now --date 2026-05-15
+
+# (레거시) 로컬 수동 검증 — GA와 무관, deprecated
 node tools/main.js --now --dry-run && node tools/preview_send.js
-
-# 데이터 수집만 (리포트·발행 생략)
-node tools/main.js --now --dry-run
-
-# 리포트 재생성·재발송 (기존 data.json 재사용)
-node tools/preview_send.js
-
-# 수급 스냅샷 수동 수집 (16:30 KST 이후에 실행해야 당일 데이터)
-node tools/collectors/supply_snapshot.js
 
 # TF팀 단독 실행 (디버깅용)
 node tools/teams/tf_news.js --date 2026-05-13
@@ -125,28 +141,33 @@ OUTPUT_DIR             기본값: ./outputs
 
 ```
 tools/
-├── main.js                 GA 수집 진입점 (--dry-run 모드로 사용)
-├── preview_send.js         HTML 생성 + Gmail + Notion 발행 (GA Step 2)
-├── orchestrator.js         3-layer 통합 진입점 (실험적, 미사용 중)
-├── collectors/             Layer 1 수집기 (GA 실제 사용)
+├── orchestrator.js         ⭐ GA 단독 진입점 — Layer 1·2·3 순차 실행
+├── main.js                 (deprecated) 로컬 수집 검증용. GA 미호출.
+├── preview_send.js         (deprecated) 로컬 발송 검증용. GA 미호출.
+├── collectors/             Layer 1 수집기 (orchestrator → pipeline 경유)
 │   ├── domestic.js         KOSPI·KOSDAQ·시가총액
 │   ├── overseas.js         해외 증시
 │   ├── fx_rates.js         환율·금리·FOMC
 │   ├── commodities.js      원자재
 │   ├── news.js             Naver 뉴스
-│   └── supply_snapshot.js  수급·VKOSPI (supply-collect.yml, 16:40 KST)
-├── pipeline/               신규 피드 (orchestrator.js 전용, 레거시 래퍼)
+│   └── supply_snapshot.js  수급·VKOSPI (16:30 KST 수동 또는 preview_send 호출 시)
+├── pipeline/               Layer 1 진입점 (collectors + 실시간 폴백 + DART/Crypto 피드)
+│   ├── index.js            runPipeline() — KOSPI·VKOSPI·거래대금·히스토리 폴백 포함
+│   ├── dart_feed.js        OpenDART 애널리스트 리포트
+│   └── crypto_feed.js      CoinGecko 코인 가격·지표
 ├── teams/                  Layer 2 — TF 분석 (Gemini)
-├── desk/                   Layer 3 — 편집·발행
-├── publishers/             Gmail·Notion 발행 모듈
+├── desk/                   Layer 3 — 편집·디자인·발행 (orchestrator가 직접 호출)
+│   ├── editor.js           헤드라인 데이터 검증 + AI Summary 생성
+│   ├── designer.js         HTML·이메일 카드 빌더
+│   └── publisher.js        Gmail·Notion 발행
+├── publishers/             Gmail·Notion 모듈 (publisher.js가 사용)
 ├── validators/             데이터 정합성 검증
 └── utils/                  logger, formatter, holiday
 
 outputs/{YYYY-MM-DD}/
-├── data.json               수집 데이터 (Layer 1 출력)
-├── tf_results.json         TF팀 분석 결과 (Layer 2 출력, preview_send.js 생성)
-├── report.html             최종 HTML 리포트
-├── supply.json             수급·VKOSPI 스냅샷 (supply-collect.yml 생성)
+├── data.json               수집 데이터 (Layer 1 출력 — pipeline/index.js 생성)
+├── tf_results.json         TF팀 분석 결과 (Layer 2 출력 — orchestrator 생성)
+├── report.html             최종 HTML 리포트 (Layer 3 출력)
 └── sent.flag               로컬 중복 발송 방지 플래그
 ```
 
@@ -174,8 +195,8 @@ push 완료를 확인한 후 세션을 종료한다. 이 단계를 건너뛰면 
 
 ## 개발 가이드라인
 
-- **하위 호환**: `tools/main.js`와 `tools/preview_send.js`는 GA 워크플로우용으로 유지.
-  새 기능은 `tools/orchestrator.js` 파이프라인에 추가.
+- **GA 진입점은 단 하나**: `tools/orchestrator.js`. 새 기능·폴백·재시도·발행 로직은 반드시 orchestrator 호출 경로(`tools/pipeline/*`, `tools/teams/*`, `tools/desk/*`) 위에 올린다.
+- **레거시 도구는 건드리지 마라**: `tools/main.js`·`tools/preview_send.js`는 로컬 수동 검증 용도. 여기에 새 기능을 넣으면 GA에 절대 반영되지 않는다.
 - **실패 격리**: 각 TF팀·피드는 실패 시 `null`/`[]` 반환. 절대 throw로 전체 중단 금지.
 - **데이터 저장**: Layer 1 → `data.json`, Layer 2 → `tf_results.json`. 각 단계 재실행 가능.
 - **모델 비용**: 수집(AI 없음) → 분석(`gemini-2.5-flash`) → 편집(`gemini-2.5-flash`).

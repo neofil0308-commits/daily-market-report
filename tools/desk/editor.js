@@ -28,10 +28,16 @@ export async function runEditor(pipelineData, tfResults) {
       .replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
 
     const plan = JSON.parse(raw);
-    logger.info(`[desk/editor] 편집 완료 — 헤드라인: "${plan.headline}"`);
+
+    // 헤드라인 데이터 검증 — Gemini가 뉴스 본문에서 잘못된 KOSPI 수치를 인용하는 사고 방지
+    const safeHeadline = _validateHeadline(plan.headline ?? '', pipelineData.domestic?.kospi);
+    if (safeHeadline !== (plan.headline ?? '')) {
+      logger.warn(`[desk/editor] 헤드라인 KOSPI 수치 불일치 — 원본: "${plan.headline}" → 정정: "${safeHeadline}"`);
+    }
+    logger.info(`[desk/editor] 편집 완료 — 헤드라인: "${safeHeadline}"`);
 
     return {
-      headline:          plan.headline          ?? '',
+      headline:          safeHeadline,
       summary_bullets:   plan.summary_bullets   ?? [],
       section_order:     plan.section_order     ?? _defaultSectionOrder(tfResults),
       emphasis_items:    plan.emphasis_items     ?? [],
@@ -52,6 +58,11 @@ function _buildEditorPrompt(pipelineData, tfResults) {
   const analyst = tfResults.analyst ?? {};
   const crypto  = tfResults.crypto  ?? {};
 
+  const kospiAvailable = kospi?.today != null;
+  const headlineRule = kospiAvailable
+    ? `KOSPI 종가 ${kospi.today}, 전일比 ${kospi.diff >= 0 ? '+' : ''}${kospi.diff} (${kospi.pct >= 0 ? '+' : ''}${kospi.pct}%) 외 수치 인용 금지. 뉴스 본문에서 발견한 다른 KOSPI 숫자는 절대 헤드라인에 쓰지 말 것.`
+    : `KOSPI 종가 데이터가 수집되지 않았다. 헤드라인에 KOSPI 수치를 절대 인용하지 말 것. KOSPI 대신 해외 증시·환율·테마 위주로 헤드라인을 작성할 것.`;
+
   return `당신은 일일 시장 리포트의 수석 편집장입니다.
 
 오늘의 시장 스냅샷:
@@ -59,6 +70,9 @@ function _buildEditorPrompt(pipelineData, tfResults) {
 - 주요 테마: ${news.themes?.join('·') ?? '없음'}
 - BTC 신호: ${crypto.signal ?? '없음'}
 - 애널 컨센서스 변경: ${analyst.consensus_changes ?? 0}건
+
+⚠️ 헤드라인 작성 규칙 (반드시 준수):
+${headlineRule}
 
 TF팀 주요 발견:
 - 뉴스 top_stories: ${JSON.stringify(news.top_stories ?? [])}
@@ -106,4 +120,30 @@ function _defaultSectionOrder(tfResults) {
   if (_hasAnalyst(tfResults)) base.push('analyst');
   base.push('news');
   return base;
+}
+
+// 헤드라인의 KOSPI 수치가 실제 데이터와 어긋나면 차단 (Gemini가 뉴스 본문 숫자를 잘못 인용한 케이스 방지).
+// 실 데이터와 ±200p 또는 ±2% 이상 차이나면 KOSPI 부분을 제거하고 안전한 폴백 헤드라인 사용.
+function _validateHeadline(headline, kospi) {
+  if (!headline) return headline;
+  const m = headline.match(/(?:코스피|KOSPI)[^\d]*(\d[\d,\.]{2,})/i);
+  if (!m) return headline;
+  const cited = parseFloat(m[1].replace(/,/g, ''));
+  if (isNaN(cited)) return headline;
+
+  // KOSPI 데이터가 아예 없으면 → 인용된 숫자가 진위 불명. 헤드라인의 "코스피 ~" 절 제거
+  if (kospi?.today == null) {
+    return headline
+      .replace(/(?:코스피|KOSPI)[^,…—·]*[,…—·]?\s*/i, '')
+      .replace(/^[\s,…—·]+/, '')
+      .trim() || '시장 동향';
+  }
+  // KOSPI 데이터가 있는데 인용값이 200p 이상 또는 2% 이상 어긋나면 마찬가지
+  const drift = Math.abs(cited - kospi.today);
+  if (drift > 200 || drift / kospi.today > 0.02) {
+    return headline
+      .replace(/(?:코스피|KOSPI)[^,…—·]*[,…—·]?\s*/i, `코스피 ${kospi.today}, `)
+      .trim();
+  }
+  return headline;
 }

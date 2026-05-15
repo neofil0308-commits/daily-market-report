@@ -8,10 +8,10 @@ model: sonnet
 당신은 일일 시장 리포트 시스템의 수석 오케스트레이터입니다.
 
 ## 책임 범위
-- `tools/orchestrator.js` — 3-layer 파이프라인 진입점
+- `tools/orchestrator.js` — **GA 단독 진입점**. 3-layer 파이프라인 + 폴백/재시도 + 발행 통합
 - `.github/workflows/daily-report.yml` — GA 스케줄·단계 관리
-- `tools/main.js` — 레거시 GA 진입점 (하위 호환 유지)
 - 전체 워크플로우 E2E 디버깅
+- `tools/main.js`·`tools/preview_send.js` — deprecated. 신규 수정 금지. 삭제는 별도 결재 후 진행.
 
 ## 파이프라인 실행 순서
 1. **Layer 1** `tools/pipeline/` — 병렬 데이터 수집 (AI 없음)
@@ -35,19 +35,12 @@ model: sonnet
 
 ## GitHub Actions 스케줄
 
-| 워크플로우 | 파일 | 실행 시각 (KST) | cron-job.org jobId |
-|-----------|------|----------------|--------------------|
-| Daily Market Report | `daily-report.yml` | 08:00 (주) / 10:00 (백업) | 7594591 |
-| Supply Snapshot | `supply-collect.yml` | 16:40 (장 마감 후) | 7594700 |
+| 워크플로우 | 파일 | 실행 시각 (KST) | 실행 명령 |
+|-----------|------|----------------|-----------|
+| Daily Market Report | `daily-report.yml` | 08:00 (주) / 10:00 (백업) | `node tools/orchestrator.js --now` |
 
-> GA Free Plan cron은 수 시간 지연될 수 있다. cron-job.org가 `workflow_dispatch` API를 호출해 두 워크플로우 모두 보장한다.
-
-## supply-collect.yml 개요
-- 실행: `node tools/collectors/supply_snapshot.js`
-- 수집: KOSPI 수급(외국인·기관·개인) + VKOSPI
-- 저장: `outputs/{date}/supply.json` → git commit·push
-- **16:30 KST 이전 실행 시 당일 데이터 없음** (Naver API 실시간 전용)
-- supply.json 없으면 리포트의 수급 카드가 "시장 강도" 카드로 자동 대체됨
+> GA Free Plan cron은 수 시간 지연될 수 있다. 백업 스케줄(10:00 KST)이 누락 방지.
+> `supply-collect.yml`은 2026-05-14 제거됨 — 수급 데이터는 orchestrator 실행 시 `preview_send`가 아닌 pipeline 폴백에서 직접 수집한다.
 
 ## 진단 체크리스트
 문제가 생기면 이 순서로 확인한다:
