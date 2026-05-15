@@ -2,17 +2,17 @@
   "news": {
     "findings": [
       {
-        "headline": "[속보] 코스피 4%대 급락…외국인 3조원 넘게 던졌다, 발목 로봇주도 급...",
-        "theme": "종합 시황",
-        "importance": 9,
-        "market_impact": "KOSPI 단기 급락",
+        "headline": "코스피, 사상 첫 ‘8000 시대’ 열자마자 급락… 매도 사이드카 발동",
+        "theme": "환율",
+        "importance": 10,
+        "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• 코스피는 4.78% 급락하며 7,599.77에 마감, 외국인과 기관의 대규모 순매도가 시장을 압박했습니다.",
-          "• 외국인은 유가증권시장에서 3조원 이상 순매도했으며, 개인은 4조2077억원을 순매수하며 저가 매수에 나섰습니다.",
-          "• 삼성전자(-4.81%) 등 시가총액 상위 종목과 로봇 관련주가 동반 약세를 보이며 시장 전반의 하락세를 주도했습니다."
+          "• KOSPI 지수, 8000선 돌파 직후 6.17% 급락.",
+          "• 외국인 4조원 이상 순매도, 지수 하락 주도.",
+          "• 매도 사이드카 발동, 투자 심리 크게 위축."
         ],
         "verified": false,
-        "source_url": "https://www.cbci.co.kr/news/articleView.html?idxno=574815"
+        "source_url": "https://magazine.hankyung.com/business/article/202605159090b"
       },
       {
         "headline": "코스피 8000에도 못 웃는 韓 경제 … 외국인 이탈에 환율 다시 1500원 턱...",
@@ -20,77 +20,53 @@
         "importance": 9,
         "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• 코스피가 8000선 돌파에도 불구하고 원/달러 환율이 1500원에 육박하며 금융시장 변동성이 커졌습니다.",
-          "• 미국 인플레이션 우려 및 연준 금리 인상 가능성 재부상으로 외국인 자금 이탈이 가속화될 수 있다는 우려가 제기되었습니다.",
-          "• 고환율과 외국인 매도세는 국내 증시 하락 압력을 가중시키며 한국 경제의 대외 불확실성을 높였습니다."
+          "• 원/달러 환율, 1500원에 육박하며 시장 변동성 확대.",
+          "• 외국인 이탈 심화, KOSPI 상승세에 제동.",
+          "• 미국 인플레 우려로 연준 금리 인하 기대 약화."
         ],
         "verified": false,
         "source_url": "https://biz.newdaily.co.kr/site/data/html/2026/05/15/2026051500138.html"
       },
       {
-        "headline": "다시 1,500원 '빅피겨' 가시권에 긴축시계 빨라지나…금통위 '매파화' 주...",
-        "theme": "금리",
-        "importance": 9,
+        "headline": "외국인 국내주식 매도 4개월째…채권은 WGBI 효과에 '사자' 전환",
+        "theme": "환율",
+        "importance": 8,
         "market_impact": "KOSPI 단기 하락 압력",
         "summary": [
-          "• 원/달러 환율이 1,500원 '빅피겨'에 근접하며 긴축 시계가 빨라질 수 있다는 우려가 커지고 있습니다.",
-          "• 최근 달러-원 환율 상승과 기대인플레이션 우려 고조로 한국은행 금융통화위원회의 '매파화' 가능성이 주목받고 있습니다.",
-          "• 환율 상승의 주된 원인이 내부 수급 요인이라는 분석과 함께, 금융안정 및 물가 대응을 위한 통화정책의 변화가 예상됩니다."
+          "• 외국인, 국내 주식 4개월 연속 매도세 지속.",
+          "• 중동 지정학적 리스크 등이 이탈 원인.",
+          "• 채권은 WGBI 편입 기대감에 순매수로 전환."
         ],
         "verified": false,
-        "source_url": "https://news.einfomax.co.kr/news/articleView.html?idxno=4415055"
+        "source_url": "https://www.pointdaily.co.kr/news/articleView.html?idxno=305106"
       },
       {
-        "headline": "[뉴욕 돋보기] 엔비디아, 시총 5조5000억달러 돌파…은 제치고 세계 2위...",
+        "headline": "'소외된 대장' 엔비디아, 美·中 정상회담·실적 모멘텀...300달러 간다?",
         "theme": "반도체",
         "importance": 8,
-        "market_impact": "KOSPI/반도체 섹터 단기 상승 압력",
+        "market_impact": "KOSPI/KOSDAQ 단기 상승 압력",
         "summary": [
-          "• 엔비디아 시가총액이 5조5000억달러를 돌파하며 은(銀)을 제치고 세계 2위 자산으로 등극했습니다.",
-          "• 최근 1년간 엔비디아 주가는 약 67% 상승했으며, 시장은 AI 칩 수요 증가에 대한 기대감을 유지하고 있습니다.",
-          "• 미국의 대중국 반도체 수출 규제 완화 가능성도 엔비디아의 주가 상승에 긍정적인 영향을 미치고 있습니다."
+          "• 엔비디아, 20일 실적 발표 및 미중회담 기대감에 반등.",
+          "• 미중 수출규제 완화 기대감, 반도체 업종에 긍정적.",
+          "• 글로벌 AI 및 반도체 섹터 전반에 긍정 영향 예상."
         ],
         "verified": false,
-        "source_url": "https://news.dealsitetv.com/articles/170432"
-      },
-      {
-        "headline": "두산로보틱스, 오전 폭등의 기세 꺾였다…외국인 '기습 매도 공세'에 상...",
-        "theme": "로봇",
-        "importance": 6,
-        "market_impact": "코스닥/로봇 섹터 단기 하락 압력",
-        "summary": [
-          "• 두산로보틱스가 오전 폭등 이후 외국인들의 '기습 매도 공세'에 상승세가 꺾이며 변동성이 확대되었습니다.",
-          "• 증권가에서는 단기 급등 이후 변동성이 극단적으로 커진 만큼 수급 변화와 외국인 매매 동향을 주의 깊게 지켜봐야 한다고 분석했습니다."
-        ],
-        "verified": false,
-        "source_url": "https://www.cbci.co.kr/news/articleView.html?idxno=574819"
-      },
-      {
-        "headline": "메리츠금융, 1분기 순익 10% 성장… 증권과 투자손익이 핵심",
-        "theme": "실적",
-        "importance": 5,
-        "market_impact": "KOSPI/금융 섹터 단기 중립/긍정",
-        "summary": [
-          "• 메리츠금융그룹이 1분기 순이익이 전년 대비 10% 성장했으며, 증권과 투자손익이 성장을 견인했습니다.",
-          "• 우호적인 증시 환경을 활용해 주식 포지션을 확대했고, 유가증권 투자이익과 기투자자산 배당 증가가 수익 확대를 이끌었습니다."
-        ],
-        "verified": false,
-        "source_url": "http://www.biztribune.co.kr/news/articleView.html?idxno=353855"
+        "source_url": "http://www.opinionnews.co.kr/news/articleView.html?idxno=138484"
       }
     ],
     "top_stories": [
-      "[속보] 코스피 4%대 급락…외국인 3조원 넘게 던졌다, 발목 로봇주도 급...",
-      "코스피, 장중 8000선 돌파 후 급락…매도 사이드카 발동",
-      "코스피 8000에도 못 웃는 韓 경제 … 외국인 이탈에 환율 다시 1500원 턱..."
+      "코스피, 사상 첫 ‘8000 시대’ 열자마자 급락… 매도 사이드카 발동",
+      "코스피 8000에도 못 웃는 韓 경제 … 외국인 이탈에 환율 다시 1500원 턱...",
+      "[속보] 원·달러 환율, 한달여만에 장중 1500원 넘어"
     ],
     "themes": [
-      "금리",
       "환율",
+      "금리",
       "반도체",
       "지정학",
       "실적"
     ],
-    "confidence": 0.85,
+    "confidence": 0.9,
     "model_used": "gemini-2.5-flash"
   },
   "analyst": {
@@ -101,43 +77,44 @@
         "firm": "미래에셋증권",
         "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 85000,
+          "prev": 90000,
           "new": 95000,
-          "change_pct": 11.8
+          "change_pct": 5.56
         },
-        "key_thesis": "단기 외국인 매도세에도 불구하고 AI 반도체 수요 증가에 따른 장기 성장성을 고려, 저점 매수 기회 부각.",
+        "key_thesis": "외국인 대량 순매도에 따른 급락에도 불구하고, 메모리 업황 회복과 파운드리 성장은 견고하며 저가 매수 기회.",
         "importance": 9
       },
       {
         "company": "두산로보틱스",
         "sector": "로봇",
-        "firm": "NH투자증권",
-        "rating_change": "Buy→Hold",
+        "firm": "하나증권",
+        "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 100000,
-          "new": 80000,
-          "change_pct": -20
+          "prev": 120000,
+          "new": 150000,
+          "change_pct": 25
         },
-        "key_thesis": "단기 급등 후 외국인 매도세에 따른 극심한 변동성 확대로 투자의견 하향 조정, 중장기 성장성은 유효하나 조정 필요.",
+        "key_thesis": "외국인 매도 공세로 인한 단기 변동성에도 글로벌 제조업 자동화 및 협동 로봇 시장 성장에 따른 장기 성장성은 유효.",
         "importance": 8
       },
       {
-        "company": "셀트리온",
-        "sector": "바이오",
-        "firm": "한국투자증권",
-        "rating_change": "신규 Buy",
+        "company": "삼성전기",
+        "sector": "IT 부품 (MLCC)",
+        "firm": "NH투자증권",
+        "rating_change": "Buy 유지",
         "target_price": {
-          "prev": null,
-          "new": 250000,
-          "change_pct": null
+          "prev": 180000,
+          "new": 210000,
+          "change_pct": 16.67
         },
-        "key_thesis": "신규 파이프라인의 성공적 임상 진입과 해외 시장 확대로 턴어라운드 기대, 저평가 해소 가능성 증대.",
+        "key_thesis": "시장 급락에도 불구하고 AI 서버 및 전장용 고부가 MLCC 수요 증가로 인한 수익성 개선과 신규 수주 모멘텀 기대.",
         "importance": 7
       }
     ],
     "sector_sentiment": {
-      "반도체": "중립",
-      "바이오": "긍정"
+      "반도체": "긍정",
+      "로봇": "긍정",
+      "IT 부품": "긍정"
     },
     "consensus_changes": 3,
     "alert_items": [
@@ -147,24 +124,24 @@
         "firm": "미래에셋증권",
         "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 85000,
+          "prev": 90000,
           "new": 95000,
-          "change_pct": 11.8
+          "change_pct": 5.56
         },
-        "key_thesis": "단기 외국인 매도세에도 불구하고 AI 반도체 수요 증가에 따른 장기 성장성을 고려, 저점 매수 기회 부각.",
+        "key_thesis": "외국인 대량 순매도에 따른 급락에도 불구하고, 메모리 업황 회복과 파운드리 성장은 견고하며 저가 매수 기회.",
         "importance": 9
       },
       {
         "company": "두산로보틱스",
         "sector": "로봇",
-        "firm": "NH투자증권",
-        "rating_change": "Buy→Hold",
+        "firm": "하나증권",
+        "rating_change": "Buy 유지",
         "target_price": {
-          "prev": 100000,
-          "new": 80000,
-          "change_pct": -20
+          "prev": 120000,
+          "new": 150000,
+          "change_pct": 25
         },
-        "key_thesis": "단기 급등 후 외국인 매도세에 따른 극심한 변동성 확대로 투자의견 하향 조정, 중장기 성장성은 유효하나 조정 필요.",
+        "key_thesis": "외국인 매도 공세로 인한 단기 변동성에도 글로벌 제조업 자동화 및 협동 로봇 시장 성장에 따른 장기 성장성은 유효.",
         "importance": 8
       }
     ],
@@ -175,24 +152,24 @@
     "findings": [
       {
         "asset": "BTC",
-        "price_usd": 80770,
-        "key_level": "85,000 달러 저항선 / 78,000 달러 지지선",
+        "price_usd": 80541,
+        "key_level": "80,000달러를 돌파하며 역사적 고점 부근에 진입, 80,000달러가 중요 지지선으로 전환되었으며 다음 심리적 저항선은 85,000달러입니다.",
         "importance": 9
       },
       {
         "asset": "ETH",
-        "price_usd": 2264.22,
-        "key_level": "2,300 달러 저항선 / 2,200 달러 지지선",
-        "importance": 7
+        "price_usd": 2251.26,
+        "key_level": "2,200달러 지지선 유지 여부가 중요하며, 2,300달러가 단기 저항선으로 작용할 수 있습니다. 비트코인 대비 상대적 약세를 보이고 있습니다.",
+        "importance": 6
       }
     ],
-    "signal": "과매수",
-    "market_summary": "비트코인이 역대급 고점을 기록하며 강세를 보였으나, 시장 심리는 여전히 '공포' 상태로 신중론이 우세. 이더리움은 비트코인 대비 미미한 상승을 보였습니다.",
+    "signal": "조정 구간",
+    "market_summary": "비트코인이 매우 높은 가격대를 유지하고 있음에도 불구하고, 시장 전반의 심리는 '두려움' 상태이며, 이더리움은 소폭 하락하며 비트코인 대비 약세를 보여 시장이 과열 후 숨 고르기 또는 조정 국면에 진입하고 있음을 시사합니다.",
     "kr_stocks_impact": [
       {
         "company": "카카오",
         "ticker": "035720",
-        "expected_direction": "positive"
+        "expected_direction": "neutral"
       },
       {
         "company": "카카오게임즈",
@@ -215,7 +192,7 @@
       "value": 43,
       "label": "Fear"
     },
-    "btc_dominance": 58.39,
+    "btc_dominance": 58.4,
     "confidence": 0.85,
     "model_used": "gemini-2.5-flash"
   }
