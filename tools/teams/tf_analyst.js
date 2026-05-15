@@ -68,20 +68,31 @@ export async function runTFAnalyst(dartData, newsData = []) {
 }
 
 // 한경 컨센서스 최근 리포트 스크래핑
+// 2026-05-16 한경이 엔드포인트를 리디자인. /apps.analysis/analysis.list(404) → /analysis/list,
+// 날짜는 YYYYMMDD → YYYY-MM-DD, category=CO → report_type=CO, pagenum은 페이지번호→페이지당건수로 의미가 바뀜.
 async function fetchHankyungConsensus() {
   try {
     const today = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const sdate = new Date(today);
     sdate.setDate(sdate.getDate() - 3);
-    const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
+    const fmt = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
 
     const res = await axios.get(
-      'https://consensus.hankyung.com/apps.analysis/analysis.list',
+      'https://consensus.hankyung.com/analysis/list',
       {
-        params: { pagenum: 1, sdate: fmt(sdate), edate: fmt(today), category: 'CO', report_type: '' },
+        params: {
+          sdate: fmt(sdate),
+          edate: fmt(today),
+          report_type: 'CO', // 기업분석
+          pagenum: 50,       // 페이지당 건수 (최대치 80, 안정적으로 50)
+          now_page: 1,
+        },
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          Referer: 'https://consensus.hankyung.com/',
+          // 한경은 짧은 UA를 봇으로 보고 500을 던진다(2026-05-16 확인). 풀 브라우저 UA + Accept 헤더 필수.
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+          'Referer': 'https://consensus.hankyung.com/',
         },
         timeout: 12000,
       }
@@ -91,18 +102,38 @@ async function fetchHankyungConsensus() {
     const $ = load(res.data);
     const items = [];
 
-    // 한경 컨센서스 리포트 테이블 파싱
-    $('ul.analysis_list li, table.type_1 tbody tr, .report_list li').each((_, el) => {
-      const titleEl = $(el).find('a.subject, .subject a, td.col_tit a').first();
-      const title   = titleEl.text().trim();
-      const url     = titleEl.attr('href') ?? '';
-      const firm    = $(el).find('.company, .col_company, td:nth-child(4)').first().text().trim();
-      const company = $(el).find('.stock_nm, .col_stock, td:nth-child(2)').first().text().trim();
-      const date    = $(el).find('.date, .col_date, td:nth-child(6)').first().text().trim();
+    // 새 구조: <tbody> 안의 <tr>들. 컬럼 순서 = 작성일·제목·적정가격·투자의견·작성자·증권사·...
+    // 제목 셀(td.text_l > a) 텍스트가 "회사명(종목코드) 리포트제목" 형태로 합쳐져 있다.
+    $('tbody tr').each((_, el) => {
+      const tds = $(el).find('td');
+      if (tds.length < 6) return;
 
-      if (title && title.length > 4) {
-        items.push({ title, firm, company, date, url: url.startsWith('http') ? url : `https://consensus.hankyung.com${url}` });
-      }
+      const date     = $(tds[0]).text().trim();
+      const titleA   = $(tds[1]).find('a').first();
+      const rawTitle = titleA.text().replace(/\s+/g, ' ').trim();
+      const href     = titleA.attr('href') ?? '';
+      const target   = $(tds[2]).text().trim();   // 적정가격
+      const rating   = $(tds[3]).text().trim();   // 투자의견
+      const firm     = $(tds[5]).text().trim();   // 제공출처(증권사)
+
+      if (!rawTitle || rawTitle.length < 4) return;
+
+      // "회사명(종목코드) 나머지" 분리. 매칭 실패해도 원제목 그대로 사용.
+      const m = rawTitle.match(/^(.+?)\s*\((\d{6})\)\s*(.*)$/);
+      const company = m ? m[1].trim() : '';
+      const ticker  = m ? m[2]        : '';
+      const title   = m ? m[3].trim() || rawTitle : rawTitle;
+
+      items.push({
+        title,
+        firm,
+        company,
+        ticker,
+        target_price: target,
+        rating,
+        date,
+        url: href.startsWith('http') ? href : `https://consensus.hankyung.com${href}`,
+      });
     });
 
     if (items.length > 0) logger.info(`[tf-analyst] 한경 컨센서스 ${items.length}건 수집`);
@@ -124,9 +155,10 @@ function _buildPrompt(dartReports, analystNews, consensusItems) {
   }
   if (consensusItems.length > 0) {
     // ⭐ url 포함해서 Gemini에게 전달 — 선정한 리포트의 원문 링크를 findings에 그대로 담을 수 있도록.
+    // 한경 신규 스크래퍼가 target_price·rating까지 채워주므로 그대로 노출 → Gemini가 추측 대신 사용.
     sections.push(`## 한경 컨센서스 최근 리포트 (${consensusItems.length}건)
-각 항목 형식: [INDEX] 회사 | 증권사 | 제목 | URL
-${consensusItems.map((c, i) => `[${i}] ${c.company ?? ''} | ${c.firm ?? ''} | ${c.title} | ${c.url ?? ''}`).join('\n')}`);
+각 항목 형식: [INDEX] 회사(종목코드) | 증권사 | 투자의견 | 적정가격 | 제목 | URL
+${consensusItems.map((c, i) => `[${i}] ${c.company ?? ''}${c.ticker ? `(${c.ticker})` : ''} | ${c.firm ?? ''} | ${c.rating ?? ''} | ${c.target_price ?? ''} | ${c.title} | ${c.url ?? ''}`).join('\n')}`);
   }
 
   return `당신은 한국 주식 시장 애널리스트 리포트 큐레이터입니다.

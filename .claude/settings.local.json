@@ -20,7 +20,21 @@
       "Bash(node -e \"try{const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-14/data.json','utf8'\\)\\);console.log\\('marketCap:',d.domestic?.marketCap\\);console.log\\('volumeBn:',d.domestic?.volumeBn\\);}catch\\(e\\){console.log\\('파일없음'\\)}\")",
       "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-15/data.json','utf8'\\)\\); console.log\\('KOSPI today:', d.domestic.kospi?.today, '\\(source:', d.domestic.kospi?.source, '\\)'\\); console.log\\('marketCap:', d.domestic.marketCap, '/ prev:', d.domestic.prevMarketCap, '/ pct:', d.domestic.marketCapPct\\); console.log\\('volumeBn:', d.domestic.volumeBn, '/ prevVolumeBn:', d.domestic.prevVolumeBn\\); console.log\\('kospiHistory last 2:', JSON.stringify\\(d.domestic.kospiHistory.slice\\(-2\\), null, 2\\)\\);\")",
       "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-15/data.json','utf8'\\)\\); console.log\\('KOSPI:', d.domestic.kospi?.today, '/ source:', d.domestic.kospi?.source\\); console.log\\('marketCap:', d.domestic.marketCap, '/ prev:', d.domestic.prevMarketCap, '/ pct:', d.domestic.marketCapPct\\); console.log\\('volumeBn:', d.domestic.volumeBn, '/ prevVolumeBn:', d.domestic.prevVolumeBn\\); console.log\\('VKOSPI:', d.domestic.vkospi?.today\\); console.log\\('kospiHistory tradingValueBn[]:', d.domestic.kospiHistory.map\\(h=>h.tradingValueBn\\)\\);\")",
-      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-15/data.json','utf8'\\)\\); console.log\\('KOSPI:', d.domestic.kospi?.today, '/', d.domestic.kospi?.source\\); console.log\\('KOSDAQ:', d.domestic.kosdaq?.today, '/', d.domestic.kosdaq?.source\\); console.log\\('VKOSPI:', d.domestic.vkospi?.today\\);\")"
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('./outputs/2026-05-15/data.json','utf8'\\)\\); console.log\\('KOSPI:', d.domestic.kospi?.today, '/', d.domestic.kospi?.source\\); console.log\\('KOSDAQ:', d.domestic.kosdaq?.today, '/', d.domestic.kosdaq?.source\\); console.log\\('VKOSPI:', d.domestic.vkospi?.today\\);\")",
+      "Bash(node --check tools/teams/tf_analyst.js)",
+      "Bash(node --check tools/orchestrator.js)",
+      "Bash(node tools/teams/tf_analyst.js --date 2026-05-15)",
+      "Bash(node -e ' *)",
+      "PowerShell($out = \"$env:TEMP\\\\hk_consensus.html\"; curl.exe -sS -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -e \"https://consensus.hankyung.com/\" \"https://consensus.hankyung.com/analysis/list?market=KOR&report_type=CO\" -o $out; \"size: $\\(\\(Get-Item $out\\).Length\\)\")",
+      "Bash(curl -sS -o NUL -w \"old_search: %{http_code}\\\\n\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" \"https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90&report_type=&search_type=2\")",
+      "Bash(curl -sSL -o NUL -w \"new_search: %{http_code} \\(final: %{url_effective}, size: %{size_download}\\)\\\\n\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" \"https://consensus.hankyung.com/analysis/list?search_value=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90&report_type=&search_type=2\")",
+      "Bash(gh run *)",
+      "PowerShell(gh run list --limit 5 --json status,conclusion,name,startedAt,headBranch,event,databaseId 2>&1)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(curl -sS -o NUL -w 'report_idx=__TRACKED_VAR__ → %{http_code}\\\\n' -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36' 'https://consensus.hankyung.com/apps.analysis/analysis.view?report_idx=__TRACKED_VAR__')",
+      "Bash(curl -sS -o NUL -w 'downpdf?report_idx=__TRACKED_VAR__ → %{http_code}\\\\n' -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36' 'https://consensus.hankyung.com/analysis/downpdf?report_idx=__TRACKED_VAR__')",
+      "Bash(git restore *)"
     ]
   }
 }

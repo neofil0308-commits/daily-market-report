@@ -138,27 +138,46 @@ async function run(opts = {}) {
     const dartByNorm = new Map(
       (pipelineData.dart?.reports ?? []).map(r => [normalize(r.company), r.url])
     );
-    let directHits = 0, dartHits = 0, searchHits = 0;
+    // 안전망: Gemini가 학습 시점의 옛 한경 경로(/apps.analysis/analysis.view·analysis.list 등)를
+    // URL로 합성하면 메일에서 클릭 시 한경 404로 떨어진다. 모든 한경 도메인 URL을 신규 경로로 강제 변환.
+    // 2026-05-15 19:08 KST 발행 메일에서 view 링크 3건 전부 404로 깨졌던 사고 재발 방지.
+    const normalizeHankyungUrl = u => {
+      if (!u || typeof u !== 'string') return u;
+      if (!u.includes('consensus.hankyung.com')) return u;
+      return u
+        .replace(/\/apps\.analysis\/analysis\.view\?/, '/analysis/downpdf?') // 개별 리포트 → PDF 직접 다운로드
+        .replace(/\/apps\.analysis\/analysis\.list\?/, '/analysis/list?')    // 리스트
+        .replace(/\/apps\.analysis\//, '/analysis/');                         // 그 외 안전 일반 매핑
+    };
+    let directHits = 0, dartHits = 0, searchHits = 0, urlRewrites = 0;
     tfAnalyst.findings = tfAnalyst.findings.map(f => {
+      let mapped;
       // 1순위: Gemini가 직접 뽑은 한경 URL
-      if (f.report_url) { directHits++; return { ...f, dart_url: f.report_url }; }
-      if (f.dart_url) return f;
-      // 3순위: DART 정규화 매칭
-      const dartMatch = dartByNorm.get(normalize(f.company));
-      if (dartMatch) { dartHits++; return { ...f, dart_url: dartMatch }; }
-      // 4순위: 한경 컨센서스 검색 URL — 회사명 인코딩
-      const company = String(f.company ?? '').trim();
-      if (company && company !== '―') {
-        searchHits++;
-        const q = encodeURIComponent(company);
-        return {
-          ...f,
-          dart_url: `https://consensus.hankyung.com/apps.analysis/analysis.list?search_value=${q}&report_type=&search_type=2`,
-        };
+      if (f.report_url) { directHits++; mapped = { ...f, dart_url: f.report_url }; }
+      else if (f.dart_url) { mapped = f; }
+      else {
+        // 3순위: DART 정규화 매칭
+        const dartMatch = dartByNorm.get(normalize(f.company));
+        if (dartMatch) { dartHits++; mapped = { ...f, dart_url: dartMatch }; }
+        else {
+          // 4순위: 한경 컨센서스 검색 URL — 회사명 인코딩
+          // 2026-05-16: 한경 리디자인으로 /apps.analysis/analysis.list 가 404, /analysis/list 로 이전.
+          const company = String(f.company ?? '').trim();
+          if (company && company !== '―') {
+            searchHits++;
+            const q = encodeURIComponent(company);
+            mapped = { ...f, dart_url: `https://consensus.hankyung.com/analysis/list?search_value=${q}&report_type=&search_type=2` };
+          } else {
+            mapped = { ...f, dart_url: null };
+          }
+        }
       }
-      return { ...f, dart_url: null };
+      const before = mapped.dart_url;
+      const after  = normalizeHankyungUrl(before);
+      if (before && after !== before) urlRewrites++;
+      return { ...mapped, dart_url: after };
     });
-    logger.info(`[TF-2] 애널리스트 링크 — 한경 직링크 ${directHits}건, DART 매칭 ${dartHits}건, 한경 검색 폴백 ${searchHits}건`);
+    logger.info(`[TF-2] 애널리스트 링크 — 한경 직링크 ${directHits}건, DART 매칭 ${dartHits}건, 한경 검색 폴백 ${searchHits}건, 옛경로 자동변환 ${urlRewrites}건`);
   }
 
   const tfResults = { news: tfNews, analyst: tfAnalyst, crypto: tfCrypto };
