@@ -29,6 +29,7 @@ export async function cachedFetch(feed, key, fn, opts = {}) {
 
   // 1) 메모리 캐시 hit (가장 빠름, GA에서도 효과)
   if (_mem.has(cacheKey)) {
+    logger.info(`[cache] memory hit: ${feed}/${key}`);
     return _mem.get(cacheKey).value;
   }
 

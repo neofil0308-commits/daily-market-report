@@ -1,12 +1,13 @@
 // tools/collectors/domestic.js
 import axios from 'axios';
+import { cachedFetch } from '../../kernel/cache.js';
 
 const YF_BASE      = 'https://query1.finance.yahoo.com/v8/finance/chart';
 const NAVER_BASE   = 'https://m.stock.naver.com/api/index';
 const NAVER_POLL   = 'https://polling.finance.naver.com/api/realtime/domestic/index';
 const NAVER_HDRS   = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', Referer: 'https://finance.naver.com/' };
 
-export async function collectDomestic(isHoliday, prevOutputDir = null) {
+export async function collectDomestic(isHoliday, prevOutputDir = null, reportDate = null) {
   if (isHoliday) {
     return { kospi: null, kosdaq: null, supply: null, kospiHistory: [], isHoliday: true };
   }
@@ -15,10 +16,10 @@ export async function collectDomestic(isHoliday, prevOutputDir = null) {
     fetchYahooHistory('^KS11', '20d'),
     fetchYahooHistory('^KQ11', '5d'),
     fetchVkospi(prevOutputDir),
-    fetchKospiRealtimeStats(),
+    fetchKospiRealtimeStats(reportDate),
     fetchKrxSupply(),
     fetchMarketBreadth(),
-    fetchNaverKospiHistory(),
+    fetchNaverKospiHistory(reportDate),
   ]);
 
   // 최근 6거래일 이력: Naver 우선(거래대금 포함), 부족 시 Yahoo 폴백
@@ -239,7 +240,7 @@ async function fetchVkospi(prevOutputDir = null) {
 }
 
 // KOSPI 거래대금(조원) + 거래량 — Naver polling realtime
-async function fetchKospiRealtimeStats() {
+async function fetchKospiRealtimeStats(reportDate = null) {
   try {
     const res = await axios.get(`${NAVER_POLL}/KOSPI`, {
       headers: NAVER_HDRS, timeout: 10000,
@@ -253,8 +254,8 @@ async function fetchKospiRealtimeStats() {
     const valueBn = pRaw(data.accumulatedTradingValueRaw);
     const volumeThousand = pRaw(data.accumulatedTradingVolumeRaw); // 주 단위
 
-    // 시가총액 병렬 수집 (별도 함수)
-    const marketCap = await fetchKospiMarketCap();
+    // 시가총액 병렬 수집 (별도 함수) — reportDate 전달로 캐시 활성화
+    const marketCap = await fetchKospiMarketCap(reportDate);
 
     return {
       volumeBn:  valueBn  != null ? round2(valueBn  / 1e12) : null,   // 조원
@@ -269,8 +270,15 @@ async function fetchKospiRealtimeStats() {
 
 // KOSPI 전체 시가총액(조원) — Naver sise_market_sum 전 종목 합산
 // sosok=0: KOSPI, 페이지당 50개 종목, 시가총액 컬럼 단위: 억원
+// 같은 날 두 번째 호출부터는 메모리 캐시 hit으로 즉시 반환 (0ms).
 // pipeline 폴백에서도 호출하므로 export.
-export async function fetchKospiMarketCap() {
+export async function fetchKospiMarketCap(dateKey) {
+  // dateKey가 없으면 캐시 불가 — 직접 호출
+  if (!dateKey) return _fetchKospiMarketCapRaw();
+  return cachedFetch('kospi-marketcap', dateKey, _fetchKospiMarketCapRaw, { useDisk: false });
+}
+
+async function _fetchKospiMarketCapRaw() {
   try {
     // 1페이지에서 총 페이지 수 확인 후 전체 병렬 수집
     const firstRes = await axios.get(
@@ -395,8 +403,14 @@ async function fetchMarketBreadth() {
 }
 
 // 네이버 KOSPI 일별 시세 (거래대금 포함) — 역사 테이블용
+// 같은 날 두 번째 호출부터는 메모리 캐시 hit으로 즉시 반환 (0ms).
 // pipeline 폴백에서도 직접 호출하므로 export
-export async function fetchNaverKospiHistory() {
+export async function fetchNaverKospiHistory(dateKey) {
+  if (!dateKey) return _fetchNaverKospiHistoryRaw();
+  return cachedFetch('naver-kospi-history', dateKey, _fetchNaverKospiHistoryRaw, { useDisk: false });
+}
+
+async function _fetchNaverKospiHistoryRaw() {
   try {
     const res = await axios.get(
       'https://finance.naver.com/sise/sise_index_day.nhn?code=KOSPI&page=1',

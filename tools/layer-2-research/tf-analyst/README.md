@@ -28,11 +28,15 @@ const result = await runTFAnalyst(newsRaw);   // tf-news가 수집한 raw를 받
   ],
   sector_sentiment: { 반도체: '긍정', ... },
   consensus_changes: number,
-  alert_items: object[],     // importance ≥ 8
+  alert_items: object[],            // importance ≥ 8
   confidence: number,
   model_used: 'gemini-2.5-flash',
-  consensus_raw: object[],   // ⭐ 한경 컨센서스 raw (orchestrator 폴백·링크 매핑용)
-  dart_reports: object[],    // ⭐ DART 공시 raw (orchestrator 최종 폴백용)
+  consensus_raw: object[],          // ⭐ 한경 컨센서스 raw (orchestrator 폴백·링크 매핑용)
+  dart_reports: object[],           // ⭐ DART 공시 raw (orchestrator 최종 폴백용)
+  target_price_changes: [           // ⭐ 전일 대비 목표주가 변동 종목 (Phase 3 시작점)
+    { company, ticker, prev_price, new_price, change_pct, firm, direction }
+    // direction: 'up' | 'down' | 'new' (신규 커버리지)
+  ],
 }
 ```
 
@@ -57,6 +61,7 @@ const result = await runTFAnalyst(newsRaw);   // tf-news가 수집한 raw를 받
 
 ## 발전 기록
 
+- 2026-05-16: `_loadPrevConsensus()` + `_diffTargetPrices()` 추가 — 전일 대비 목표주가 변동 추적. `target_price_changes` 필드로 반환. Phase 3 자기검증 토대.
 - 2026-05-16: dart_feed를 tf-analyst 소속으로 이동, 자체 수집. `dart_reports` 노출.
 - 2026-05-16: 한경 신규 엔드포인트 대응 (`/apps.analysis/...` → `/analysis/list`).
 - 2026-05-16: 옛 한경 URL 자동 변환 안전망 추가 (orchestrator에 `normalizeHankyungUrl`).

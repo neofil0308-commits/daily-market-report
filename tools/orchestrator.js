@@ -49,7 +49,12 @@ async function run(opts = {}) {
 
   logger.info(`[orchestrator] 오늘 발행 콘텐츠 ${targetContents.length}개: ${targetContents.map(c => c.name).join(', ')}`);
 
-  const ctx = { reportDate, outputDir, prevOutputDir, dryRun: !!opts.dryRun, skipCollect: !!opts.skipCollect };
+  const ctx = {
+    reportDate, outputDir, prevOutputDir,
+    dryRun:      !!opts.dryRun,
+    skipCollect: !!opts.skipCollect,
+    preview:     !!opts.preview,    // ⭐ 발송 없이 HTML만 생성 (사주 발간 전 검토용)
+  };
 
   for (const content of targetContents) {
     logger.info(`\n${'─'.repeat(60)}`);
@@ -102,6 +107,7 @@ if (process.argv.includes('--now')) {
   if (idxContent > -1) opts.content = process.argv[idxContent + 1];
   opts.dryRun      = process.argv.includes('--dry-run');
   opts.skipCollect = process.argv.includes('--skip-collect');
+  opts.preview     = process.argv.includes('--preview');   // 발송 없이 HTML만 생성
 
   run(opts).catch(e => {
     logger.warn('[orchestrator] 실행 실패:', e.message);

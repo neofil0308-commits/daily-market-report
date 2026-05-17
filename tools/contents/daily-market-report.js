@@ -10,7 +10,7 @@ import { runTFNews }     from '../layer-2-research/tf-news/index.js';
 import { runTFAnalyst }  from '../layer-2-research/tf-analyst/index.js';
 import { runTFCrypto }   from '../layer-2-research/tf-crypto/index.js';
 import { runEditor }     from '../layer-3-desk/editor/index.js';
-import { buildHtml }     from '../layer-3-desk/design/index.js';
+import { buildHtml, buildEmailCard } from '../layer-3-desk/design/index.js';
 import { publish }       from '../layer-3-desk/publisher/index.js';
 import { logger }        from '../shared/utils/logger.js';
 import fs from 'fs/promises';
@@ -32,7 +32,7 @@ export default defineContent({
    * @param {{ reportDate, outputDir, prevOutputDir, dryRun }} ctx
    */
   async run(ctx) {
-    const { reportDate, outputDir, dryRun, skipCollect } = ctx;
+    const { reportDate, outputDir, dryRun, skipCollect, preview } = ctx;
 
     // ── Layer 1: 시장 데이터 ─────────────────────────────────────────────
     let pipelineData;
@@ -96,6 +96,24 @@ export default defineContent({
     logger.info('[desk/designer] report.html 저장 완료');
 
     const reportUrl = `${process.env.PAGES_BASE_URL ?? ''}/outputs/${reportDate}/report.html`;
+
+    // ── Preview 모드: 발송 차단, 메일 카드 별도 저장 (사주가 발간 전 검토) ──
+    if (preview) {
+      const emailCardHtml = buildEmailCard(desktopData, tfResults, editorialPlan, reportUrl);
+      // Gmail로 받는 모습 그대로 — 브라우저에서 열 수 있게 최소 wrapper만 추가
+      const wrapped = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>메일 카드 미리보기 ${reportDate}</title>
+<style>body{margin:0;padding:24px;background:#e5e7eb;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+.wrap{max-width:600px;margin:0 auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.1);border-radius:8px;overflow:hidden}
+.note{max-width:600px;margin:0 auto 16px;font-size:12px;color:#475569;text-align:center}</style></head>
+<body>
+<div class="note">📧 Gmail로 발송될 카드 본문 미리보기 (${reportDate})</div>
+<div class="wrap">${emailCardHtml}</div>
+</body></html>`;
+      await fs.writeFile(path.join(outputDir, 'email-card-preview.html'), wrapped, 'utf-8');
+      logger.info('[desk/designer] email-card-preview.html 저장 완료 (Gmail 발송 차단)');
+      return { pipelineData, tfResults, editorialPlan, html, preview: true };
+    }
+
     const pubResult = await publish(reportDate, html, desktopData, outputDir, reportUrl, tfResults, editorialPlan);
 
     return { pipelineData, tfResults, editorialPlan, html, pubResult };

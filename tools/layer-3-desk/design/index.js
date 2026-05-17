@@ -20,12 +20,23 @@ const chgCell = (obj) => {
   return `<span class="chg-val ${dir(d)}">${arr(d)} ${sgn(d)}${N(Math.abs(d))} (${sgn(p)}${N(p)}%)</span>`;
 };
 
-// 표 행 헬퍼
-const trow = (lbl, obj, todayStr, prevStr, note = '') => `<tr>
+// 표 행 헬퍼 (비고 열 없는 버전 — v3부터 기본)
+const trow = (lbl, obj, todayStr, prevStr) => `<tr>
   <td>${lbl}</td><td class="r">${todayStr}</td><td class="r">${prevStr}</td>
   <td class="r">${chgCell(obj)}</td>
-  <td class="bi">${note || '―'}</td>
 </tr>`;
+
+// 섹션 Summary 박스 헬퍼
+// sectionSummaries 객체에서 해당 키의 텍스트를 받아 박스 HTML 반환.
+// 비어있거나 null이면 빈 문자열 반환 (섹션 표 위에 삽입).
+const _secSummaryBox = (text, accentColor = '#1e3a8a') => {
+  if (!text) return '';
+  const bg = accentColor + '08';  // 5% opacity via hex — fallback: always shows as near-white
+  return `<div style="background:#fafafa;border-left:3px solid ${accentColor};border-radius:0 4px 4px 0;padding:9px 13px;margin-bottom:10px;line-height:1.65;border:1px solid #cbd5e1;border-left-width:3px">
+  <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${accentColor};display:block;margin-bottom:4px">Summary</span>
+  <span style="font-size:12px;color:#0f172a">${text}</span>
+</div>`;
+};
 
 // ── 날짜 헬퍼 ────────────────────────────────────────────────────────────────
 const KO_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -91,10 +102,14 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
   const chartScript   = _buildChartScript(histDisp);  // Chart.js 인라인 스크립트
 
   const summaryHtml    = _buildSummarySection(editorialPlan, pipelineData, tfResults);
+  // 섹션별 Summary 박스 — editor가 채워주는 editorialPlan.sectionSummaries 참조
+  const secSum = editorialPlan?.sectionSummaries ?? {};
+
+  const _kimchiPremium = pipelineData?.crypto?.kimchiPremium ?? tfResults?.crypto?.kimchi_premium ?? null;
   const cryptoSection  = editorialPlan.include_crypto
-    ? _buildCryptoSection(tfResults.crypto, pipelineData.crypto) : '';
+    ? _buildCryptoSection(tfResults.crypto, pipelineData.crypto, secSum.crypto, _kimchiPremium) : '';
   const analystSection = editorialPlan.include_analyst
-    ? _buildAnalystSection(tfResults.analyst) : '';
+    ? _buildAnalystSection(tfResults.analyst, tfResults?.analyst?.target_price_changes ?? []) : '';
 
   const orderedNews = _reorderNewsByTF(news ?? [], tfResults?.news?.findings);
 
@@ -104,6 +119,11 @@ export async function buildHtml(pipelineData, tfResults, editorialPlan) {
     summaryHtml, cryptoSection, analystSection,
     summaryMap, rowNotes, histIssues,
     headline: editorialPlan.headline,
+    secSum,
+    theme: editorialPlan?.theme ?? 'light',
+    conflicts: editorialPlan?.conflicts ?? [],
+    targetPriceChanges: tfResults?.analyst?.target_price_changes ?? [],
+    kimchiPremium: pipelineData?.crypto?.kimchiPremium ?? tfResults?.crypto?.kimchi_premium ?? null,
   });
 
   logger.info(`[desk/designer] HTML 생성 완료 (${Math.round(html.length / 1024)}KB)`);
@@ -142,7 +162,7 @@ function _buildSupplyHistory(history) {
 
   const lastDate = history[history.length - 1]?.date ?? '';
   const TH = 'text-align:center;font-size:11px;color:#888;font-weight:500;padding:4px 4px 6px;';
-  const TD = 'font-size:12px;font-weight:700;color:#374151;padding:4px 8px 4px 0;white-space:nowrap;';
+  const TD = 'font-size:12px;font-weight:700;color:#4b5563;padding:4px 8px 4px 0;white-space:nowrap;';
 
   const headers = history.map(h =>
     `<th style="${TH}${h.date === lastDate ? 'color:#1d4ed8;font-weight:700;' : ''}">${h.date}</th>`
@@ -294,7 +314,7 @@ function _buildSummarySection(plan, pipelineData, tfResults) {
 
 // ── 코인 섹션 ─────────────────────────────────────────────────────────────────
 
-function _buildCryptoSection(tfCrypto, rawCrypto) {
+function _buildCryptoSection(tfCrypto, rawCrypto, secSummary = '', kimchiPremium = null) {
   if (!rawCrypto?.btc) return '';
   const { btc, eth, fearGreed, btcDominance, top10 } = rawCrypto;
   const fgColor = fearGreed?.value >= 60 ? COLOR.up : fearGreed?.value <= 30 ? COLOR.dn : COLOR.neu;
@@ -310,21 +330,17 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
   const findingFor = (sym) =>
     (tfCrypto?.findings ?? []).find(f => (f.asset ?? '').toUpperCase() === sym.toUpperCase())?.key_level ?? '';
 
-  const TH  = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #e0e0e0';
-  const THL = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid #e0e0e0';
-  const THC = 'background:#f8f8f8;font-size:12px;font-weight:600;color:#555;padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #e0e0e0';
-  const TD  = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:right';
-  const TDL = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;font-weight:600';
-  const TDC = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#1e2330;text-align:center';
-  const TDNOTE = 'padding:7px 10px;border-bottom:1px solid #ebebeb;vertical-align:top;color:#555;font-size:12px;text-align:left';
+  const TH  = 'background:rgba(14,116,144,0.05);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0e7490;padding:5px 7px;text-align:right;white-space:nowrap;border:1px solid #cbd5e1;font-variant-numeric:tabular-nums';
+  const THL = 'background:rgba(14,116,144,0.05);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0e7490;padding:5px 7px;text-align:left;white-space:nowrap;border:1px solid #cbd5e1';
+  const THC = 'background:rgba(14,116,144,0.05);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0e7490;padding:5px 7px;text-align:center;white-space:nowrap;border:1px solid #cbd5e1';
+  const TD  = 'padding:4px 7px;border:1px solid #cbd5e1;vertical-align:middle;color:#0f172a;font-size:12px;text-align:right;font-variant-numeric:tabular-nums';
+  const TDL = 'padding:4px 7px;border:1px solid #cbd5e1;vertical-align:middle;color:#0f172a;font-size:12px;font-weight:600';
+  const TDC = 'padding:4px 7px;border:1px solid #cbd5e1;vertical-align:middle;color:#0f172a;font-size:12px;text-align:center;font-variant-numeric:tabular-nums';
 
   const chgSpan = (v) => {
     const color = v >= 0 ? COLOR.up : COLOR.dn;
     return `<span style="color:${color}">${arr(v)} ${sgn(v)}${N(Math.abs(v ?? 0))}%</span>`;
   };
-
-  const btcNote = findingFor('BTC') || (tfCrypto?.market_summary ? tfCrypto.market_summary.slice(0, 45) : '');
-  const ethNote = findingFor('ETH');
 
   const rows = filteredTop10.map(coin => `
     <tr>
@@ -332,7 +348,6 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
       <td style="${TDL}">${coin.symbol ?? coin.name}</td>
       <td style="${TD}">$${N(coin.priceUsd)}</td>
       <td style="${TD}">${chgSpan(coin.change24h)}</td>
-      <td style="${TDNOTE}">${findingFor(coin.symbol ?? '')}</td>
     </tr>`).join('');
 
   const footerItems = [
@@ -346,56 +361,84 @@ function _buildCryptoSection(tfCrypto, rawCrypto) {
 
   return `
 <div class="sec">
-  <div class="sec-title">블록체인 · 코인</div>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-crypto)">DIGITAL ASSETS</span><span class="sec-kor">블록체인 · 코인</span></div>
+  ${_secSummaryBox(secSummary, '#0e7490')}
   <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>
-      <th style="${THC};width:5%">순위</th><th style="${THL};width:10%">심볼</th>
-      <th style="${TH};width:22%">시세(USD)</th><th style="${TH};width:15%">24h 변동</th>
-      <th style="${THL};width:48%">시장 동향</th>
+      <th style="${THC};width:12%">순위</th><th style="${THL};width:23%">심볼</th>
+      <th style="${TH};width:35%">시세(USD)</th><th style="${TH};width:30%">24h 변동</th>
     </tr></thead>
     <tbody>
       <tr>
         <td style="${TDC}">${btcEntry.rank}</td><td style="${TDL}">BTC</td>
         <td style="${TD}">$${N(btc?.price)}</td>
         <td style="${TD}">${chgSpan(btc?.change24h)}</td>
-        <td style="${TDNOTE}">${btcNote}</td>
       </tr>
       ${eth ? `<tr>
         <td style="${TDC}">${ethEntry.rank}</td><td style="${TDL}">ETH</td>
         <td style="${TD}">$${N(eth?.price)}</td>
         <td style="${TD}">${chgSpan(eth?.change24h)}</td>
-        <td style="${TDNOTE}">${ethNote}</td>
       </tr>` : ''}
       ${rows}
     </tbody>
   </table></div>
   ${footerHtml}
-  ${tfCrypto?.market_summary ? `<div style="margin-top:10px;font-size:13px;color:#374151;background:#f0f4ff;border-left:4px solid #2563eb;padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.6">💡 <strong>코인 시장 요약:</strong> ${tfCrypto.market_summary}</div>` : ''}
+  ${(() => {
+    if (!kimchiPremium) return '';
+    const items = [];
+    if (kimchiPremium.btc != null) {
+      const v = kimchiPremium.btc;
+      const color = v >= 0 ? '#E24B4A' : '#378ADD';
+      const label = v < -0.3 ? ' (역프리미엄)' : v > 0.3 ? ' (프리미엄)' : '';
+      items.push(`BTC <span style="color:${color}">${v >= 0 ? '+' : ''}${N(v)}%${label}</span>`);
+    }
+    if (kimchiPremium.eth != null) {
+      const v = kimchiPremium.eth;
+      const color = v >= 0 ? '#E24B4A' : '#378ADD';
+      items.push(`ETH <span style="color:${color}">${v >= 0 ? '+' : ''}${N(v)}%</span>`);
+    }
+    return items.length ? `<div class="kimchi-box"><strong>김치프리미엄</strong> ${items.join(' · ')}</div>` : '';
+  })()}
 </div>`;
 }
 
 // ── 애널리스트 섹션 ────────────────────────────────────────────────────────────
 
-function _buildAnalystSection(tfAnalyst) {
+function _buildAnalystSection(tfAnalyst, targetPriceChanges = []) {
   if (!tfAnalyst?.findings?.length) return '';
+
+  // 목표가 변동 박스 (최대 3건)
+  const tpcBox = (() => {
+    if (!targetPriceChanges?.length) return '';
+    const items = targetPriceChanges.slice(0, 3).map(t => {
+      const dir = (t.change_pct ?? 0) >= 0 ? '↑' : '↓';
+      const color = (t.change_pct ?? 0) >= 0 ? '#E24B4A' : '#378ADD';
+      const pct = t.change_pct != null ? `<span style="color:${color}">${t.change_pct >= 0 ? '+' : ''}${N(t.change_pct)}% ${dir}</span>` : '';
+      const firm = t.firm ? ` (${t.firm})` : '';
+      return `${t.company ?? '?'} ${pct}${firm}`;
+    });
+    return `<div class="target-box"><strong>전일 대비 목표가 변동</strong> ${items.join(' · ')}</div>`;
+  })();
+
   const rows = tfAnalyst.findings.slice(0, 5).map(f => {
     const companyHtml = f.dart_url
-      ? `<a href="${f.dart_url}" target="_blank" style="color:var(--color-text-info);text-decoration:none;font-weight:600;border-bottom:1px dotted var(--color-text-info)">${f.company ?? '―'}</a>`
+      ? `<a href="${f.dart_url}" target="_blank" style="color:var(--accent-analyst);text-decoration:none;font-weight:600;border-bottom:1px dotted var(--accent-analyst)">${f.company ?? '―'}</a>`
       : (f.company ?? '―');
     return `
-    <tr ${f.importance >= 8 ? 'style="background:var(--color-background-warning)"' : ''}>
+    <tr ${f.importance >= 8 ? 'style="background:#fffbeb"' : ''}>
       <td style="font-weight:500">${companyHtml}</td>
       <td>${f.firm ?? '―'}</td>
-      <td class="c">${f.rating_change ?? '―'}</td>
-      <td class="r">${f.target_price?.new ? NI(f.target_price.new) + '원' : '―'}</td>
-      <td class="bi">${f.key_thesis ?? '―'}</td>
+      <td class="c" style="white-space:normal">${f.rating_change ?? '―'}</td>
+      <td class="r" style="white-space:nowrap">${f.target_price?.new ? NI(f.target_price.new) + '원' : '―'}</td>
+      <td class="bi" style="white-space:normal;overflow:visible">${f.key_thesis ?? '―'}</td>
     </tr>`;
   }).join('');
   return `
 <div class="sec">
-  <div class="sec-title">애널리스트 리포트</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th class="l">종목</th><th class="l">증권사</th><th>의견</th><th>목표가</th><th class="l">핵심 논거</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-analyst)">ANALYST CONSENSUS</span><span class="sec-kor">애널리스트 리포트</span></div>
+  ${tpcBox}
+  <div class="tbl-wrap"><table class="tbl s-analyst">
+    <thead><tr><th class="l" style="width:22%">종목</th><th class="l" style="width:14%">증권사</th><th style="width:10%">의견</th><th class="r" style="width:14%">목표가</th><th class="l" style="width:40%">핵심 논거</th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>
 </div>`;
@@ -404,7 +447,8 @@ function _buildAnalystSection(tfAnalyst) {
 // ── 최종 HTML 조립 ────────────────────────────────────────────────────────────
 
 function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
-  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, rowNotes, histIssues = {}, headline }) {
+  chartUrl, chartScript, summaryHtml, cryptoSection, analystSection, summaryMap, rowNotes, histIssues = {}, headline, secSum = {}, theme = 'light',
+  conflicts = [], targetPriceChanges = [], kimchiPremium = null }) {
   const rn = rowNotes ?? {};
 
   const supply = d.supply ?? {};
@@ -473,133 +517,276 @@ function _assembleHtml({ date, d, o, fx, c, news, histDisp, histAll,
     </tr>`;
   }).join('');
 
+  // 요일 영문 변환 (헤더 메타 표시용)
+  const EN_DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const reportDateObj = new Date(date + 'T00:00:00+09:00');
+  const reportDow  = EN_DAYS[reportDateObj.getDay()];
+  const reportYear = reportDateObj.getFullYear();
+  const reportMM   = String(reportDateObj.getMonth()+1).padStart(2,'0');
+  const reportDD   = String(reportDateObj.getDate()).padStart(2,'0');
+  const reportDatePrimary = `${reportYear}.${reportMM}.${reportDD}`;
+  const reportDateSub     = `${reportDow} · 08:00 KST`;
+
   return `<!DOCTYPE html>
-<html lang="ko"><head>
+<html lang="ko"${theme === 'dark' ? ' class="theme-dark"' : ''}><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>시장 리포트 ${date}</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── 테마 변수 (라이트 기본 / 다크 모드는 .theme-dark 클래스로 활성화) ── */
 :root{
-  --fn:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif;
-  --up:#E24B4A;--dn:#378ADD;--neu:#888;
-  --color-text-primary:#1e2330;
-  --color-text-secondary:#555;
-  --color-text-tertiary:#888;
-  --color-text-info:#2563eb;
-  --color-text-success:#16a34a;
-  --color-text-warning:#d97706;
-  --color-background-secondary:#f8f8f8;
-  --color-background-info:#eff6ff;
+  --fn:'Apple SD Gothic Neo',Pretendard,'Malgun Gothic','Noto Sans KR',-apple-system,sans-serif;
+  --up:#E24B4A;--dn:#378ADD;--neu:#888888;
+
+  /* ── 사주 인터뷰 기반 증권사 PDF 톤 (2026-05-16) ── */
+  --bg-page:#ffffff;
+  --bg-card:#ffffff;
+  --bg-subtle:#fafafa;
+  --text-primary:#0f172a;
+  --text-secondary:#475569;
+  --text-tertiary:#94a3b8;
+  --border-strong:#cbd5e1;
+  --border-soft:#e5e7eb;
+
+  /* 섹션별 액센트 */
+  --accent-domestic:#1e3a8a;
+  --accent-overseas:#374151;
+  --accent-fxrates:#4338ca;
+  --accent-commodities:#854d0e;
+  --accent-crypto:#0e7490;
+  --accent-analyst:#1e3a8a;
+  --accent-news:#374151;
+
+  /* 하위 호환 aliases (기존 코드가 참조하는 변수 유지) */
+  --color-text-primary:#0f172a;
+  --color-text-secondary:#475569;
+  --color-text-tertiary:#94a3b8;
+  --color-text-info:#1e3a8a;
+  --color-text-success:#15803d;
+  --color-text-warning:#854d0e;
+  --color-background-secondary:#fafafa;
+  --color-background-info:rgba(30,58,138,0.05);
   --color-background-success:#f0fdf4;
   --color-background-warning:#fffbeb;
-  --color-border-secondary:#e0e0e0;
-  --color-border-tertiary:#ebebeb;
+  --color-border-secondary:#cbd5e1;
+  --color-border-tertiary:#e5e7eb;
+  --color-th-bg:#fafafa;
+  --color-th-border:#cbd5e1;
+  --color-accent:#1e3a8a;
   --border-radius-md:6px;
 }
+
+/* 다크 모드 — editorialPlan.theme==='dark' 시 <html>에 .theme-dark 추가 (Phase 3 활성화용) */
+.theme-dark{
+  --bg-page:#0b0f1a;
+  --bg-card:#131929;
+  --bg-subtle:#1a2235;
+  --text-primary:#e2e8f0;
+  --text-secondary:#94a3b8;
+  --text-tertiary:#64748b;
+  --border-strong:#1e293b;
+  --border-soft:#0f172a;
+  --color-text-primary:#e2e8f0;
+  --color-text-secondary:#94a3b8;
+  --color-text-tertiary:#64748b;
+  --color-text-info:#60a5fa;
+  --color-text-success:#4ade80;
+  --color-text-warning:#fbbf24;
+  --color-background-secondary:#1e2740;
+  --color-background-info:#1e3a5f;
+  --color-background-success:#14532d;
+  --color-background-warning:#451a03;
+  --color-border-secondary:#1e293b;
+  --color-border-tertiary:#0f172a;
+  --color-th-bg:#1a2235;
+  --color-th-border:#1e293b;
+  --color-accent:#60a5fa;
+}
+.theme-dark body{background:var(--bg-page)}
+.theme-dark .wrap{background:var(--bg-card)}
+
+/* ── 폰트 위계 (v6 — 증권사 PDF 격식 + 헤드라인 강화)
+   헤드라인       : 28px Bold     letter-spacing -0.01em  line-height 1.3
+   섹션 영문      : 11px Bold     letter-spacing 0.15em   uppercase  섹션 액센트 색
+   섹션 한글      : 16px Bold     잉크 검정
+   표 헤더 (th)   : 10px Bold     letter-spacing 0.08em   uppercase
+   표 본문 (td)   : 12px Regular  tabular-nums
+   메타 (날짜 등) : 11px Regular  tertiary
+   라벨 태그      : 10px Bold     letter-spacing 0.04em
+───────────────────────────────── */
 body,div,span,td,th,a,p{font-family:var(--fn)!important}
-body{font-size:14px;background:#f5f7fa;padding:24px 16px;color:var(--color-text-primary)}
-.wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:8px;padding:32px 36px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
-.hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:1.8rem;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-secondary)}
-.hdr-title{font-size:20px;font-weight:600}
-.hdr-date{font-size:12px;color:var(--color-text-secondary)}
-.hdr-headline{font-size:13px;color:var(--color-text-info);margin-top:6px;font-weight:500;display:block}
-.sec{margin:0 0 2rem}
-.sec-title{font-size:15px;font-weight:700;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-secondary);padding-bottom:6px;margin-bottom:12px}
+body{font-size:14px;background:var(--bg-page);padding:24px 16px;color:var(--text-primary)}
+.wrap{max-width:1100px;margin:0 auto;background:var(--bg-card);border-radius:4px;padding:28px 32px;box-shadow:0 0 0 1px var(--border-strong)}
+/* ── 헤더 — 좌/우 듀얼 레이아웃 ── */
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.8rem;padding-bottom:14px;border-bottom:2px solid var(--border-strong)}
+.hdr-brand{}
+.hdr-eng{font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#374151;margin-bottom:3px}
+.hdr-kor{font-size:16px;font-weight:700;color:var(--text-primary)}
+.hdr-meta{text-align:right}
+.hdr-date-primary{font-size:13px;font-weight:700;color:var(--text-primary)}
+.hdr-date-sub{font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-secondary);margin-top:2px}
+/* ── 헤드라인 블록 ── */
+.headline-block{border-left:4px solid #1e3a8a;padding:14px 20px;margin-bottom:1.6rem}
+.headline-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#374151;display:block;margin-bottom:6px}
+.headline-text{font-size:28px;font-weight:700;color:#0f172a;line-height:1.3;letter-spacing:-0.01em;display:block}
+.sec{margin:0 0 1.6rem}
+/* 섹션 제목 — 듀얼 표기 (영문 + 한글) */
+.sec-title{display:flex;flex-direction:column;gap:2px;border-bottom:2px solid var(--border-strong);padding-bottom:7px;margin-bottom:13px}
+.sec-eng{font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase}
+.sec-kor{font-size:16px;font-weight:700;color:var(--text-primary)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{font-size:11px;font-weight:700;color:#333;background:#eceef2;padding:7px 8px;border-bottom:1px solid #ced2da;white-space:nowrap;text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.tbl th{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:5px 7px;border:1px solid var(--border-strong);white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
 .tbl th.l{text-align:left}
-.tbl td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);font-weight:400;vertical-align:middle;line-height:1.5}
+.tbl th.r{text-align:right}
+.tbl td{padding:4px 7px;border:1px solid var(--border-strong);color:var(--text-primary);font-size:12px;font-weight:400;vertical-align:middle;line-height:1.5;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbl td.r{text-align:right;white-space:nowrap}
 .tbl td.c{text-align:center}
-.tbl td.bi{font-size:11px;color:var(--color-text-secondary);line-height:1.55}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--color-background-secondary)}
-.chg-val{font-size:13px;font-weight:400;white-space:nowrap}
+/* analyst table — 핵심논거 열은 줄바꿈 허용 */
+.s-analyst td.bi{white-space:normal;overflow:visible}
+.tbl tr:hover td{background:var(--bg-subtle)}
+.chg-val{font-size:12px;font-weight:400;white-space:nowrap;font-variant-numeric:tabular-nums}
 .up{color:var(--up)}.dn{color:var(--dn)}.neu{color:var(--neu)}
 .bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
-.bar-row .nm{min-width:40px;color:var(--color-text-secondary)}
-.bwrap{flex:1;height:4px;background:var(--color-border-tertiary);border-radius:2px}
+.bar-row .nm{min-width:40px;color:var(--text-secondary)}
+.bwrap{flex:1;height:4px;background:var(--border-soft);border-radius:2px}
 .bfill{height:100%;border-radius:2px}
 .b-buy{background:var(--up)}.b-sell{background:var(--dn)}
-.bar-row .val{min-width:90px;text-align:right;font-size:12px}
+.bar-row .val{min-width:90px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
 .sup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.sup-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:11px 13px}
-.sup-card .st{font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:7px}
+.sup-card{background:var(--bg-subtle);border:1px solid var(--border-strong);border-radius:4px;padding:10px 12px}
+.sup-card .st{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:7px}
 .chart-wrap{position:relative;width:100%;height:220px;margin-bottom:6px}
-.summary-box{background:var(--color-background-info);border:1px solid #dbe8ff;border-radius:8px;padding:14px 18px;margin-bottom:1.8rem}
-.summary-box .s-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-info);margin-bottom:10px}
-.s-badge{display:inline-block;font-size:10px;font-weight:700;background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px}
-.ntbl{width:100%;border-collapse:collapse;font-size:13px}
-.ntbl th{font-size:11px;font-weight:700;color:#333;background:#eceef2;padding:7px 8px;border-bottom:1px solid #ced2da;text-align:center}
+.summary-box{background:rgba(30,58,138,0.04);border:1px solid rgba(30,58,138,0.18);border-left:3px solid var(--accent-domestic);border-radius:0 4px 4px 0;padding:14px 18px;margin-bottom:1.6rem}
+.summary-box .s-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-domestic);margin-bottom:10px}
+.s-badge{display:inline-block;font-size:10px;font-weight:700;background:var(--accent-domestic);color:#fff;padding:2px 7px;border-radius:3px}
+.ntbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.ntbl th{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:5px 7px;border:1px solid var(--border-strong);text-align:center;font-variant-numeric:tabular-nums}
 .ntbl th.l{text-align:left}
-.ntbl td{padding:9px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;font-weight:400}
-.ntbl tr:last-child td{border-bottom:none}
-.td-date{white-space:nowrap;font-size:12px;color:var(--color-text-secondary);min-width:68px}
-.td-cat{white-space:nowrap;min-width:64px;text-align:center}
-.td-ttl{min-width:190px;max-width:320px}
-.td-ttl a{color:var(--color-text-info);text-decoration:none;font-size:12px;line-height:1.45;font-weight:400}
+.ntbl td{padding:6px 7px;border:1px solid var(--border-strong);vertical-align:top;font-weight:400;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis}
+.td-ttl,.td-sum{white-space:normal;overflow:visible;text-overflow:clip}
+.td-date{white-space:nowrap;font-size:11px;color:var(--text-tertiary);min-width:62px;font-variant-numeric:tabular-nums}
+.td-cat{white-space:nowrap;min-width:60px;text-align:center;font-variant-numeric:tabular-nums}
+.td-ttl{min-width:180px;max-width:300px}
+.td-ttl a{color:var(--accent-news);text-decoration:none;font-size:12px;line-height:1.45;font-weight:400}
 .td-ttl a:hover{text-decoration:underline}
-.td-src{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
-.td-sum{font-size:12px;color:var(--color-text-secondary);line-height:1.65}
-.tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px}
-.t-mkt{background:var(--color-background-info);color:var(--color-text-info)}
-.t-corp{background:var(--color-background-success);color:var(--color-text-success)}
-.t-mac{background:var(--color-background-warning);color:var(--color-text-warning)}
-.note{font-size:11px;color:var(--color-text-tertiary);margin-top:5px;line-height:1.7}
-.divider{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0}
+.td-src{font-size:10px;color:var(--text-tertiary);margin-top:3px}
+.td-sum{font-size:11px;color:var(--text-secondary);line-height:1.65}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.04em;padding:2px 6px;border-radius:3px;text-transform:none}
+.t-mkt{background:rgba(30,58,138,0.08);color:var(--accent-domestic)}
+.t-corp{background:#f0fdf4;color:#15803d}
+.t-mac{background:#fffbeb;color:var(--accent-commodities)}
+.note{font-size:11px;color:var(--text-tertiary);margin-top:5px;line-height:1.7}
+.divider{height:1px;background:var(--border-strong);margin:1.6rem 0}
+/* ── 섹션별 th 액센트 색 (표 헤더 텍스트만, 배경은 --bg-subtle 공통) ── */
+.tbl th{background:var(--bg-subtle);color:var(--text-secondary)}
+.s-domestic  th{background:rgba(30,58,138,0.04);color:var(--accent-domestic)}
+.s-overseas  th{background:rgba(55,65,81,0.04);color:var(--accent-overseas)}
+.s-fxrates   th{background:rgba(67,56,202,0.04);color:var(--accent-fxrates)}
+.s-commodities th{background:rgba(133,77,14,0.04);color:var(--accent-commodities)}
+.s-crypto    th{background:rgba(14,116,144,0.04);color:var(--accent-crypto)}
+.s-analyst   th{background:rgba(30,58,138,0.04);color:var(--accent-analyst)}
+.s-news      th{background:rgba(55,65,81,0.04);color:var(--accent-news)}
+/* ── 새 데이터 박스 ── */
+.conflict-box{background:#fff7ed;border:1px solid #fdba74;border-left:3px solid #ea580c;border-radius:0 4px 4px 0;padding:8px 13px;margin-bottom:14px;font-size:12px;color:#9a3412;line-height:1.6}
+.kimchi-box{background:rgba(14,116,144,0.05);border:1px solid rgba(14,116,144,0.25);border-left:3px solid var(--accent-crypto);border-radius:0 4px 4px 0;padding:7px 13px;margin-bottom:10px;font-size:12px;color:var(--accent-crypto);line-height:1.6}
+.target-box{background:rgba(30,58,138,0.04);border:1px solid rgba(30,58,138,0.18);border-left:3px solid var(--accent-domestic);border-radius:0 4px 4px 0;padding:7px 13px;margin-bottom:10px;font-size:12px;color:var(--accent-domestic);line-height:1.6}
+
+/* ── 풋터 섹션 ── */
+.report-footer{background:#fafafa;border-top:1px solid var(--border-strong);padding:20px 24px;margin-top:1.6rem}
+.footer-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#374151;display:block;margin-bottom:4px}
+.footer-text{font-size:11px;color:var(--text-secondary);line-height:1.8}
+.footer-block{margin-bottom:14px}
+.footer-block:last-child{margin-bottom:0}
+
+/* ── 모바일 (900px) ── */
 @media(max-width:900px){
   .wrap{padding:24px 20px}
   .td-sum{display:none}
 }
+
+/* ── 모바일 (600px) — 표 카드형 변환 + 가로 스크롤 폴백 ── */
 @media(max-width:600px){
-  body{padding:10px 8px}
-  .wrap{padding:16px 14px;border-radius:4px}
-  .hdr{flex-wrap:wrap;gap:4px}
+  body{padding:8px 6px}
+  .wrap{padding:14px 12px;border-radius:0;box-shadow:none}
+  .hdr{flex-wrap:wrap;gap:4px;margin-bottom:1.2rem}
   .hdr-title{font-size:17px}
   .hdr-date{font-size:11px}
   .sec-title{font-size:14px}
-  .sec{margin-bottom:1.5rem}
-  .tbl-wrap{margin:0 -2px}
-  .tbl,.ntbl{min-width:480px}
-  .tbl th,.tbl td{padding:6px 6px;font-size:12px}
-  .ntbl th,.ntbl td{padding:7px 6px;font-size:12px}
+  .sec{margin-bottom:1.2rem}
+  /* 표: thead 숨김 → 각 tr이 카드 1개로 세로 나열 */
+  .tbl-wrap{margin:0;overflow-x:visible}
+  .tbl{width:100%;min-width:0}
+  .tbl thead{display:none}
+  .tbl tbody tr{display:block;padding:12px;border:1px solid var(--border-strong);margin-bottom:8px;border-radius:6px;background:var(--bg-card)}
+  .tbl tbody td{display:block;border:none;padding:2px 0;text-align:left!important}
+  /* 1열(종목명·구분): 큰 타이틀 */
+  .tbl tbody td:first-child{font-size:15px;font-weight:700;color:var(--accent-domestic);margin-bottom:2px}
+  /* 2·3열(당일·전일 종가): 수치 */
+  .tbl tbody td:nth-child(2){font-size:14px;font-weight:600;color:var(--text-primary)}
+  .tbl tbody td:nth-child(3){font-size:14px;font-weight:600;color:var(--text-secondary)}
+  /* 4열(변동): 등락 색상 유지 */
+  .tbl tbody td:nth-child(4){font-size:14px}
+  /* 5열 이후(서브 정보): 작은 보조 텍스트 */
+  .tbl tbody td:nth-child(n+5){font-size:11px;color:var(--text-tertiary)}
+  /* ntbl(뉴스표)는 기존 가로 스크롤 유지 */
+  .ntbl{min-width:460px}
+  .ntbl-wrap,.tbl-wrap.ntbl-outer{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* 부가 정보 열 숨김 */
   .td-sum{display:none}
+  .td-date{min-width:56px}
+  .td-cat{min-width:56px}
+  /* 수급 카드 단열 */
   .sup-grid{grid-template-columns:1fr}
-  .chart-wrap{height:170px}
-  .summary-box{padding:11px 13px}
+  /* 차트 높이 축소 */
+  .chart-wrap{height:160px}
+  /* summary box 패딩 */
+  .summary-box{padding:10px 12px}
 }
 </style>
 </head>
 <body><div class="wrap">
 
-<!-- HEADER -->
+<!-- HEADER — D. 메타 정보 정돈 (영문+한글 듀얼 / 우측 일자·요일·기준시각) -->
 <div class="hdr">
-  <span class="hdr-title">일일 시장 리포트</span>
-  <span class="hdr-date">${dateFull} 종가 기준 — 한국경제 · 네이버증권</span>
+  <div class="hdr-brand">
+    <div class="hdr-eng">DAILY MARKET REPORT</div>
+    <div class="hdr-kor">일일 시장 리포트</div>
+  </div>
+  <div class="hdr-meta">
+    <div class="hdr-date-primary">${reportDatePrimary}</div>
+    <div class="hdr-date-sub">${reportDateSub}</div>
+  </div>
 </div>
-${headline ? `<div style="margin-top:-1.2rem;margin-bottom:1.8rem"><span class="hdr-headline">${headline}</span></div>` : ''}
+
+<!-- A. 헤드라인 블록 — 강한 시각 무게감 (border-left 딥네이비 + 28px Bold) -->
+${headline ? `<div class="headline-block">
+  <span class="headline-label">TODAY'S HEADLINE</span>
+  <span class="headline-text">${headline}</span>
+</div>` : ''}
+${conflicts.length ? `<div class="conflict-box"><strong>상충 알림</strong> ${conflicts.slice(0,3).map(cv => typeof cv === 'string' ? cv : `${cv.company ?? ''} — ${cv.note ?? ''}`).join(' · ')}</div>` : ''}
 
 <!-- AI SUMMARY -->
 ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-badge">✦ AI</span> Summary</div>${summaryHtml}</div>` : ''}
 
 <!-- ══ 1. 국내 증시 ══ -->
 <div class="sec">
-  <div class="sec-title">국내 증시</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 종가</th><th>전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-domestic)">DOMESTIC MARKET</span><span class="sec-kor">국내 증시</span></div>
+  ${_secSummaryBox(secSum.domestic, '#1e3a8a')}
+  <div class="tbl-wrap"><table class="tbl s-domestic">
+    <thead><tr><th class="l" style="width:34%">구분</th><th style="width:20%">당일(${dateMd}) 종가</th><th style="width:20%">전일(${prevMd}) 종가</th><th style="width:26%">변동</th></tr></thead>
     <tbody>
-      ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev),  rn.kospi)}
-      ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev), rn.kosdaq)}
+      ${trow('KOSPI',  d.kospi,  N(d.kospi?.today),  N(d.kospi?.prev))}
+      ${trow('KOSDAQ', d.kosdaq, N(d.kosdaq?.today), N(d.kosdaq?.prev))}
       ${(d.volumeBn != null || prevDayTvBn != null)
-        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td><td class="bi">${rn.volume || '일중 누적'}</td></tr>`
+        ? `<tr><td>KOSPI 거래대금</td><td class="r">${d.volumeBn != null ? N(d.volumeBn)+'조원' : '―'}</td><td class="r">${prevDayTvBn != null ? N(prevDayTvBn)+'조원' : '―'}</td><td class="r">${volDiff != null ? `<div class="chg"><span class="chg-val ${dir(volDiff)}">${arr(volDiff)} ${sgn(volDiff)}${N(Math.abs(volDiff))}조원 (${sgn(volPct)}${N(volPct)}%)</span></div>` : '<span class="neu">―</span>'}</td></tr>`
         : ''}
       ${d.vkospi?.today != null
         ? trow(
             d.vkospi.source === 'carry_forward' ? 'VKOSPI (전일값)' : 'VKOSPI (공포지수)',
             d.vkospi,
-            N(d.vkospi.today), N(d.vkospi.prev),
-            rn.vkospi || (d.vkospi.today > 30 ? '불안심리 고조' : d.vkospi.today > 20 ? '경계' : '안정')
+            N(d.vkospi.today), N(d.vkospi.prev)
           )
         : ''}
       ${d.marketCap != null
@@ -607,8 +794,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
             'KOSPI 시가총액',
             { diff: d.marketCapDiff, pct: d.marketCapPct },
             N(d.marketCap) + '조원',
-            d.prevMarketCap != null ? N(d.prevMarketCap) + '조원' : '―',
-            rn.marketCap
+            d.prevMarketCap != null ? N(d.prevMarketCap) + '조원' : '―'
           )
         : ''}
     </tbody>
@@ -618,7 +804,7 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 
 <!-- ══ 2. KOSPI 5거래일 추이 ══ -->
 <div class="sec">
-  <div class="sec-title">KOSPI 최근 5거래일 종가 추이 &amp; 거래대금</div>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-domestic)">KOSPI TREND</span><span class="sec-kor">최근 5거래일 종가 추이 &amp; 거래대금</span></div>
   <div class="chart-wrap">
     <!-- 이메일 폴백: quickchart 이미지 -->
     <img id="kChartImg" src="${chartUrl}" alt="KOSPI 차트" style="width:100%;height:auto;display:block;border-radius:4px">
@@ -626,14 +812,10 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
     <canvas id="kChart" role="img" aria-label="코스피 최근 5거래일 종가 추이"
       style="display:none;width:100%;height:195px"></canvas>
   </div>
-  <div class="tbl-wrap"><table class="tbl" style="margin-top:6px">
-    <colgroup>
-      <col style="width:14%"><col style="width:11%"><col style="width:11%">
-      <col style="width:9%"><col style="width:12%"><col style="width:43%">
-    </colgroup>
+  <div class="tbl-wrap"><table class="tbl s-domestic" style="margin-top:6px">
     <thead><tr>
-      <th class="l">날짜</th><th>KOSPI 종가</th><th>전일比</th><th>등락률</th><th>거래대금</th>
-      <th class="l" style="min-width:120px">주요 이슈</th>
+      <th class="l" style="width:18%">날짜</th><th style="width:14%">KOSPI 종가</th><th style="width:13%">전일比</th><th style="width:10%">등락률</th><th style="width:14%">거래대금</th>
+      <th class="l" style="width:31%">주요 이슈</th>
     </tr></thead>
     <tbody>${histRows || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:12px">데이터 없음</td></tr>'}</tbody>
   </table></div>
@@ -641,42 +823,44 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 
 <!-- ══ 3. 해외 증시 ══ -->
 <div class="sec">
-  <div class="sec-title">해외 증시</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th class="l">구분</th><th>전일(${dateMd}) 종가</th><th>전전일(${prevMd}) 종가</th><th>변동</th><th class="l">비고</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-overseas)">GLOBAL MARKETS</span><span class="sec-kor">해외 증시</span></div>
+  ${_secSummaryBox(secSum.overseas, '#374151')}
+  <div class="tbl-wrap"><table class="tbl s-overseas">
+    <thead><tr><th class="l" style="width:34%">구분</th><th style="width:20%">전일(${dateMd}) 종가</th><th style="width:20%">전전일(${prevMd}) 종가</th><th style="width:26%">변동</th></tr></thead>
     <tbody>
-      ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev),    rn.dow)}
-      ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev),  rn.sp500)}
-      ${trow('나스닥',                 o.nasdaq, N(o.nasdaq?.today), N(o.nasdaq?.prev), rn.nasdaq)}
-      ${trow('필라델피아 반도체(SOX)', o.sox,    N(o.sox?.today),    N(o.sox?.prev),    rn.sox)}
-      ${trow('닛케이225',              o.nikkei, N(o.nikkei?.today), N(o.nikkei?.prev), rn.nikkei)}
+      ${trow('다우존스',               o.dow,    N(o.dow?.today),    N(o.dow?.prev))}
+      ${trow('S&amp;P 500',            o.sp500,  N(o.sp500?.today),  N(o.sp500?.prev))}
+      ${trow('나스닥',                 o.nasdaq, N(o.nasdaq?.today), N(o.nasdaq?.prev))}
+      ${trow('필라델피아 반도체(SOX)', o.sox,    N(o.sox?.today),    N(o.sox?.prev))}
+      ${trow('닛케이225',              o.nikkei, N(o.nikkei?.today), N(o.nikkei?.prev))}
       ${o.dax?.today != null ? trow('DAX (독일)', o.dax, N(o.dax?.today), N(o.dax?.prev)) : ''}
-      ${trow('항셍지수',               o.hsi,    N(o.hsi?.today),    N(o.hsi?.prev),    rn.hsi)}
+      ${trow('항셍지수',               o.hsi,    N(o.hsi?.today),    N(o.hsi?.prev))}
     </tbody>
   </table></div>
 </div>
 
 <!-- ══ 4. 환율 · 금리 ══ -->
 <div class="sec">
-  <div class="sec-title">환율 · 금리</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd})</th><th>전일(${prevMd})</th><th>변동</th><th class="l">비고</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-fxrates)">FX &amp; RATES</span><span class="sec-kor">환율 · 금리</span></div>
+  ${_secSummaryBox(secSum.fxRates, '#4338ca')}
+  <div class="tbl-wrap"><table class="tbl s-fxrates">
+    <thead><tr><th class="l" style="width:38%">구분</th><th style="width:20%">당일(${dateMd})</th><th style="width:20%">전일(${prevMd})</th><th style="width:22%">변동</th></tr></thead>
     <tbody>
-      ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원', rn.usdKrw)}
-      ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev),             rn.dxy)}
-      ${trow('미 국채 10년물',  fx.us10y,  N(fx.us10y?.today) + '%',     N(fx.us10y?.prev) + '%',     rn.us10y)}
-      ${fx.us2y?.today != null ? trow('미 국채 2년물', fx.us2y, N(fx.us2y?.today) + '%', N(fx.us2y?.prev) + '%', rn.us2y || '단기금리 — 연준 정책 민감') : ''}
+      ${trow('원/달러 환율',    fx.usdKrw, NI(fx.usdKrw?.today) + '원', NI(fx.usdKrw?.prev) + '원')}
+      ${trow('달러 인덱스',     fx.dxy,    N(fx.dxy?.today),             N(fx.dxy?.prev))}
+      ${trow('미 국채 10년물',  fx.us10y,  N(fx.us10y?.today) + '%',     N(fx.us10y?.prev) + '%')}
+      ${fx.us2y?.today != null ? trow('미 국채 2년물', fx.us2y, N(fx.us2y?.today) + '%', N(fx.us2y?.prev) + '%') : ''}
       ${(() => {
         const f = fx.fomc ?? {};
-        const fRow = (lbl, today, prev, note) => {
+        const fRow = (lbl, today, prev) => {
           const diff = today != null && prev != null ? r2(today - prev) : null;
           const chg = diff == null ? '<span class="neu">―</span>'
             : `<span class="${dir(diff)}">${sgn(diff)}${N(Math.abs(diff))}%p</span>`;
-          return `<tr><td>${lbl}</td><td class="r">${today ?? 'N/A'}%</td><td class="r">${prev != null ? prev + '%' : '―'}</td><td class="r">${chg}</td><td class="bi">${note}</td></tr>`;
+          return `<tr><td>${lbl}</td><td class="r">${today ?? 'N/A'}%</td><td class="r">${prev != null ? prev + '%' : '―'}</td><td class="r">${chg}</td></tr>`;
         };
         return [
-          fRow('6월 FOMC 동결확률', f.junHoldPct, f.junHoldPctPrev, 'CME FedWatch'),
-          fRow('9월 인하 가능성',   f.sepCutPct,  f.sepCutPctPrev,  'CME FedWatch'),
+          fRow('6월 FOMC 동결확률', f.junHoldPct, f.junHoldPctPrev),
+          fRow('9월 인하 가능성',   f.sepCutPct,  f.sepCutPctPrev),
         ].join('');
       })()}
     </tbody>
@@ -685,19 +869,20 @@ ${summaryHtml ? `<div class="summary-box"><div class="s-title"><span class="s-ba
 
 <!-- ══ 5. 원자재 · 비철금속 ══ -->
 <div class="sec">
-  <div class="sec-title">원자재 · 비철금속</div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th class="l">구분</th><th>당일(${dateMd}) 시세</th><th>전일(${prevMd}) 시세</th><th>변동</th><th class="l">비고</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-commodities)">COMMODITIES</span><span class="sec-kor">원자재 · 비철금속</span></div>
+  ${_secSummaryBox(secSum.commodities, '#854d0e')}
+  <div class="tbl-wrap"><table class="tbl s-commodities">
+    <thead><tr><th class="l" style="width:35%">구분</th><th style="width:21%">당일(${dateMd}) 시세</th><th style="width:21%">전일(${prevMd}) 시세</th><th style="width:23%">변동</th></tr></thead>
     <tbody>
-      ${trow('금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev),        rn.gold    || '안전자산 수요')}
-      ${trow('금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원',   '살 때 기준')}
-      ${c.silver?.today  != null ? trow('은 (COMEX, oz)',     c.silver,   '$' + N(c.silver?.today),   '$' + N(c.silver?.prev),   '태양광·반도체 수요') : ''}
-      ${c.platinum?.today != null ? trow('백금 (COMEX, oz)',  c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev), '귀금속 동조') : ''}
-      ${trow('WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev),         rn.wti     || '')}
-      ${trow('구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev),      rn.copper  || '경기 선행 지표')}
-      ${c.aluminum?.today != null ? trow('알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev), '그린에너지 수요') : ''}
-      ${c.zinc?.today != null ? trow('아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev), '전기차·친환경 도금 수요') : ''}
-      ${c.nickel?.today != null ? trow('니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev), '배터리 수요 회복') : ''}
+      ${trow('금 (선물, oz)',           c.gold,     '$' + N(c.gold?.today),      '$' + N(c.gold?.prev))}
+      ${trow('금 (국내 순금 1돈)',      c.goldKrw,  NI(c.goldKrw?.today) + '원', NI(c.goldKrw?.prev) + '원')}
+      ${c.silver?.today  != null ? trow('은 (COMEX, oz)',    c.silver,   '$' + N(c.silver?.today),   '$' + N(c.silver?.prev)) : ''}
+      ${c.platinum?.today != null ? trow('백금 (COMEX, oz)', c.platinum, '$' + N(c.platinum?.today), '$' + N(c.platinum?.prev)) : ''}
+      ${trow('WTI 원유 (bbl)',          c.wti,      '$' + N(c.wti?.today),       '$' + N(c.wti?.prev))}
+      ${trow('구리 (COMEX, lb)',        c.copper,   '$' + N(c.copper?.today),    '$' + N(c.copper?.prev))}
+      ${c.aluminum?.today != null ? trow('알루미늄 (LME, t)', c.aluminum, '$' + N(c.aluminum?.today), '$' + N(c.aluminum?.prev)) : ''}
+      ${c.zinc?.today != null ? trow('아연 (LME, t)', c.zinc, '$' + N(c.zinc?.today), '$' + N(c.zinc?.prev)) : ''}
+      ${c.nickel?.today != null ? trow('니켈 (LME, t)', c.nickel, '$' + N(c.nickel?.today), '$' + N(c.nickel?.prev)) : ''}
     </tbody>
   </table></div>
   <div class="note">※ 은·백금은 Yahoo Finance 선물 기준. 알루미늄·아연·니켈은 LME 참고값. 정확한 공식가는 당일 마감 후 확인 필요.</div>
@@ -708,18 +893,27 @@ ${analystSection}
 
 <!-- ══ 6. 주요 뉴스 ══ -->
 <div class="sec">
-  <div class="sec-title">주요 뉴스</div>
-  <div class="tbl-wrap"><table class="ntbl">
-    <thead><tr><th class="l" style="width:68px">일자</th><th style="width:64px">구분</th><th class="l" style="width:210px">제목 / 출처</th><th class="l">요약</th></tr></thead>
+  <div class="sec-title"><span class="sec-eng" style="color:var(--accent-news)">TODAY'S NEWS</span><span class="sec-kor">주요 뉴스</span></div>
+  <div class="tbl-wrap ntbl-outer"><table class="ntbl s-news">
+    <thead><tr><th class="l" style="width:70px">일자</th><th style="width:64px">구분</th><th class="l" style="width:30%">제목 / 출처</th><th class="l">요약</th></tr></thead>
     <tbody>${newsRows}</tbody>
   </table></div>
 </div>
 
-<!-- FOOTER -->
-<div class="divider"></div>
-<div class="note" style="line-height:1.9">
-  출처: Yahoo Finance · 네이버금융 · CoinGecko · DART · CME FedWatch<br>
-  본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+<!-- B. 풋터/면책 — 명확한 섹션 분리 (출처 / 발행 정보 / 면책) -->
+<div class="report-footer">
+  <div class="footer-block">
+    <span class="footer-label">데이터 출처</span>
+    <span class="footer-text">Yahoo Finance · CoinGecko · 한경 컨센서스 · 네이버 금융 · 한국은행 · OpenDART · Investing.com</span>
+  </div>
+  <div class="footer-block">
+    <span class="footer-label">발행 정보</span>
+    <span class="footer-text">${reportDatePrimary} (${reportDow}) · 08:00 KST · Daily Market Report</span>
+  </div>
+  <div class="footer-block">
+    <span class="footer-label">면책</span>
+    <span class="footer-text">본 리포트는 정보 제공을 목적으로 작성되었으며, 투자 권유나 매수·매도 추천이 아닙니다.<br>시장 데이터는 외부 API에서 자동 수집되며 지연·오류 가능성이 있습니다.<br>투자 판단의 최종 책임은 사용자에게 있습니다.</span>
+  </div>
 </div>
 
 </div><!-- /wrap -->
@@ -974,15 +1168,17 @@ function _buildChartUrl(histDisp) {
         {
           type: 'line', label: 'KOSPI 종가',
           data: histDisp.map(h => h.close),
-          borderColor: '#E24B4A', backgroundColor: 'rgba(226,75,74,0.08)',
-          borderWidth: 2, pointBackgroundColor: '#E24B4A', pointRadius: 4,
+          // C. quickchart 폴백도 딥 네이비 통일
+          borderColor: '#1e3a8a', backgroundColor: 'rgba(30,58,138,0.07)',
+          borderWidth: 2, pointBackgroundColor: '#1e3a8a', pointRadius: 4,
           fill: true, yAxisID: 'A',
         },
         {
           type: 'bar', label: '거래대금',
           data: tvBns,
-          backgroundColor: 'rgba(55,138,221,0.22)',
-          borderColor: 'rgba(55,138,221,0.55)',
+          // C. 거래대금 막대: 차콜
+          backgroundColor: 'rgba(55,65,81,0.28)',
+          borderColor: 'rgba(55,65,81,0.50)',
           borderWidth: 1, yAxisID: 'B',
         },
       ],
@@ -1007,11 +1203,12 @@ function _buildChartUrl(histDisp) {
 // 최대 너비 600px, 배경 카드 컬러링으로 등락 방향 즉시 인지
 
 export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl) {
-  const d  = pipelineData?.domestic    ?? {};
-  const o  = pipelineData?.overseas    ?? {};
-  const fx = pipelineData?.fxRates     ?? {};
-  const c  = pipelineData?.commodities ?? {};
-  const cr = pipelineData?.crypto      ?? {};
+  const d   = pipelineData?.domestic    ?? {};
+  const o   = pipelineData?.overseas    ?? {};
+  const fx  = pipelineData?.fxRates     ?? {};
+  const c   = pipelineData?.commodities ?? {};
+  const cr  = pipelineData?.crypto      ?? {};
+  const secSum = editorialPlan?.sectionSummaries ?? {};
   const dateStr = pipelineData?.date ?? new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
 
   // ── 날짜 표기 ──────────────────────────────────────────────────────────────
@@ -1039,34 +1236,44 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
   const pctStr   = pct  => pct  == null ? ''  : `(${sg(pct)}${fmt2(pct)}%)`;
 
   // ── 섹션 구분선 ────────────────────────────────────────────────────────────
-  const DIVIDER = `<div style="height:1px;background:#f0f2f5"></div>`;
+  const DIVIDER = `<div style="height:1px;background:#e5e7eb"></div>`;
 
-  // ── 섹션 헤더 헬퍼 ─────────────────────────────────────────────────────────
-  const secHdr = (emoji, title, meta) =>
-    `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px">
-      <tr>
-        <td style="white-space:nowrap;vertical-align:middle;padding-right:8px">
-          <span style="font-size:13px;font-weight:700;color:#1a1f2e;font-family:${FONT}">${emoji} ${title}</span>
-        </td>
-        <td width="100%" style="vertical-align:middle">
-          <div style="height:1px;background:#e8eaed"></div>
-        </td>
-        ${meta ? `<td style="white-space:nowrap;vertical-align:middle;padding-left:8px">
-          <span style="font-size:11px;color:#9aa0ab;font-family:${FONT}">${meta}</span>
-        </td>` : ''}
-      </tr>
-    </table>`;
+  // ── 섹션 Summary 박스 (인라인 스타일 — Gmail 호환) ───────────────────────
+  const emailSecSummary = (text) => {
+    if (!text) return '';
+    return `<div style="background:#eff6ff;border-left:4px solid #1e40af;border-radius:0 6px 6px 0;padding:9px 13px;margin-bottom:12px;box-sizing:border-box">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1e40af;margin-bottom:4px;font-family:${FONT}">Summary</div>
+      <div style="font-size:12px;color:#111827;line-height:1.65;font-family:${FONT}">${text}</div>
+    </div>`;
+  };
+
+  // ── 섹션 헤더 헬퍼 (듀얼 표기 — 증권사 PDF 격식) ──────────────────────────
+  // accentColor: 섹션별 직접 색 값 (CSS variables 사용 불가 — Gmail 인라인 스타일 전용)
+  const secHdr = (engLabel, korLabel, meta, accentColor = '#1e3a8a') =>
+    `<div style="border-bottom:2px solid #0f172a;padding-bottom:8px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:${accentColor};font-family:${FONT};margin-bottom:2px">${engLabel}</div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="white-space:nowrap;vertical-align:middle">
+            <span style="font-size:16px;font-weight:700;color:#0f172a;font-family:${FONT}">${korLabel}</span>
+          </td>
+          ${meta ? `<td style="vertical-align:bottom;text-align:right;white-space:nowrap;padding-left:8px">
+            <span style="font-size:10px;color:#94a3b8;letter-spacing:0.04em;font-family:${FONT}">${meta}</span>
+          </td>` : ''}
+        </tr>
+      </table>
+    </div>`;
 
   // ── 카드 컴포넌트 헬퍼 ─────────────────────────────────────────────────────
   // direction: 'up' | 'down' | 'neu'
   const indexCard = (label, valueStr, aStr, pStr, direction, valueFontSize) => {
     const fs    = valueFontSize || '22px';
-    const bg    = direction === 'up'   ? '#fff8f8' : direction === 'down' ? '#f0f5ff' : '#f8f9fb';
-    const bdr   = direction === 'up'   ? '#ffd6d6' : direction === 'down' ? '#c7d9ff' : '#e8eaed';
-    const color = direction === 'up'   ? '#E24B4A' : direction === 'down' ? '#378ADD' : '#888888';
-    return `<div style="width:100%;min-height:88px;box-sizing:border-box;background:${bg};border:1px solid ${bdr};border-radius:10px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:6px;font-family:${FONT}">${label}</div>
-      <div style="font-size:${fs};font-weight:700;color:#1a1f2e;margin-bottom:5px;line-height:1.1;font-family:${FONT}">${valueStr}</div>
+    const bg    = direction === 'up'   ? '#fff8f8' : direction === 'down' ? '#eff6ff' : '#f9fafb';
+    const bdr   = direction === 'up'   ? '#fecaca' : direction === 'down' ? '#bfdbfe' : '#d1d5db';
+    const color = direction === 'up'   ? '#E24B4A' : direction === 'down' ? '#378ADD' : '#6b7280';
+    return `<div style="width:100%;min-height:84px;box-sizing:border-box;background:${bg};border:1px solid ${bdr};border-radius:8px;padding:12px 14px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;font-family:${FONT}">${label}</div>
+      <div style="font-size:${fs};font-weight:700;color:#111827;margin-bottom:4px;line-height:1.1;font-family:${FONT}">${valueStr}</div>
       <div style="font-size:12px;font-weight:500;color:${color};font-family:${FONT}">${aStr}&nbsp;${pStr}</div>
     </div>`;
   };
@@ -1096,96 +1303,94 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     </table>`;
   };
 
-  // ── 1. 헤더 ────────────────────────────────────────────────────────────────
-  const headerHtml = `<div style="background:#1a1f2e;padding:0 24px">
+  // ── 1. 헤더 — D. 메타 정보 정돈 (영문+한글 듀얼 / 우측 일자·요일·기준시각) ──
+  const EN_DAYS_EMAIL = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const emailDow      = EN_DAYS_EMAIL[dtObj.getDay()];
+  const emailDatePrimary = `${dtObj.getFullYear()}.${MM}.${DD}`;
+  const emailDateSub     = `${emailDow} · 08:00 KST`;
+
+  const headerHtml = `<div style="background:#0f172a;padding:0 24px">
   <div style="border-top:3px solid #E24B4A;padding:20px 0 18px">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="vertical-align:bottom">
-          <div style="color:#fff;font-size:18px;font-weight:700;font-family:${FONT}">일일 시장 리포트</div>
-          <div style="color:#8892a4;font-size:11px;margin-top:4px;font-family:${FONT}">Korea Market Daily</div>
+          <div style="color:#8892a4;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;font-family:${FONT};margin-bottom:3px">DAILY MARKET REPORT</div>
+          <div style="color:#fff;font-size:16px;font-weight:700;font-family:${FONT}">일일 시장 리포트</div>
         </td>
         <td style="vertical-align:bottom;text-align:right">
-          <div style="color:#e8eaed;font-size:13px;font-weight:600;font-family:${FONT}">${dateLabel}</div>
-          <div style="color:#8892a4;font-size:11px;margin-top:3px;font-family:${FONT}">장 마감 기준</div>
+          <div style="color:#e8eaed;font-size:13px;font-weight:700;font-family:${FONT}">${emailDatePrimary}</div>
+          <div style="color:#8892a4;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;font-family:${FONT}">${emailDateSub}</div>
         </td>
       </tr>
     </table>
   </div>
 </div>`;
 
-  // ── 2. 증시 섹션 (2열 2행: KOSPI·KOSDAQ / S&P 500·NASDAQ) ─────────────────
-  const mktDefs = [
-    { label: 'KOSPI',   obj: d.kospi,  valFn: v => fmtI(v) },
-    { label: 'KOSDAQ',  obj: d.kosdaq, valFn: v => fmtI(v) },
-    { label: 'S&P 500', obj: o.sp500,  valFn: v => fmt2(v) },
-    { label: 'NASDAQ',  obj: o.nasdaq, valFn: v => fmt2(v) },
-  ];
-  const mkCard = m => m.obj?.today != null
-    ? indexCard(m.label, m.valFn(m.obj.today), arrowStr(m.obj.diff), pctStr(m.obj.pct), dir(m.obj.diff), '22px')
+  // 헤드라인 (헤더 바로 아래) — A. 헤드라인 임팩트 + D. 메타 정보 정돈
+  const emailHeadline = editorialPlan?.headline
+    ? `<div style="border-left:4px solid #1e3a8a;padding:14px 20px 16px;background:#fff;border-bottom:1px solid #e5e7eb">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#374151;margin-bottom:6px;font-family:${FONT}">TODAY'S HEADLINE</div>
+        <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1.3;letter-spacing:-0.01em;font-family:${FONT}">${editorialPlan.headline}</div>
+      </div>`
     : '';
-  const mktRow1 = [mkCard(mktDefs[0]), mkCard(mktDefs[1])];
-  const mktRow2 = [mkCard(mktDefs[2]), mkCard(mktDefs[3])];
-  const hasMkt  = mktRow1.some(Boolean) || mktRow2.some(Boolean);
-  const hasMktR2 = mktRow2.some(Boolean);
 
-  const mktSection = hasMkt ? `<div style="padding:20px 24px 16px">
-  ${secHdr('📊', '증시', `${baseMd} 종가`)}
-  ${mktRow1.some(Boolean) ? cardRow2(mktRow1, hasMktR2 ? '10px' : '0') : ''}
-  ${hasMktR2 ? cardRow2(mktRow2, '0') : ''}
-</div>` : '';
+  // ── 2. 핵심 수치 3카드 (KOSPI · S&P500 · BTC 고정) ─────────────────────────
+  // 휴장일이면 KOSPI 전일 종가 + "휴장" 표시, 데이터 누락 시 "—" 표시
+  const isHoliday = pipelineData?.isHoliday ?? false;
 
-  // ── 3. 환율·원자재 섹션 (3열 2행 고정) ─────────────────────────────────────
-  // Row 1: 달러/원, 금, 은  |  Row 2: 구리, WTI, DXY
-  // 데이터 없는 칸은 빈 문자열 → 빈 <td>로 유지해 열 너비가 흔들리지 않음
-  const calcPct = (diff, today) =>
-    diff != null && today ? diff / today * 100 : null;
-
-  const fxMk = (label, val, diff, today, fs = '18px') =>
-    val != null
-      ? indexCard(label, val, arrowStr(diff), pctStr(calcPct(diff, today)), dir(diff), fs)
-      : '';
-
-  const fxCards1 = [
-    fxMk('달러/원', fx.usdKrw?.today != null ? fmtI(fx.usdKrw.today)+'원' : null, fx.usdKrw?.diff, fx.usdKrw?.today),
-    fxMk('금 (oz)',  c.gold?.today   != null ? '$'+fmt2(c.gold.today)   : null, c.gold?.diff,   c.gold?.today),
-    fxMk('은 (oz)',  c.silver?.today != null ? '$'+fmt2(c.silver.today) : null, c.silver?.diff, c.silver?.today),
-  ];
-  const fxCards2 = [
-    fxMk('구리 (lb)', c.copper?.today != null ? '$'+fmt2(c.copper.today) : null, c.copper?.diff, c.copper?.today),
-    fxMk('WTI (bbl)', c.wti?.today   != null ? '$'+fmt2(c.wti.today)    : null, c.wti?.diff,    c.wti?.today),
-    fxMk('DXY',       fx.dxy?.today  != null ? fmt2(fx.dxy.today)       : null, fx.dxy?.diff,   fx.dxy?.today),
-  ];
-  const hasFxR1 = fxCards1.some(Boolean);
-  const hasFxR2 = fxCards2.some(Boolean);
-
-  const fxSection = (hasFxR1 || hasFxR2) ? `<div style="padding:16px 24px">
-  ${secHdr('💱', '환율 · 원자재', `${baseMd} 기준`)}
-  ${hasFxR1 ? cardRow3(fxCards1, hasFxR2 ? '10px' : '0') : ''}
-  ${hasFxR2 ? cardRow3(fxCards2, '0') : ''}
-</div>` : '';
-
-  // ── 4. 코인 섹션 (3열 1행 고정) ───────────────────────────────────────────
-  const btc   = cr.btc ?? null;
-  const eth   = cr.eth ?? null;
-  const top10 = (cr.top10 ?? []).filter(x => !['BTC','ETH'].includes(x.symbol?.toUpperCase())).slice(0,1);
-
-  const mkCoinCard = (sym, price, chg) => {
-    const chgStr = chg != null ? `${ar(chg)}&nbsp;${sg(chg)}${fmt2(Math.abs(chg))}%` : '―';
-    return indexCard(sym, price != null ? '$'+fmtI(price) : 'N/A', chgStr, '', dir(chg), '18px');
+  const _make3Card = (label, accentColor, valueStr, chgStr, chgDir) => {
+    const bg    = chgDir === 'up'   ? '#fff8f8' : chgDir === 'down' ? '#eff6ff' : '#f9fafb';
+    const bdr   = chgDir === 'up'   ? '#fecaca' : chgDir === 'down' ? '#bfdbfe' : '#d1d5db';
+    const color = chgDir === 'up'   ? '#E24B4A' : chgDir === 'down' ? '#378ADD' : '#6b7280';
+    return `<td style="width:33%;padding:0 4px;vertical-align:top">
+      <div style="background:${bg};border:1px solid ${bdr};border-radius:6px;padding:12px 8px;text-align:center;box-sizing:border-box">
+        <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${accentColor};font-weight:700;font-family:${FONT};margin-bottom:6px">${label}</div>
+        <div style="font-size:20px;font-weight:700;color:#0f172a;font-variant-numeric:tabular-nums;font-family:${FONT};line-height:1.1;margin-bottom:4px">${valueStr}</div>
+        <div style="font-size:12px;font-weight:600;color:${color};font-family:${FONT}">${chgStr}</div>
+      </div>
+    </td>`;
   };
-  const coinCards3 = [
-    btc      ? mkCoinCard('BTC', btc.price, btc.change24h)                             : '',
-    eth      ? mkCoinCard('ETH', eth.price, eth.change24h)                             : '',
-    top10[0] ? mkCoinCard(top10[0].symbol ?? '―', top10[0].priceUsd, top10[0].change24h) : '',
-  ];
 
-  const coinSection = coinCards3.some(Boolean) ? `<div style="padding:16px 24px">
-  ${secHdr('₿', '코인', '24h 변동')}
-  ${cardRow3(coinCards3, '0')}
-</div>` : '';
+  // KOSPI 카드
+  const kospiObj  = d.kospi;
+  const kospiDir  = dir(kospiObj?.diff);
+  const kospiVal  = kospiObj?.today != null ? fmtI(kospiObj.today) : (kospiObj?.prev != null ? fmtI(kospiObj.prev) : '—');
+  const kospiChg  = kospiObj?.diff != null
+    ? `${ar(kospiObj.diff)}&nbsp;${sg(kospiObj.diff)}${fmt2(Math.abs(kospiObj.diff))} (${sg(kospiObj.pct)}${fmt2(kospiObj.pct)}%)`
+    : '―';
+  const kospiLabel = isHoliday && kospiObj?.today == null ? 'KOSPI (휴장)' : 'KOSPI';
+  const kospiCard  = _make3Card(kospiLabel, '#1e3a8a', kospiVal, kospiChg, kospiObj?.today == null ? 'neu' : kospiDir);
 
-  // ── 0. 시장 요약 섹션 (Gemini 결과 있을 때만 표시) ───────────────────────
+  // S&P500 카드
+  const spObj   = o.sp500;
+  const spDir   = dir(spObj?.diff);
+  const spVal   = spObj?.today != null ? fmt2(spObj.today) : '—';
+  const spChg   = spObj?.diff != null
+    ? `${ar(spObj.diff)}&nbsp;${sg(spObj.diff)}${fmt2(Math.abs(spObj.diff))} (${sg(spObj.pct)}${fmt2(spObj.pct)}%)`
+    : '―';
+  const spCard  = _make3Card('S&P 500', '#374151', spVal, spChg, spObj?.today == null ? 'neu' : spDir);
+
+  // BTC 카드
+  const btcObj  = cr.btc ?? null;
+  const btcDir  = dir(btcObj?.change24h);
+  const btcVal  = btcObj?.price != null ? '$' + fmtI(btcObj.price) : '—';
+  const btcChg  = btcObj?.change24h != null
+    ? `${ar(btcObj.change24h)}&nbsp;${sg(btcObj.change24h)}${fmt2(Math.abs(btcObj.change24h))}%`
+    : '―';
+  const btcCard = _make3Card('BTC', '#0e7490', btcVal, btcChg, btcObj?.price == null ? 'neu' : btcDir);
+
+  // 3카드 가로 나열 (모바일: 각 td가 width:100%로 자연스럽게 축소되도록 inline-block 패턴)
+  const digest3Cards = `<div style="padding:16px 22px 14px">
+  <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:separate;border-spacing:0">
+    <tr>
+      ${kospiCard}
+      ${spCard}
+      ${btcCard}
+    </tr>
+  </table>
+</div>`;
+
+  // ── AI Summary + 상충 알림 섹션 ──────────────────────────────────────────
   const summaryBullets = editorialPlan?.summary_bullets ?? [];
   const topStories     = tfResults?.news?.top_stories   ?? [];
   const themes         = tfResults?.news?.themes        ?? [];
@@ -1195,12 +1400,17 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     : topStories.length ? topStories
     : [];
 
+  const emailConflicts = (editorialPlan?.conflicts ?? []).slice(0, 3);
+  const conflictBox = emailConflicts.length
+    ? `<div style="background:#fff7ed;border-left:3px solid #ea580c;padding:7px 12px;margin-bottom:12px;font-size:12px;color:#9a3412;font-family:${FONT}"><strong>상충 알림</strong> ${emailConflicts.map(cv => typeof cv === 'string' ? cv : `${cv.company ?? ''} — ${cv.note ?? ''}`).join(' · ')}</div>`
+    : '';
+
   if (summaryLines.length) {
     const bullets = summaryLines.map(s =>
       `<table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:9px">
         <tr>
           <td style="vertical-align:top;padding-right:8px;white-space:nowrap;color:#2563eb;font-size:14px;line-height:1.6;font-family:${FONT}">•</td>
-          <td style="font-size:13px;color:#2d3748;line-height:1.65;font-family:${FONT}">${String(s).replace(/^[•·\-]\s*/,'')}</td>
+          <td style="font-size:13px;color:#111827;line-height:1.65;font-family:${FONT}">${String(s).replace(/^[•·\-]\s*/,'')}</td>
         </tr>
       </table>`
     ).join('');
@@ -1211,13 +1421,17 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
         }</div>`
       : '';
 
-    summarySection = `<div style="padding:20px 24px 16px;background:#f8faff;border-bottom:1px solid #e0eaff">
-  ${secHdr('💡', '오늘의 시장 요약')}
+    summarySection = `<div style="padding:18px 22px 14px;background:#fafafa;border-bottom:1px solid #cbd5e1">
+  ${conflictBox}
+  ${secHdr('AI SUMMARY', '오늘의 시장 요약', '', '#1e3a8a')}
   ${bullets}${themePills}
 </div>`;
+  } else if (conflictBox) {
+    // 상충만 있는 경우
+    summarySection = `<div style="padding:14px 22px;background:#fafafa;border-bottom:1px solid #cbd5e1">${conflictBox}</div>`;
   }
 
-  // ── 5. 뉴스 섹션 ──────────────────────────────────────────────────────────
+  // ── 뉴스 3건 다이제스트 ───────────────────────────────────────────────────
   const rawFindings = tfResults?.news?.findings ?? [];
   const rawNews     = pipelineData?.news        ?? [];
 
@@ -1226,12 +1440,12 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     const seen    = new Set();
     const ordered = [...rawFindings].sort((a,b) => (b.importance??0)-(a.importance??0));
     for (const f of ordered) {
-      if (newsItems.length >= 6) break;
+      if (newsItems.length >= 3) break;  // 다이제스트: 3건 고정
       const theme = f.theme ?? f.category ?? '';
       if (!seen.has(theme)) { seen.add(theme); newsItems.push(f); }
     }
     for (const f of ordered) {
-      if (newsItems.length >= 6) break;
+      if (newsItems.length >= 3) break;
       if (!newsItems.includes(f)) newsItems.push(f);
     }
     const urlToTitle = new Map(rawNews.map(n => [n.url, n.title]));
@@ -1246,8 +1460,49 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
       };
     });
   } else if (rawNews.length) {
-    newsItems = rawNews.slice(0,6).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', summary: [], url: n.url ?? null }));
+    newsItems = rawNews.slice(0, 3).map(n => ({ category: n.category ?? '시장전반', title: n.title ?? '', summary: [], url: n.url ?? null }));
   }
+
+  // ── 알림 박스 (김치프리미엄 + 목표가 변동) ──────────────────────────────
+  const _alertBoxHtml = (() => {
+    const lines = [];
+
+    // 김치프리미엄 한 줄
+    const kp = pipelineData?.crypto?.kimchiPremium ?? tfResults?.crypto?.kimchi_premium ?? null;
+    if (kp) {
+      const items = [];
+      if (kp.btc != null) {
+        const v = kp.btc;
+        const color = v >= 0 ? '#E24B4A' : '#378ADD';
+        items.push(`BTC <span style="color:${color}">${v >= 0 ? '+' : ''}${Number(v).toFixed(2)}%${v < -0.3 ? ' (역프리미엄)' : v > 0.3 ? ' (프리미엄)' : ''}</span>`);
+      }
+      if (kp.eth != null) {
+        const v = kp.eth;
+        const color = v >= 0 ? '#E24B4A' : '#378ADD';
+        items.push(`ETH <span style="color:${color}">${v >= 0 ? '+' : ''}${Number(v).toFixed(2)}%</span>`);
+      }
+      if (items.length) {
+        lines.push(`<div style="padding:7px 12px;border-bottom:1px solid #e0f2fe;font-size:12px;font-family:${FONT};color:#0e7490"><strong>김치프리미엄</strong> ${items.join(' · ')}</div>`);
+      }
+    }
+
+    // 목표가 변동 한 줄
+    const tpcs = tfResults?.analyst?.target_price_changes ?? [];
+    if (tpcs.length) {
+      const tpcItems = tpcs.slice(0, 4).map(t => {
+        const dSymbol = (t.change_pct ?? 0) >= 0 ? '↑' : '↓';
+        const color   = (t.change_pct ?? 0) >= 0 ? '#E24B4A' : '#378ADD';
+        const pct     = t.change_pct != null ? ` <span style="color:${color}">${t.change_pct >= 0 ? '+' : ''}${Number(t.change_pct).toFixed(1)}% ${dSymbol}</span>` : '';
+        const firm    = t.firm ? ` ${t.firm}` : '';
+        return `${t.company ?? '?'}${pct}${firm ? `<span style="font-size:10px;color:#6b7280"> / ${firm}</span>` : ''}`;
+      });
+      const totalNote = tpcs.length > 4 ? ` <span style="font-size:10px;color:#6b7280">(총 ${tpcs.length}건)</span>` : '';
+      lines.push(`<div style="padding:7px 12px;font-size:12px;font-family:${FONT};color:#1e3a8a"><strong>목표가 변동</strong> ${tpcItems.join(' · ')}${totalNote}</div>`);
+    }
+
+    if (!lines.length) return '';
+    return `<div style="background:rgba(30,58,138,0.03);border:1px solid #cbd5e1;border-radius:4px;margin:0 22px 14px;overflow:hidden">${lines.join('')}</div>`;
+  })();
 
   // 뉴스 태그 색상
   const chipStyle = cat => {
@@ -1278,7 +1533,7 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
     const bullets = (n.summary ?? []).filter(Boolean);
     const summaryHtml = bullets.length
       ? bullets.map(b =>
-          `<div style="font-size:11px;color:#374151;line-height:1.6;font-family:${FONT}">${String(b).startsWith('•') ? b : '• ' + b}</div>`
+          `<div style="font-size:11px;color:#4b5563;line-height:1.6;font-family:${FONT}">${String(b).startsWith('•') ? b : '• ' + b}</div>`
         ).join('')
       : `<div style="min-height:14px"></div>`;
     return `<div style="padding:12px 0;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
@@ -1286,80 +1541,49 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
         <span style="display:inline-block;background:${chip.bg};color:${chip.txt};font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-right:7px;font-family:${FONT}">${n.category}</span>
       </div>
       ${n.url
-        ? `<a href="${n.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</a>`
-        : `<div style="font-size:13px;font-weight:500;color:#1a1f2e;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</div>`
+        ? `<a href="${n.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;font-size:13px;font-weight:500;color:#111827;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</a>`
+        : `<div style="font-size:13px;font-weight:500;color:#111827;line-height:1.55;font-family:${FONT};margin-bottom:5px">${title}</div>`
       }
       ${summaryHtml}
     </div>`;
   }).join('');
 
-  const newsSection = newsItems.length ? `<div style="padding:16px 24px 20px">
-  ${secHdr('📰', '주요 뉴스')}
+  const newsSection = newsItems.length ? `<div style="padding:14px 22px 18px">
+  ${secHdr("TODAY'S NEWS", '주요 뉴스', '', '#374151')}
   ${newsRows}
 </div>` : '';
 
-  // ── 6. 애널리스트 섹션 ────────────────────────────────────────────────────
-  const analystFindings = (tfResults?.analyst?.findings ?? []).slice(0, 3);
-  let analystSection = '';
-  if (analystFindings.length) {
-    const analystRows = analystFindings.map((f, i) => {
-      const isLast = i === analystFindings.length - 1;
-      const tpPrev = f.target_price?.prev;
-      const tpNew  = f.target_price?.new;
-      const tpPct  = f.target_price?.change_pct;
-      const tpColor = (tpNew != null && tpPrev != null) ? (tpNew > tpPrev ? '#E24B4A' : '#378ADD') : '#1a1f2e';
-      const tpStr  = (tpPrev != null && tpNew != null)
-        ? `${fmtI(tpPrev)} → <span style="color:${tpColor};font-weight:700">${fmtI(tpNew)}원</span>${tpPct != null ? ` (${tpPct > 0 ? '+' : ''}${fmt2(tpPct)}%)` : ''}`
-        : tpNew != null ? `<span style="font-weight:700">${fmtI(tpNew)}원</span>` : '―';
-      return `<div style="padding:10px 0;box-sizing:border-box;${isLast ? '' : 'border-bottom:1px solid #f0f2f5'}">
-        <table cellpadding="0" cellspacing="0" border="0" style="width:100%">
-          <tr>
-            <td style="font-size:13px;font-weight:600;color:#1a1f2e;font-family:${FONT}">
-              ${f.dart_url
-                ? `<a href="${f.dart_url}" target="_blank" style="color:#2563eb;text-decoration:none;font-weight:600;font-family:${FONT}">${f.company ?? '―'}</a>`
-                : (f.company ?? '―')}
-              <span style="font-size:10px;font-weight:400;color:#6b7280;margin-left:6px">${f.sector ?? ''}</span>
-            </td>
-            <td style="font-size:11px;color:#6b7280;text-align:right;white-space:nowrap;font-family:${FONT}">${f.firm ?? ''} · ${f.rating_change ?? '―'}</td>
-          </tr>
-          <tr>
-            <td style="font-size:11px;color:#374151;padding-top:4px;font-family:${FONT}">${f.key_thesis ?? ''}</td>
-            <td style="font-size:11px;color:#374151;text-align:right;padding-top:4px;white-space:nowrap;font-family:${FONT}">목표가 ${tpStr}</td>
-          </tr>
-        </table>
-      </div>`;
-    }).join('');
-    analystSection = `<div style="padding:16px 24px 20px">
-  ${secHdr('📊', '애널리스트 리포트')}
-  ${analystRows}
-</div>`;
-  }
-
-  // ── 7. CTA 섹션 ────────────────────────────────────────────────────────────
+  // ── CTA + B. 풋터/면책 ─────────────────────────────────────────────────
   const url = reportUrl || '#';
-  const ctaHtml = `<div style="background:#f8f9fb;padding:20px 24px;text-align:center;border-top:1px solid #edeef0">
+  const ctaHtml = `<div style="padding:18px 22px;text-align:center;border-top:1px solid #cbd5e1">
   <a href="${url}" target="_blank"
-     style="display:inline-block;background:#1a1f2e;color:#fff;font-size:14px;font-weight:600;padding:12px 36px;border-radius:8px;text-decoration:none;font-family:${FONT}">
+     style="display:inline-block;background:#0f172a;color:#fff;font-size:14px;font-weight:700;padding:12px 36px;border-radius:3px;text-decoration:none;font-family:${FONT};letter-spacing:0.04em">
     전체 리포트 보기 →
   </a>
-  <div style="margin-top:14px;font-size:11px;color:#9aa0ab;line-height:1.8;font-family:${FONT}">
-    출처: Yahoo Finance · 네이버금융 · CoinGecko<br>
-    본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다.
+</div>
+<div style="background:#fafafa;border-top:1px solid #e5e7eb;padding:20px 22px">
+  <div style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#374151;font-family:${FONT};margin-bottom:4px">데이터 출처</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.8;font-family:${FONT}">Yahoo Finance · CoinGecko · 한경 컨센서스 · 네이버 금융 · 한국은행 · OpenDART</div>
+  </div>
+  <div style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#374151;font-family:${FONT};margin-bottom:4px">발행 정보</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.8;font-family:${FONT}">${emailDatePrimary} (${emailDow}) · 08:00 KST · Daily Market Report</div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#374151;font-family:${FONT};margin-bottom:4px">면책</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.8;font-family:${FONT}">본 리포트는 정보 제공을 목적으로 작성되었으며, 투자 권유나 매수·매도 추천이 아닙니다. 시장 데이터는 외부 API에서 자동 수집되며 지연·오류 가능성이 있습니다. 투자 판단의 최종 책임은 사용자에게 있습니다.</div>
   </div>
 </div>`;
 
-  // ── 조립 ───────────────────────────────────────────────────────────────────
+  // ── 다이제스트 조립 ── 헤드라인→상충/Summary→3카드→뉴스3건→알림박스→CTA ──
   const sections = [
     summarySection,
-    mktSection,
-    mktSection  && (fxSection || coinSection || newsSection || analystSection) ? DIVIDER : '',
-    fxSection,
-    fxSection   && (coinSection || newsSection || analystSection)              ? DIVIDER : '',
-    coinSection,
-    coinSection && (newsSection || analystSection)                             ? DIVIDER : '',
+    summarySection ? DIVIDER : '',
+    digest3Cards,
+    DIVIDER,
     newsSection,
-    newsSection && analystSection                                              ? DIVIDER : '',
-    analystSection,
+    _alertBoxHtml,
   ].filter(Boolean).join('');
 
   return `<!DOCTYPE html>
@@ -1374,7 +1598,7 @@ export function buildEmailCard(pipelineData, tfResults, editorialPlan, reportUrl
 <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08)">
 
   ${headerHtml}
-
+  ${emailHeadline}
   ${sections}
 
   ${ctaHtml}
@@ -1403,6 +1627,7 @@ function _buildChartScript(histDisp) {
   const yMax   = Math.ceil(Math.max(...prices.filter(Boolean)) * 1.02 / 100) * 100;
   const tvMax  = hasTv ? Math.ceil(Math.max(...tvBns.filter(Boolean)) * 1.4 * 2) / 2 || 80 : 80;
 
+  // C. 차트 색 톤 — PDF 보고서 딥네이비 팔레트
   return `<script>
 (function() {
   try {
@@ -1412,8 +1637,9 @@ function _buildChartScript(histDisp) {
     img.style.display = 'none';
     cnv.style.display = 'block';
     var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
-    var gc = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-    var tc = isDark ? '#9c9a92' : '#73726c';
+    // C. 격자선: 옅은 그레이 / 축 라벨: 슬레이트
+    var gc = isDark ? 'rgba(255,255,255,0.07)' : '#e5e7eb';
+    var tc = isDark ? '#94a3b8' : '#475569';
     new Chart(cnv, {
       type: 'bar',
       data: {
@@ -1421,13 +1647,15 @@ function _buildChartScript(histDisp) {
         datasets: [
           { type:'line', label:'KOSPI 종가',
             data: ${JSON.stringify(prices)},
-            borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)',
-            borderWidth:2, pointBackgroundColor:'#E24B4A', pointRadius:4,
+            // C. KOSPI 선/점: 딥 네이비 #1e3a8a
+            borderColor:'#1e3a8a', backgroundColor:'rgba(30,58,138,0.07)',
+            borderWidth:2, pointBackgroundColor:'#1e3a8a', pointRadius:4,
             fill:true, tension:0.3, yAxisID:'yL' },
           { type:'bar', label:'거래대금(조원)',
             data: ${JSON.stringify(tvBns)},
-            backgroundColor: isDark ? 'rgba(55,138,221,0.30)' : 'rgba(55,138,221,0.22)',
-            borderColor: isDark ? 'rgba(55,138,221,0.65)' : 'rgba(55,138,221,0.55)',
+            // C. 거래대금 막대: 차콜 50% opacity
+            backgroundColor: isDark ? 'rgba(55,65,81,0.40)' : 'rgba(55,65,81,0.28)',
+            borderColor: isDark ? 'rgba(55,65,81,0.70)' : 'rgba(55,65,81,0.50)',
             borderWidth:1, yAxisID:'yR' }
         ]
       },
@@ -1444,7 +1672,7 @@ function _buildChartScript(histDisp) {
           }}}
         },
         scales:{
-          x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11}} },
+          x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11, family:"'Apple SD Gothic Neo',sans-serif"}} },
           yL:{ position:'left', min:${yMin}, max:${yMax}, grid:{color:gc},
                ticks:{color:tc, font:{size:11}, callback:function(v){ return v.toLocaleString(); }} },
           yR:{ position:'right', min:0, max:${tvMax}, grid:{drawOnChartArea:false},

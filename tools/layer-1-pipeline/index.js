@@ -39,7 +39,7 @@ export async function runPipeline(reportDate, outputDir) {
 
   // ── 시장 데이터 병렬 수집 ────────────────────────────────────────────────────
   const [domestic, overseas, fxRates, commodities] = await Promise.all([
-    collectDomestic(krHoliday, prevOutputDir)
+    collectDomestic(krHoliday, prevOutputDir, reportDate)
       .catch(e => { logger.warn('[pipeline] domestic 실패:', e.message);    return {}; }),
     collectOverseas(usHoliday)
       .catch(e => { logger.warn('[pipeline] overseas 실패:', e.message);    return {}; }),
@@ -213,9 +213,10 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
   }
 
   // KOSPI 히스토리 폴백 1단계: Naver (거래대금 포함, 사주 핵심 요구)
+  // data.date를 캐시 키로 전달 → collectDomestic에서 이미 호출했으면 메모리 hit (0ms).
   if ((d.kospiHistory ?? []).length < 6) {
     try {
-      const naver = await fetchNaverKospiHistory();
+      const naver = await fetchNaverKospiHistory(data.date);
       if (naver?.length >= 2) {
         d.kospiHistory = naver.slice(-6);
         logger.info(`[pipeline] KOSPI 히스토리 Naver 폴백: ${naver.length}거래일 (거래대금 포함)`);
@@ -287,8 +288,9 @@ async function _applyLiveFallbacks(data, prevOutputDir = null) {
 
   // ── 시가총액·거래대금 전일比 폴백 (kospiHistory·KOSPI 종가 채워진 후 실행) ────
   // 시가총액 합산 폴백 — Naver polling에 marketCapRaw 없으면 sise_market_sum 전 종목 합산
+  // data.date를 캐시 키로 전달 → collectDomestic에서 이미 호출했으면 메모리 hit (0ms).
   if (d.marketCap == null && d.kospi?.today != null) {
-    const mc = await fetchKospiMarketCap();
+    const mc = await fetchKospiMarketCap(data.date);
     if (mc != null) {
       d.marketCap = mc;
       logger.info(`[pipeline] KOSPI 시가총액 합산 폴백: ${mc}조`);

@@ -21,7 +21,9 @@ const KR_CRYPTO_STOCKS = [
  */
 export async function runTFCrypto(news = []) {
   // 자기 도메인 데이터를 직접 수집 (Layer 1의 cross-layer 제거)
-  const cryptoData = await collectCrypto()
+  // date 파라미터를 넘겨 업비트·환율 캐시 키를 날짜별로 구분
+  const runDate = news?._date ?? new Date().toISOString().slice(0, 10);
+  const cryptoData = await collectCrypto(runDate)
     .catch(e => { logger.warn('[tf-crypto] crypto 수집 실패:', e.message); return null; });
 
   if (!cryptoData?.btc) {
@@ -60,6 +62,7 @@ export async function runTFCrypto(news = []) {
       regulatory_alert:   parsed.regulatory_alert   ?? null,
       fear_greed:         cryptoData.fearGreed,
       btc_dominance:      cryptoData.btcDominance,
+      kimchi_premium:     cryptoData.kimchiPremium  ?? null,   // ⭐ 업비트 vs CoinGecko 가격차
       confidence:         parsed.confidence         ?? 0.75,
       model_used:         modelName,
       crypto_data:        cryptoData,   // ⭐ designer가 받을 raw (orchestrator가 호환용으로 전달)
@@ -71,7 +74,14 @@ export async function runTFCrypto(news = []) {
 }
 
 function _buildPrompt(cryptoData, cryptoNews) {
-  const { btc, eth, fearGreed, btcDominance, top10 } = cryptoData;
+  const { btc, eth, fearGreed, btcDominance, top10, kimchiPremium } = cryptoData;
+
+  const kpBtc = kimchiPremium?.btc;
+  const kpEth = kimchiPremium?.eth;
+  const kimchiLine = kpBtc
+    ? `- 김치프리미엄: BTC ${kpBtc.premium_pct > 0 ? '+' : ''}${kpBtc.premium_pct}% / ETH ${kpEth?.premium_pct != null ? (kpEth.premium_pct > 0 ? '+' : '') + kpEth.premium_pct + '%' : 'N/A'} (양수=한국이 비쌈, 음수=역프리미엄)`
+    : '- 김치프리미엄: 수집 실패';
+
   return `당신은 블록체인·가상자산 전문 리서치 애널리스트입니다.
 
 시장 데이터:
@@ -79,6 +89,7 @@ function _buildPrompt(cryptoData, cryptoNews) {
 - ETH: $${eth?.price ?? 'N/A'} (24h: ${eth?.change24h ?? 'N/A'}%)
 - Fear & Greed: ${fearGreed?.value ?? 'N/A'} (${fearGreed?.label ?? '-'})
 - BTC 도미넌스: ${btcDominance ?? 'N/A'}%
+${kimchiLine}
 
 아래 데이터를 분석해 다음을 수행하세요:
 1. BTC/ETH 기술적 신호 및 주요 가격 레벨
@@ -112,6 +123,7 @@ function _emptyResult(cryptoData = null) {
     kr_stocks_impact: [], regulatory_alert: null,
     fear_greed: cryptoData?.fearGreed ?? null,
     btc_dominance: cryptoData?.btcDominance ?? null,
+    kimchi_premium: cryptoData?.kimchiPremium ?? null,
     confidence: 0, model_used: null,
     crypto_data: cryptoData,
   };
@@ -132,6 +144,8 @@ if (process.argv.includes('--date')) {
       ));
       news = data.news ?? [];
     } catch { /* news 없어도 동작 */ }
+    // _date를 배열 속성으로 전달 → runTFCrypto 내 캐시 키에 사용
+    news._date = date;
     const result = await runTFCrypto(news);
     console.log(JSON.stringify(result, null, 2));
   });

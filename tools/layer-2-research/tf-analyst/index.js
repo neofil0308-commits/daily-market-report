@@ -1,7 +1,10 @@
 // tools/layer-2-research/tf-analyst/index.js — TF-2 애널리스트 리포트 분석팀
 // 자기 도메인 데이터(dart + 한경 컨센서스)를 직접 수집해 분석. Layer 1 의존 제거(2026-05-16).
 // 뉴스 + 한경 컨센서스 + DART 공시 → 주목할 애널리스트 리포트 3개 선정
+// 2026-05-16: _loadPrevConsensus() + _diffTargetPrices() 추가 — 목표주가 변동 추적
 import axios from 'axios';
+import fs from 'fs/promises';
+import path from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../shared/utils/logger.js';
 import { geminiWithRetry } from '../../shared/utils/gemini_retry.js';
@@ -9,15 +12,18 @@ import { collectDart } from './feeds/dart_feed.js';
 
 /**
  * TF-2: 애널리스트 리포트 분석 실행.
- * @param {Array}  newsData  수집된 뉴스 목록 (orchestrator가 Layer 1에서 전달)
+ * @param {Array}  newsData    수집된 뉴스 목록 (orchestrator가 Layer 1에서 전달)
+ * @param {string} reportDate  YYYY-MM-DD (목표주가 비교 기준일, 기본값: 오늘)
  * @returns {Promise<TFAnalystResult>}
  */
-export async function runTFAnalyst(newsData = []) {
+export async function runTFAnalyst(newsData = [], reportDate = null) {
   // 자기 도메인 데이터를 직접 수집 (Layer 1의 cross-layer 제거)
-  // 한경 컨센서스 + DART 병렬 — 한쪽 실패해도 다른 쪽 분석 가능
-  const [consensusItems, dartData] = await Promise.all([
+  // 한경 컨센서스 + DART + 전일 컨센서스 병렬 — 한쪽 실패해도 다른 쪽 분석 가능
+  const today = reportDate ?? new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const [consensusItems, dartData, prevConsensus] = await Promise.all([
     fetchHankyungConsensus(),
     collectDart().catch(e => { logger.warn('[tf-analyst] dart 실패:', e.message); return { reports: [] }; }),
+    _loadPrevConsensus(today).catch(e => { logger.warn('[tf-analyst] 전일 컨센서스 로드 실패:', e.message); return []; }),
   ]);
 
   const apiKey = process.env.GOOGLE_API_KEY;
@@ -56,15 +62,21 @@ export async function runTFAnalyst(newsData = []) {
     const parsed = JSON.parse(raw);
     logger.info(`[tf-analyst] 분석 완료 — ${parsed.findings?.length ?? 0}건`);
 
+    const targetPriceChanges = _diffTargetPrices(consensusItems, prevConsensus);
+    if (targetPriceChanges.length > 0) {
+      logger.info(`[tf-analyst] 목표주가 변동 ${targetPriceChanges.length}건 감지`);
+    }
+
     return {
-      findings:          parsed.findings          ?? [],
-      sector_sentiment:  parsed.sector_sentiment  ?? {},
-      consensus_changes: parsed.consensus_changes ?? 0,
-      alert_items:       (parsed.findings ?? []).filter(f => f.importance >= 8),
-      confidence:        parsed.confidence        ?? 0.8,
-      model_used:        modelName,
-      consensus_raw:     consensusItems,
-      dart_reports:      dartData?.reports ?? [],   // ⭐ orchestrator가 폴백·링크 매핑에 사용
+      findings:             parsed.findings          ?? [],
+      sector_sentiment:     parsed.sector_sentiment  ?? {},
+      consensus_changes:    parsed.consensus_changes ?? 0,
+      alert_items:          (parsed.findings ?? []).filter(f => f.importance >= 8),
+      confidence:           parsed.confidence        ?? 0.8,
+      model_used:           modelName,
+      consensus_raw:        consensusItems,
+      dart_reports:         dartData?.reports ?? [],   // ⭐ orchestrator가 폴백·링크 매핑에 사용
+      target_price_changes: targetPriceChanges,
     };
   } catch (e) {
     logger.warn('[tf-analyst] 분석 실패:', e.message);
@@ -222,25 +234,150 @@ function _emptyResult(consensusItems = [], dartData = { reports: [] }) {
     alert_items: [], confidence: 0, model_used: null,
     consensus_raw: consensusItems,
     dart_reports: dartData?.reports ?? [],
+    target_price_changes: [],
   };
+}
+
+// ── 전일 컨센서스 로드 (로컬 tf_results.json → gh-pages 폴백) ─────────────────
+// GA 워크스페이스는 매 실행마다 새것이라 로컬에 어제 파일이 없을 수 있음.
+// _loadPrevDayData() in layer-1-pipeline/index.js와 동일한 2단계 폴백 패턴.
+async function _loadPrevConsensus(currentDate) {
+  const outputDir = process.env.OUTPUT_DIR ?? './outputs';
+
+  // 직전 거래일 날짜 후보: 최대 7일 전까지 역순으로 탐색
+  for (let i = 1; i <= 7; i++) {
+    const dt   = new Date(new Date(currentDate).getTime() - i * 86400000);
+    const dstr = dt.toISOString().slice(0, 10);
+
+    // 1차: 로컬 outputs/{prevDate}/tf_results.json
+    try {
+      const raw = await fs.readFile(
+        path.join(outputDir, dstr, 'tf_results.json'),
+        'utf-8'
+      );
+      const parsed = JSON.parse(raw);
+      const prev   = parsed?.analyst?.consensus_raw ?? [];
+      if (prev.length > 0) {
+        logger.info(`[tf-analyst] 전일 컨센서스 로컬 로드 성공: ${dstr} (${prev.length}건)`);
+        return prev;
+      }
+    } catch { /* 다음 시도 */ }
+
+    // 2차: gh-pages 배포된 tf_results.json (GA 환경)
+    const pagesBase = (process.env.PAGES_BASE_URL ?? '').replace(/\/$/, '');
+    if (pagesBase) {
+      try {
+        const r = await axios.get(
+          `${pagesBase}/outputs/${dstr}/tf_results.json`,
+          { timeout: 10000 }
+        );
+        const prev = r.data?.analyst?.consensus_raw ?? [];
+        if (prev.length > 0) {
+          logger.info(`[tf-analyst] 전일 컨센서스 gh-pages 로드 성공: ${dstr} (${prev.length}건)`);
+          return prev;
+        }
+      } catch { /* 다음 날짜 */ }
+    }
+  }
+
+  logger.info('[tf-analyst] 전일 컨센서스 없음 — target_price_changes 빈 배열');
+  return [];
+}
+
+// ── 목표주가 변동 비교 ─────────────────────────────────────────────────────────
+// today/yesterday: 한경 컨센서스 raw 배열 (consensus_raw 형식)
+// 의미 있는 변화 기준: 변동률 ≥ 5% 또는 가격 차이 ≥ 5,000원
+// 신규 커버리지(어제 없던 종목) 포함. 변동률 절댓값 내림차순 정렬.
+function _diffTargetPrices(today = [], yesterday = []) {
+  const parsePrice = str => {
+    if (str == null || str === '' || str === '-') return null;
+    const n = parseFloat(String(str).replace(/,/g, '').replace(/[^0-9.]/g, ''));
+    return isNaN(n) || n === 0 ? null : n;
+  };
+
+  // 어제 배열을 회사명+증권사 복합키 맵으로 인덱싱 (같은 회사를 여러 증권사가 커버)
+  const prevMap = new Map();
+  for (const item of yesterday) {
+    const key = `${item.company ?? ''}|${item.firm ?? ''}`;
+    if (!prevMap.has(key)) prevMap.set(key, item);
+  }
+  // 회사명만으로도 폴백 인덱스
+  const prevByCompany = new Map();
+  for (const item of yesterday) {
+    if (item.company && !prevByCompany.has(item.company)) {
+      prevByCompany.set(item.company, item);
+    }
+  }
+
+  const changes = [];
+
+  for (const cur of today) {
+    const newPrice = parsePrice(cur.target_price);
+    if (newPrice == null) continue;
+
+    // 매칭: 회사+증권사 우선, 없으면 회사명만
+    const key      = `${cur.company ?? ''}|${cur.firm ?? ''}`;
+    const prevItem = prevMap.get(key) ?? prevByCompany.get(cur.company ?? '');
+
+    if (!prevItem) {
+      // 신규 커버리지 — 어제 목록에 없던 종목
+      changes.push({
+        company:    cur.company   ?? '',
+        ticker:     cur.ticker    ?? '',
+        prev_price: null,
+        new_price:  String(cur.target_price).trim(),
+        change_pct: null,
+        firm:       cur.firm      ?? '',
+        direction:  'new',
+      });
+      continue;
+    }
+
+    const prevPrice = parsePrice(prevItem.target_price);
+    if (prevPrice == null) continue;
+    if (prevPrice === newPrice) continue;
+
+    const diff     = newPrice - prevPrice;
+    const changePct = Math.round((diff / prevPrice) * 1000) / 10; // 소수점 1자리
+
+    // 의미 있는 변화만 포함
+    if (Math.abs(changePct) < 5 && Math.abs(diff) < 5000) continue;
+
+    changes.push({
+      company:    cur.company   ?? '',
+      ticker:     cur.ticker    ?? '',
+      prev_price: String(prevItem.target_price).trim(),
+      new_price:  String(cur.target_price).trim(),
+      change_pct: changePct,
+      firm:       cur.firm      ?? '',
+      direction:  diff > 0 ? 'up' : 'down',
+    });
+  }
+
+  // 변동률 절댓값 내림차순 정렬 (신규 커버리지는 끝으로)
+  changes.sort((a, b) => {
+    if (a.direction === 'new' && b.direction !== 'new') return 1;
+    if (a.direction !== 'new' && b.direction === 'new') return -1;
+    return Math.abs(b.change_pct ?? 0) - Math.abs(a.change_pct ?? 0);
+  });
+
+  return changes;
 }
 
 // 단독 실행 (디버깅용): node tools/layer-2-research/tf-analyst/index.js --date 2026-05-12
 // 2026-05-16: dart는 자체 수집하므로 data.json 불필요. news만 있으면 됨.
 if (process.argv.includes('--date')) {
   import('dotenv/config').then(async () => {
-    const fs   = await import('fs/promises');
-    const path = await import('path');
     const idx  = process.argv.indexOf('--date');
     const date = process.argv[idx + 1] ?? new Date().toISOString().slice(0, 10);
     let news = [];
     try {
-      const data = JSON.parse(await fs.default.readFile(
-        path.default.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
+      const data = JSON.parse(await fs.readFile(
+        path.join(process.env.OUTPUT_DIR ?? './outputs', date, 'data.json'), 'utf-8'
       ));
       news = data.news ?? [];
     } catch { /* news 없어도 동작 */ }
-    const result = await runTFAnalyst(news);
+    const result = await runTFAnalyst(news, date);
     console.log(JSON.stringify(result, null, 2));
   });
 }

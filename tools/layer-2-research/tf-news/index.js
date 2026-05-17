@@ -40,10 +40,12 @@ export async function runTFNews(marketData = {}) {
       .replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
 
     const parsed = JSON.parse(raw);
-    logger.info(`[tf-news] 분석 완료 — ${parsed.findings?.length ?? 0}건, 상위 테마: ${parsed.themes?.slice(0,3).join('·') ?? '-'}`);
+    const rawFindings = parsed.findings ?? [];
+    const dedupedFindings = _dedupeFindings(rawFindings);
+    logger.info(`[tf-news] 분석 완료 — 상위 테마: ${parsed.themes?.slice(0,3).join('·') ?? '-'}`);
 
     return {
-      findings:     parsed.findings     ?? [],
+      findings:     dedupedFindings,
       top_stories:  parsed.top_stories  ?? [],
       themes:       parsed.themes       ?? [],
       confidence:   parsed.confidence   ?? 0.7,
@@ -69,14 +71,28 @@ function _buildPrompt(news, marketData) {
 1. 각 기사의 시장 중요도 스코어(0~10) 부여
 2. 테마 분류 (금리·환율·반도체·바이오·방산·지정학·실적 중 해당)
 3. KOSPI/코스닥에 대한 단기 시장 영향 판단
-4. 상위 3개 핵심 기사 선정 (top_stories)
+4. 상위 3개 핵심 기사 선정 (top_stories — findings와 별도로, 오늘 시장을 이해하는 데 가장 중요한 3개 헤드라인)
 5. 오늘 시장을 관통하는 핵심 테마 최대 5개
-6. 동일 기업·사건을 다루는 유사 기사를 하나의 그룹으로 묶고 그룹당 가장 중요한 1건만 findings에 포함 (예: 삼성전자 관련 3건이면 가장 중요한 1건만 포함)
+6. 동일 기업·사건을 다루는 유사 기사를 하나의 그룹으로 묶고 그룹당 가장 중요한 1건만 findings에 포함
 
-중복 제거 규칙:
-- 같은 기업·정책·이벤트를 다루는 기사는 하나의 토픽 그룹으로 분류
-- 그룹에서 중요도(importance)가 가장 높은 1건만 findings에 포함
-- 나머지는 제외 (top_stories 선정 시 참고용으로만 사용)
+=== 중복 제거 규칙 (반드시 엄격히 준수) ===
+STEP 1. 먼저 모든 기사를 토픽 그룹으로 분류한다.
+  - 같은 기업(예: 삼성전자, SK하이닉스)이 등장하는 기사 → 동일 그룹
+  - 같은 정책·이벤트(예: 연준 금리결정, 환율 방어)를 다루는 기사 → 동일 그룹
+  - 같은 업종·섹터의 동일 이슈(예: 반도체 수출 규제) → 동일 그룹
+
+STEP 2. 각 그룹에서 importance가 가장 높은 기사 1건만 findings에 포함한다.
+  - 같은 그룹의 나머지 기사는 findings에서 완전히 제외한다.
+  - 예시: 삼성전자 1Q 실적 관련 기사 3건(중요도 8·6·5) → 중요도 8인 1건만 findings 포함
+
+STEP 3. findings를 완성한 뒤, 다시 한 번 검토한다.
+  - findings 내 각 항목의 headline과 기업명을 비교하여 중복 여부를 재확인
+  - 동일 기업·이벤트가 2건 이상이면 importance 낮은 것을 즉시 제거
+  - 이 자가 검증을 반드시 완료한 후 최종 JSON을 출력한다
+
+top_stories 규칙:
+  - findings 중복 제거와 무관하게 오늘 가장 중요한 3개 헤드라인을 별도 선정
+  - findings에 없더라도 top_stories에 포함 가능 (독자 맥락 파악용)
 
 반드시 아래 JSON 형식만 응답하세요:
 {
@@ -108,6 +124,106 @@ summary 작성 지침:
 ${JSON.stringify(news.slice(0, 20).map(n => ({
     title: n.title, url: n.url, body: n.body?.slice(0, 200), date: n.date,
   })), null, 2)}`;
+}
+
+/**
+ * 헤드라인 정규화: 공백·특수문자·따옴표 제거 후 소문자화해 단어 집합 반환.
+ * @param {string} headline
+ * @returns {Set<string>}
+ */
+function _tokenize(headline) {
+  const normalized = (headline ?? '')
+    .replace(/["""''`~!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+  return new Set(normalized.split(' ').filter(w => w.length > 1));
+}
+
+/**
+ * Jaccard 유사도: 두 단어 집합의 교집합 / 합집합.
+ * 결과 0~1. 1에 가까울수록 동일 기사.
+ * @param {Set<string>} setA
+ * @param {Set<string>} setB
+ * @returns {number}
+ */
+function _jaccard(setA, setB) {
+  if (!setA.size && !setB.size) return 1;
+  const intersection = [...setA].filter(w => setB.has(w)).length;
+  const union = new Set([...setA, ...setB]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
+/**
+ * 기업명 추출: 한글 2~6자 + 고빈도 증시 접미사 패턴으로 후보 추출.
+ * 예: "삼성전자", "SK하이닉스", "현대차"
+ * @param {string} headline
+ * @returns {string[]}
+ */
+function _extractCompanyNames(headline) {
+  // 영문 대문자 포함(SK, LG 등) + 한글 조합 기업명 패턴
+  const matches = (headline ?? '').match(/[A-Z가-힣][가-힣A-Za-z0-9]{1,8}(?:전자|하이닉스|바이오|증권|화학|에너지|차|자동차|건설|물산|생명|은행|카드|그룹|홀딩스|모터스|이노베이션|솔루션|시스템)?/g);
+  return matches ?? [];
+}
+
+/**
+ * Gemini 응답 후 findings를 한 번 더 검증·중복 제거.
+ *
+ * 중복 판단 기준 (둘 중 하나라도 해당하면 중복):
+ *   A. 헤드라인 Jaccard 유사도 ≥ 0.55 (단어 55% 이상 겹침)
+ *   B. 동일 기업명이 2개 이상 findings에 등장
+ *
+ * 중복 그룹에서 importance 높은 1건만 유지. 동점이면 먼저 등장한 것 유지.
+ *
+ * @param {object[]} findings
+ * @returns {object[]}
+ */
+function _dedupeFindings(findings) {
+  if (!Array.isArray(findings) || findings.length <= 1) return findings ?? [];
+
+  const JACCARD_THRESHOLD = 0.55;
+
+  // importance 내림차순 정렬 (높은 것 먼저 → 그룹 내 대표로 선택됨)
+  const sorted = [...findings].sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0));
+
+  const kept    = [];   // 최종 유지 항목
+  const dropped = [];   // 제거된 항목 인덱스
+
+  for (let i = 0; i < sorted.length; i++) {
+    if (dropped.includes(i)) continue;
+
+    const tokensI    = _tokenize(sorted[i].headline);
+    const companiesI = _extractCompanyNames(sorted[i].headline);
+
+    let isDupeOfKept = false;
+    for (const keptItem of kept) {
+      const tokensK    = _tokenize(keptItem.headline);
+      const similarity = _jaccard(tokensI, tokensK);
+
+      // A. 헤드라인 유사도 기준
+      if (similarity >= JACCARD_THRESHOLD) { isDupeOfKept = true; break; }
+
+      // B. 기업명 겹침 기준
+      if (companiesI.length > 0) {
+        const companiesK = _extractCompanyNames(keptItem.headline);
+        const sharedCo   = companiesI.filter(c => companiesK.includes(c));
+        if (sharedCo.length > 0) { isDupeOfKept = true; break; }
+      }
+    }
+
+    if (!isDupeOfKept) {
+      kept.push(sorted[i]);
+    } else {
+      dropped.push(i);
+    }
+  }
+
+  // importance 순이 아닌 원래 findings 순서로 복원 (DESK가 원래 순서 기대할 수 있음)
+  const keptSet = new Set(kept.map(k => k.headline));
+  const result  = findings.filter(f => keptSet.has(f.headline));
+
+  logger.info(`[tf-news] 중복 제거 ${findings.length}건 → ${result.length}건`);
+  return result;
 }
 
 function _emptyResult(news = []) {

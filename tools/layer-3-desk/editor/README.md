@@ -51,5 +51,10 @@ const editorialPlan = await runEditor(desktopData, tfResults);
 
 ## 발전 기록
 
+- 2026-05-16: Summary 풍부화 — AI Summary 5~7개 불릿(60~90자 완결 문장)·증권사 데일리 시황 톤으로 강화. sectionSummaries 2~4 문장(수치+트렌드+원인+영향)으로 확장. Gemini 503 폴백을 빈 배열 → sectionSummaries 기반 결정론적 불릿 조립으로 교체. domestic에 VKOSPI·5거래일 수급 추이 추가, overseas에 SOX 및 동조 부담 해석 추가, fxRates에 bp 변화 및 강달러 메커니즘 추가, commodities에 안전자산 vs 위험자산 분석 추가, crypto에 김치프리미엄·공포탐욕지수 해석 추가.
+- 2026-05-16: 코인 Summary 일관화 — `_summCrypto()`를 다른 섹션과 동일 패턴(사실 문장 + 원인 절)으로 재작성. tf.crypto.market_summary 직접 재사용 제거, BTC·ETH 가격/등락률·공포탐욕지수·TF 시그널을 자체 조립.
+- 2026-05-16: 상충 정보 자동 감지 추가 — `_detectConflicts(tf)` 신설. analyst 긍정 레이팅 + news 부정 시장영향(또는 반대) 조합을 최대 3건 감지해 `editorialPlan.conflicts` 배열로 반환.
+- 2026-05-16: 섹션 Summary에 원인 절(why) 추가 — `_findCauseFromNews()` 헬퍼 신설, tf.news.findings 키워드 매칭으로 importance 상위 1~2건 발췌, 매칭 실패 시 themes 힌트 또는 생략.
+- 2026-05-16: 5개 섹션 Summary 자동 생성 추가 (sectionSummaries).
 - 2026-05-15: 헤드라인 데이터 검증 추가 (KOSPI 수치 누락 시 제거).
 - 2026-05-14: AI Summary 생성 추가.

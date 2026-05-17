@@ -54,6 +54,7 @@ const data = await runPipeline({ reportDate, outputDir, prevOutputDir });
 
 ## 발전 기록
 
+- 2026-05-16: `fetchKospiMarketCap`·`fetchNaverKospiHistory`에 메모리 캐시 적용 — 같은 날 두 번째 호출부터 0ms 반환, 49페이지 스크래핑 중복 제거.
 - 2026-05-16: news 수집을 tf-news 소속으로 이양. Layer 1은 시장 데이터(4종)만 책임.
 - 2026-05-16: dart_feed·crypto_feed를 각 TF팀 소속으로 이양 (cross-layer import 제거).
 - 2026-05-15: 휴장일 분기 함정 수정 (VKOSPI·시가총액·수급 4행 누락 → 폴백 추가).

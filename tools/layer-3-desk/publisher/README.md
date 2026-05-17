@@ -54,9 +54,28 @@ const result = await publish(date, html, desktopData, outputDir, reportUrl, tfRe
 
 ## 실패 처리
 
-- Gmail 실패 → throw (필수 채널이므로 발송 끊김 알림)
-- Notion 실패 → warn, Gmail은 그대로 완료 처리. 다음 실행에서 Notion만 재시도.
+- Gmail 실패 → `outputs/{date}/failures.json`에 기록 후 throw (필수 채널이므로 발송 끊김 알림)
+- Notion 실패 → `outputs/{date}/failures.json`에 기록 후 warn, Gmail은 그대로 완료 처리. 다음 실행에서 Notion만 재시도.
 - GitHub Pages는 워크플로우 외부 단계(`peaceiris/actions-gh-pages`)에서 별도 처리.
+
+## 발송 실패 알림 체계
+
+| 파일 | 설명 |
+|------|------|
+| `outputs/{date}/failures.json` | 해당 날짜 실패 이벤트 누적 배열 |
+| `outputs/{date}/consumed.failures.json` | 다음 정상 발송에서 prefix 적용 후 rename된 파일 |
+
+**failures.json 스키마**
+```json
+[
+  { "ts": "2026-05-16T08:01:23.000Z", "channel": "notion", "error": "오류 메시지" }
+]
+```
+
+**메일 제목 prefix 로직**
+1. `publish()` 시작 시 직전 날짜 폴더의 `failures.json`을 읽는다
+2. 미처리 실패가 1건 이상이면 메일 제목 앞에 `[⚠ 이전 실패 N건] ` prefix 추가
+3. Gmail 발송 성공 후 `failures.json` → `consumed.failures.json` rename (중복 prefix 방지)
 
 ## 환경 변수
 
@@ -68,5 +87,6 @@ PAGES_BASE_URL
 
 ## 발전 기록
 
+- 2026-05-16: 발송 실패 알림 체계 추가 — failures.json 누적 기록 + 다음 정상 발송 메일 제목 prefix.
 - 2026-05-13: 단계별 flag 분리 (gmail.flag/notion.flag) — 한쪽만 재시도 가능.
 - 2026-05-12: 중복 발송 방지 이중화 (로컬 flag + Notion DB).

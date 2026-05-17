@@ -51,5 +51,6 @@ const result = await runTFNews(pipelineData);   // 시장 데이터를 AI 키워
 
 ## 발전 기록
 
+- 2026-05-16: `_dedupeFindings()` 후처리 추가 — 헤드라인 Jaccard 유사도(≥0.55) + 기업명 겹침 이중 기준으로 중복 제거, 프롬프트 STEP 1~3 자가 검증 지시 강화.
 - 2026-05-16: news_feed를 tf-news 소속으로 이동, 자체 수집 시작. `news_raw` 노출.
 - 2026-05-15: 뉴스 중복 제거 규칙 강화 (같은 기업·이벤트 그룹화).
